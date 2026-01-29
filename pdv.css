@@ -1,0 +1,1143 @@
+/* CSS específico do PDV - Ponto de Venda */
+
+/* Barra de contadores (abaixo do menu) */
+.pdv-contadores-bar {
+    background: var(--secondary-color);
+    color: white;
+    padding: 0.5rem 1rem;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    border-bottom: 2px solid var(--primary-color);
+}
+
+.pdv-contadores-bar-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1rem;
+}
+
+.pdv-contadores-data-hora {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+    padding-right: 1rem;
+    border-right: 1px solid rgba(255, 255, 255, 0.25);
+    margin-right: 0.5rem;
+}
+
+.pdv-contadores-data {
+    font-size: 0.9rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.pdv-contadores-hora {
+    font-size: 1.25rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 1px;
+}
+
+.pdv-contadores-blocos {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    flex: 1;
+    align-items: stretch;
+}
+
+.pdv-contador-bloco {
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    padding: 0.5rem 0.75rem;
+    min-width: 140px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.pdv-contador-bloco.pdv-contador-total {
+    background: rgba(214, 69, 69, 0.2);
+    border-color: var(--primary-color);
+}
+
+.pdv-contador-titulo {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    opacity: 0.9;
+    margin-bottom: 0.25rem;
+}
+
+.pdv-contador-ratio {
+    font-size: 1.5rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.2;
+}
+
+.pdv-contador-legenda {
+    font-size: 0.75rem;
+    opacity: 0.85;
+    margin-top: 0.25rem;
+}
+
+@media (max-width: 768px) {
+    .pdv-contadores-bar-inner {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .pdv-contadores-data-hora {
+        border-right: none;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.25);
+        padding-right: 0;
+        padding-bottom: 0.5rem;
+        margin-right: 0;
+        margin-bottom: 0.25rem;
+    }
+
+    .pdv-contadores-blocos {
+        width: 100%;
+    }
+
+    .pdv-contador-bloco {
+        flex: 1;
+        min-width: 100px;
+    }
+}
+
+/* Notificação push: novo pedido online */
+.pdv-notificacao-container {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    pointer-events: none;
+}
+
+.pdv-notificacao-toast {
+    background: var(--success-color);
+    color: white;
+    padding: 1rem 1.25rem;
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(47, 143, 107, 0.4);
+    border-left: 4px solid rgba(255, 255, 255, 0.5);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-width: 280px;
+    max-width: 360px;
+    animation: pdv-notificacao-entrar 0.35s ease-out;
+    pointer-events: auto;
+}
+
+.pdv-notificacao-toast.pdv-notificacao-saindo {
+    animation: pdv-notificacao-sair 0.3s ease-in forwards;
+}
+
+.pdv-notificacao-toast .pdv-notificacao-icon {
+    font-size: 1.5rem;
+    flex-shrink: 0;
+}
+
+.pdv-notificacao-toast .pdv-notificacao-texto {
+    font-size: 0.95rem;
+    font-weight: 600;
+    line-height: 1.3;
+}
+
+@keyframes pdv-notificacao-entrar {
+    from {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes pdv-notificacao-sair {
+    from {
+        opacity: 1;
+        transform: translateX(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+}
+
+.pdv-container {
+    display: flex;
+    flex-direction: row;
+    gap: 1rem;
+    height: calc(100vh - 252px);
+    align-items: stretch;
+}
+
+/* Reorganizar campos de pesquisa quando um painel está expandido */
+.pdv-container:not(.produtos-colapsados) #campos-pesquisa-container,
+.pdv-container:not(.entregadores-colapsados) #campos-pesquisa-container,
+.pdv-container:not(.mesas-colapsadas) #campos-pesquisa-container,
+.pdv-container:not(.pedidos-colapsados) #campos-pesquisa-container {
+    flex-direction: column;
+    align-items: stretch;
+}
+
+.pdv-container:not(.produtos-colapsados) #campos-pesquisa-container .form-group,
+.pdv-container:not(.entregadores-colapsados) #campos-pesquisa-container .form-group,
+.pdv-container:not(.mesas-colapsadas) #campos-pesquisa-container .form-group,
+.pdv-container:not(.pedidos-colapsados) #campos-pesquisa-container .form-group {
+    flex: 1 1 100%;
+    min-width: 100%;
+    width: 100%;
+}
+
+/* Reduzir gap quando um painel está expandido */
+.pdv-container:not(.produtos-colapsados),
+.pdv-container:not(.entregadores-colapsados),
+.pdv-container:not(.mesas-colapsadas),
+.pdv-container:not(.pedidos-colapsados) {
+    gap: 0.5rem;
+}
+
+/* Reduzir padding do container no PDV */
+.container {
+    padding: 1rem;
+}
+
+/* Reduzir padding quando qualquer painel está expandido */
+body:has(.pdv-container:not(.produtos-colapsados)) .container,
+body:has(.pdv-container:not(.entregadores-colapsados)) .container,
+body:has(.pdv-container:not(.mesas-colapsadas)) .container,
+body:has(.pdv-container:not(.pedidos-colapsados)) .container {
+    padding: 0.5rem;
+}
+
+/* Animação de piscar para mesa aberta */
+
+.pdv-lateral-wrapper {
+    flex: 0 0 420px;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    order: 2;
+    height: 100%;
+    max-height: 100%;
+    overflow: visible;
+}
+
+/* Quando qualquer painel está expandido, permitir altura maior */
+.pdv-container:not(.produtos-colapsados) .pdv-lateral-wrapper,
+.pdv-container:not(.entregadores-colapsados) .pdv-lateral-wrapper,
+.pdv-container:not(.mesas-colapsadas) .pdv-lateral-wrapper,
+.pdv-container:not(.pedidos-colapsados) .pdv-lateral-wrapper {
+    max-height: none;
+    overflow-y: auto;
+}
+
+.pdv-produtos-wrapper,
+.pdv-entregadores-wrapper,
+.pdv-mesas-wrapper,
+.pdv-pedidos-wrapper {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    min-height: 0;
+    overflow: hidden;
+}
+
+/* Quando qualquer painel está expandido, dar mais altura para ele */
+.pdv-container:not(.produtos-colapsados) .pdv-produtos-wrapper {
+    flex: 2 1 auto;
+    min-height: 600px;
+}
+
+.pdv-container:not(.entregadores-colapsados) .pdv-entregadores-wrapper {
+    flex: 2 1 auto;
+    min-height: 600px;
+}
+
+.pdv-container:not(.mesas-colapsadas) .pdv-mesas-wrapper {
+    flex: 2 1 auto;
+    min-height: 600px;
+}
+
+.pdv-container:not(.pedidos-colapsados) .pdv-pedidos-wrapper {
+    flex: 2 1 auto;
+    min-height: 600px;
+}
+
+.pdv-container.produtos-colapsados .pdv-produtos-wrapper {
+    flex: 0 0 64px;
+    align-items: flex-start;
+    justify-content: flex-start;
+}
+
+.pdv-container.produtos-colapsados .pdv-carrinho {
+    flex: 1;
+}
+
+.pdv-container.entregadores-colapsados .pdv-carrinho {
+    flex: 1;
+}
+
+.pdv-container.mesas-colapsadas .pdv-carrinho {
+    flex: 1;
+}
+
+/* Garantir tamanho mínimo do carrinho quando um painel está expandido */
+.pdv-container:not(.produtos-colapsados) .pdv-carrinho,
+.pdv-container:not(.entregadores-colapsados) .pdv-carrinho,
+.pdv-container:not(.mesas-colapsadas) .pdv-carrinho,
+.pdv-container:not(.pedidos-colapsados) .pdv-carrinho {
+    min-width: 450px;
+    flex: 1 1 auto;
+}
+
+.pdv-container.produtos-colapsados.entregadores-colapsados.mesas-colapsadas.pedidos-colapsados .pdv-lateral-wrapper {
+    flex: 0 0 72px;
+}
+
+.pdv-container.produtos-colapsados .pdv-produtos-conteudo {
+    display: none;
+}
+
+.pdv-container.entregadores-colapsados .pdv-entregadores-wrapper {
+    flex: 0 0 64px;
+    align-items: flex-start;
+    justify-content: flex-start;
+}
+
+.pdv-container.entregadores-colapsados .pdv-entregadores-conteudo {
+    display: none;
+}
+
+.pdv-container.mesas-colapsadas .pdv-mesas-wrapper {
+    flex: 0 0 64px;
+    align-items: flex-start;
+    justify-content: flex-start;
+}
+
+.pdv-container.mesas-colapsadas .pdv-mesas-conteudo {
+    display: none;
+}
+
+.pdv-container.pedidos-colapsados .pdv-pedidos-wrapper {
+    flex: 0 0 64px;
+    align-items: flex-start;
+    justify-content: flex-start;
+}
+
+.pdv-container.pedidos-colapsados .pdv-pedidos-conteudo {
+    display: none;
+}
+
+/* Quando qualquer painel está expandido, usar o mesmo tamanho do wrapper */
+.pdv-container:not(.produtos-colapsados) .pdv-lateral-wrapper,
+.pdv-container:not(.entregadores-colapsados) .pdv-lateral-wrapper,
+.pdv-container:not(.mesas-colapsadas) .pdv-lateral-wrapper,
+.pdv-container:not(.pedidos-colapsados) .pdv-lateral-wrapper {
+    flex: 0 0 420px;
+}
+
+/* Garantir que os toggles sempre fiquem alinhados no topo */
+.pdv-caixa-wrapper {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 0.5rem;
+}
+
+.pdv-caixa-toggle {
+    width: 56px;
+    height: 56px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    flex-shrink: 0;
+    margin: 0;
+    border-radius: 8px;
+    border: 2px solid;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-weight: 700;
+}
+
+.pdv-caixa-toggle.caixa-fechado {
+    background: var(--danger-color);
+    color: white;
+    border-color: var(--danger-color);
+}
+
+.pdv-caixa-toggle.caixa-fechado:hover {
+    background: #c62828;
+    border-color: #c62828;
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 4px 8px rgba(211, 47, 47, 0.3);
+}
+
+.pdv-caixa-toggle.caixa-aberto {
+    background: var(--success-color);
+    color: white;
+    border-color: var(--success-color);
+}
+
+.pdv-caixa-toggle.caixa-aberto:hover {
+    background: #388e3c;
+    border-color: #388e3c;
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 4px 8px rgba(76, 175, 80, 0.3);
+}
+
+.pdv-produtos-toggle,
+.pdv-entregadores-toggle,
+.pdv-mesas-toggle,
+.pdv-pedidos-toggle {
+    flex-shrink: 0;
+    align-self: flex-start;
+}
+
+.pdv-produtos-conteudo {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.pdv-produtos-toggle {
+    width: 56px;
+    height: 56px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    flex-shrink: 0;
+    margin: 0;
+}
+
+.pdv-entregadores-conteudo {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.pdv-entregadores-toggle {
+    width: 56px;
+    height: 56px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    flex-shrink: 0;
+    margin: 0;
+}
+
+.pdv-mesas-conteudo {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.pdv-mesas-toggle {
+    width: 56px;
+    height: 56px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    flex-shrink: 0;
+    margin: 0;
+}
+
+.pdv-mesas-lista,
+.pdv-pedidos-lista {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0.5rem;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.5rem;
+    min-height: 0;
+    align-content: start;
+}
+
+.pdv-mesas-lista::-webkit-scrollbar {
+    width: 8px;
+}
+
+.pdv-mesas-lista::-webkit-scrollbar-track {
+    background: var(--light-color);
+    border-radius: 4px;
+}
+
+.pdv-mesas-lista::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 4px;
+}
+
+.pdv-mesas-lista::-webkit-scrollbar-thumb:hover,
+.pdv-pedidos-lista::-webkit-scrollbar-thumb:hover {
+    background: var(--primary-color);
+}
+
+.pdv-pedidos-lista::-webkit-scrollbar {
+    width: 8px;
+}
+
+.pdv-pedidos-lista::-webkit-scrollbar-track {
+    background: var(--light-color);
+    border-radius: 4px;
+}
+
+.pdv-pedidos-lista::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 4px;
+}
+
+.mesa-pdv-card {
+    background: white;
+    border-radius: 8px;
+    padding: 0.75rem 0.5rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 2px solid var(--border-color);
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+    aspect-ratio: 1;
+    min-height: 70px;
+}
+
+.mesa-pdv-card:hover {
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    border-color: var(--primary-color);
+}
+
+.mesa-pdv-card.mesa-ocupada {
+    background: var(--success-color);
+    color: white;
+    border-color: var(--success-color);
+    box-shadow: 0 2px 6px rgba(76, 175, 80, 0.3);
+}
+
+.mesa-pdv-card.mesa-ocupada:hover {
+    box-shadow: 0 4px 10px rgba(76, 175, 80, 0.4);
+}
+
+.mesa-pdv-card.mesa-livre {
+    background: #8B4513;
+    color: white;
+    border-color: #8B4513;
+    box-shadow: 0 2px 6px rgba(139, 69, 19, 0.3);
+}
+
+.mesa-pdv-card.mesa-livre:hover {
+    box-shadow: 0 4px 10px rgba(139, 69, 19, 0.4);
+}
+
+.mesa-pdv-card.mesa-impressa {
+    background: #9B59B6; /* Roxo */
+    color: white;
+    border-color: #9B59B6;
+    box-shadow: 0 2px 6px rgba(155, 89, 182, 0.3);
+}
+
+.mesa-pdv-card.mesa-impressa:hover {
+    box-shadow: 0 4px 10px rgba(155, 89, 182, 0.4);
+}
+
+.mesa-pdv-card.mesa-impressa {
+    background: #9B59B6; /* Roxo */
+    color: white;
+    border-color: #9B59B6;
+    box-shadow: 0 2px 6px rgba(155, 89, 182, 0.3);
+}
+
+.mesa-pdv-card.mesa-impressa:hover {
+    box-shadow: 0 4px 10px rgba(155, 89, 182, 0.4);
+}
+
+.mesa-pdv-icon {
+    font-size: 1.5rem;
+    line-height: 1;
+    display: block;
+    margin: 0;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
+}
+
+.mesa-pdv-numero {
+    font-size: 0.875rem;
+    font-weight: 700;
+    line-height: 1;
+    display: block;
+    margin: 0;
+    letter-spacing: 0.5px;
+}
+
+.pdv-pedidos-toggle {
+    width: 56px;
+    height: 56px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    flex-shrink: 0;
+    margin: 0;
+}
+
+.pedido-pdv-card {
+    background: white;
+    border-radius: 8px;
+    padding: 0.75rem 0.5rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 2px solid var(--border-color);
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+    aspect-ratio: 1;
+    min-height: 70px;
+}
+
+.pedido-pdv-card:hover {
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    border-color: var(--primary-color);
+}
+
+.pedido-pdv-card.pedido-ativo {
+    background: var(--success-color);
+    color: white;
+    border-color: var(--success-color);
+    box-shadow: 0 2px 6px rgba(76, 175, 80, 0.3);
+}
+
+.pedido-pdv-card.pedido-ativo:hover {
+    box-shadow: 0 4px 10px rgba(76, 175, 80, 0.4);
+}
+
+.pedido-pdv-card.pedido-impresso {
+    background: #9B59B6; /* Roxo */
+    color: white;
+    border-color: #9B59B6;
+    box-shadow: 0 2px 6px rgba(155, 89, 182, 0.3);
+}
+
+.pedido-pdv-card.pedido-impresso:hover {
+    box-shadow: 0 4px 10px rgba(155, 89, 182, 0.4);
+}
+
+.pedido-pdv-card.pedido-finalizado {
+    background: #8B4513;
+    color: white;
+    border-color: #8B4513;
+    box-shadow: 0 2px 6px rgba(139, 69, 19, 0.3);
+}
+
+.pedido-pdv-card.pedido-finalizado:hover {
+    box-shadow: 0 4px 10px rgba(139, 69, 19, 0.4);
+}
+
+.pedido-pdv-icon {
+    font-size: 1.5rem;
+    line-height: 1;
+    display: block;
+    margin: 0;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
+}
+
+.pedido-pdv-numero {
+    font-size: 0.875rem;
+    font-weight: 700;
+    line-height: 1;
+    display: block;
+    margin: 0;
+    letter-spacing: 0.5px;
+}
+
+/* Garantir alinhamento vertical dos toggles quando um painel está expandido */
+.pdv-lateral-wrapper {
+    align-items: flex-start;
+}
+
+.pdv-container.produtos-colapsados .pdv-produtos-wrapper,
+.pdv-container.entregadores-colapsados .pdv-entregadores-wrapper,
+.pdv-container.mesas-colapsadas .pdv-mesas-wrapper {
+    justify-content: flex-start;
+}
+
+.pdv-produtos {
+    flex: 1;
+    overflow-y: auto;
+    padding-right: 0.5rem;
+}
+
+.pdv-produtos::-webkit-scrollbar {
+    width: 8px;
+}
+
+.pdv-produtos::-webkit-scrollbar-track {
+    background: var(--light-color);
+    border-radius: 4px;
+}
+
+.pdv-produtos::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 4px;
+}
+
+.pdv-produtos::-webkit-scrollbar-thumb:hover {
+    background: var(--primary-color);
+}
+
+.pdv-entregadores-lista {
+    flex: 1;
+    overflow-y: auto;
+    padding-right: 0.5rem;
+    display: grid;
+    gap: 0.75rem;
+}
+
+.pdv-entregadores-lista::-webkit-scrollbar {
+    width: 8px;
+}
+
+.pdv-entregadores-lista::-webkit-scrollbar-track {
+    background: var(--light-color);
+    border-radius: 4px;
+}
+
+.pdv-entregadores-lista::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 4px;
+}
+
+.pdv-entregadores-lista::-webkit-scrollbar-thumb:hover {
+    background: var(--primary-color);
+}
+
+.pdv-carrinho {
+    background: white;
+    border-radius: 12px;
+    padding: 1rem;
+    box-shadow: var(--shadow);
+    display: flex;
+    flex-direction: row;
+    gap: 1rem;
+    min-height: 650px;
+    max-height: 850px;
+    overflow: hidden;
+    box-sizing: border-box;
+    flex: 1;
+    min-width: 600px;
+}
+
+.carrinho-esquerda {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.carrinho-direita {
+    width: 380px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    border-left: 2px solid var(--border-color);
+    padding-left: 1rem;
+    padding-right: 0.75rem;
+    box-sizing: border-box;
+    overflow: hidden;
+    max-height: 100%;
+}
+
+.carrinho-header {
+    flex-shrink: 0;
+    padding-bottom: 0.75rem;
+    border-bottom: 2px solid var(--border-color);
+    margin-bottom: 0.75rem;
+}
+
+.carrinho-itens-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-right: 0.5rem;
+    min-height: 0;
+    max-height: 100%;
+}
+
+.carrinho-itens-container::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+.carrinho-itens-container::-webkit-scrollbar-track {
+    background: var(--light-color);
+    border-radius: 4px;
+}
+
+.carrinho-itens-container::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 4px;
+}
+
+.carrinho-itens-container::-webkit-scrollbar-thumb:hover {
+    background: var(--primary-color);
+}
+
+.carrinho-footer {
+    flex-shrink: 0;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 2px solid var(--border-color);
+}
+
+.produto-pdv-card {
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    padding: 0.75rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: white;
+    height: 100%;
+}
+
+.produto-pdv-card:hover {
+    border-color: var(--primary-color);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
+}
+
+.produto-pdv-card:active {
+    transform: scale(0.98);
+}
+
+.produto-pdv-card .produto-nome {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--dark-color);
+    font-size: 1rem;
+}
+
+.produto-pdv-card .produto-preco {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    margin-top: 0.5rem;
+}
+
+.carrinho-item {
+    display: flex;
+    flex-direction: column;
+    padding: 0.75rem;
+    background: var(--light-color);
+    border-radius: 8px;
+    border: 2px solid var(--border-color);
+    transition: all 0.2s;
+    min-height: fit-content;
+    height: auto;
+    width: 100%;
+    box-sizing: border-box;
+    position: relative;
+}
+
+.carrinho-item:hover {
+    background: #f0f0f0;
+    border-color: var(--primary-color);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
+}
+
+.carrinho-item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 0.75rem;
+}
+
+.carrinho-item-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.carrinho-item-nome {
+    font-weight: 600;
+    color: var(--dark-color);
+    margin-bottom: 0.25rem;
+    word-break: break-word;
+    font-size: 1rem;
+}
+
+.carrinho-item-detalhes {
+    font-size: 0.875rem;
+    color: var(--text-light);
+    margin-bottom: 0.5rem;
+}
+
+.carrinho-item-subtotal {
+    font-weight: 700;
+    color: var(--primary-color);
+    font-size: 1.25rem;
+    white-space: nowrap;
+}
+
+.carrinho-item-controles {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.item-impresso-indicador {
+    color: #9B59B6; /* Roxo */
+    font-size: 1.2rem;
+    line-height: 1;
+    display: inline-block;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.6;
+    }
+}
+
+.carrinho-item.item-impresso {
+    border-left: 3px solid #9B59B6;
+    background: rgba(155, 89, 182, 0.05);
+}
+
+.carrinho-item-quantidade {
+    font-weight: 700;
+    font-size: 1.25rem;
+    color: var(--dark-color);
+    min-width: 40px;
+    text-align: center;
+}
+
+.carrinho-item-buttons {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.carrinho-total {
+    padding: 1rem;
+    background: var(--secondary-color);
+    color: white;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.carrinho-total-label {
+    text-align: center;
+    font-size: 0.875rem;
+    opacity: 0.9;
+    margin-bottom: 0.5rem;
+}
+
+.carrinho-total-valor {
+    font-size: 2rem;
+    font-weight: 700;
+    text-align: center;
+    margin: 0;
+}
+
+.carrinho-form {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    width: 100%;
+    box-sizing: border-box;
+    overflow-y: auto;
+    overflow-x: hidden;
+    max-height: 100%;
+    justify-content: flex-start;
+}
+
+.carrinho-form .form-group {
+    width: 100%;
+    box-sizing: border-box;
+    flex-shrink: 0;
+}
+
+.carrinho-form .form-group input,
+.carrinho-form .form-group textarea {
+    width: 100%;
+    box-sizing: border-box;
+    max-width: 100%;
+}
+
+.carrinho-form .btn {
+    flex-shrink: 0;
+    max-width: 100%;
+}
+
+.carrinho-vazio {
+    text-align: center;
+    color: var(--text-light);
+    padding: 3rem 1rem;
+    font-size: 1rem;
+}
+
+.carrinho-vazio-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+
+.btn-pagamento {
+    flex: 1;
+    min-width: 0;
+    white-space: nowrap;
+    transition: all 0.2s;
+}
+
+.btn-pagamento:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+@media (max-width: 1024px) {
+    .pdv-container {
+        flex-direction: column;
+    }
+
+    .pdv-carrinho {
+        width: 100%;
+        flex-direction: column;
+        max-height: 600px;
+        min-width: auto;
+        order: 1;
+    }
+
+    .pdv-lateral-wrapper {
+        max-width: 100%;
+        flex: 1;
+    }
+
+    .pdv-lateral-wrapper {
+        flex: 1 1 auto;
+        width: 100%;
+        order: 2;
+    }
+
+    .pdv-produtos-wrapper {
+        order: 2;
+    }
+
+    .carrinho-direita {
+        width: 100%;
+        border-left: none;
+        border-top: 2px solid var(--border-color);
+        padding-left: 0;
+        padding-right: 0;
+        padding-top: 1.5rem;
+        margin-top: 1rem;
+    }
+
+    .carrinho-itens-container {
+        max-height: 300px;
+    }
+}
+
+@media (max-width: 768px) {
+    .pdv-carrinho {
+        min-height: 400px;
+        max-height: none;
+        min-width: auto;
+        padding: 1rem;
+    }
+
+    .carrinho-item-controles {
+        flex-wrap: wrap;
+    }
+
+    .carrinho-direita {
+        width: 100%;
+        padding: 1rem;
+    }
+
+    .carrinho-total-valor {
+        font-size: 1.5rem;
+    }
+
+    .carrinho-form .form-group {
+        margin-bottom: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .pdv-carrinho {
+        min-height: auto;
+        min-width: auto;
+        padding: 0.75rem;
+    }
+
+    .carrinho-esquerda,
+    .carrinho-direita {
+        padding: 0.5rem;
+    }
+
+    .carrinho-total {
+        padding: 1rem;
+    }
+
+    .carrinho-total-valor {
+        font-size: 1.25rem;
+    }
+
+    .carrinho-item {
+        padding: 0.75rem;
+    }
+
+    .carrinho-item-nome {
+        font-size: 0.9rem;
+    }
+
+    .carrinho-item-subtotal {
+        font-size: 1rem;
+    }
+}

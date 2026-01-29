@@ -1,0 +1,207 @@
+{
+  "restaurante": {
+    "nome": "Restaurante Demo",
+    "cnpj": "12.345.678/0001-90",
+    "logo": "https://via.placeholder.com/150/FF6B6B/FFFFFF?text=RD",
+    "telefone": "(11) 98765-4321",
+    "endereco": "Av. Demo, 123 - Centro"
+  },
+  "cardapio": [
+    {
+      "id": 1,
+      "nome": "Hambúrguer Clássico",
+      "categoria": "Lanches",
+      "preco": 18.90,
+      "imagem": "https://via.placeholder.com/200/FF6B6B/FFFFFF?text=Hambúrguer",
+      "descricao": "Pão, carne, queijo, alface e tomate",
+      "tags": ["popular"],
+      "pratoDoDia": ["segunda"]
+    },
+    {
+      "id": 2,
+      "nome": "X-Burger",
+      "categoria": "Lanches",
+      "preco": 22.50,
+      "imagem": "https://via.placeholder.com/200/4ECDC4/FFFFFF?text=X-Burger",
+      "descricao": "Hambúrguer com bacon e ovo",
+      "tags": ["popular"],
+      "pratoDoDia": []
+    },
+    {
+      "id": 3,
+      "nome": "Cheeseburger",
+      "categoria": "Lanches",
+      "preco": 19.90,
+      "imagem": "https://via.placeholder.com/200/FF6B6B/FFFFFF?text=Cheese",
+      "descricao": "Hambúrguer duplo com queijo",
+      "tags": [],
+      "pratoDoDia": ["terça"]
+    },
+    {
+      "id": 4,
+      "nome": "Frango Grelhado",
+      "categoria": "Lanches",
+      "preco": 21.00,
+      "imagem": "https://via.placeholder.com/200/95E1D3/FFFFFF?text=Frango",
+      "descricao": "Sanduíche de frango grelhado",
+      "tags": [],
+      "pratoDoDia": []
+    },
+    {
+      "id": 5,
+      "nome": "Pizza Margherita",
+      "categoria": "Pizzas",
+      "preco": 35.00,
+      "imagem": "https://via.placeholder.com/200/F38181/FFFFFF?text=Pizza",
+      "descricao": "Molho de tomate, mussarela e manjericão",
+      "tags": ["popular"],
+      "pratoDoDia": ["quarta"]
+    },
+    {
+      "id": 6,
+      "nome": "Pizza Pepperoni",
+      "categoria": "Pizzas",
+      "preco": 42.00,
+      "imagem": "https://via.placeholder.com/200/AA96DA/FFFFFF?text=Pepperoni",
+      "descricao": "Mussarela e pepperoni",
+      "tags": ["popular"],
+      "pratoDoDia": []
+    },
+    {
+      "id": 7,
+      "nome": "Pizza Quatro Queijos",
+      "categoria": "Pizzas",
+      "preco": 45.00,
+      "imagem": "https://via.placeholder.com/200/FCBAD3/FFFFFF?text=4+Queijos",
+      "descricao": "Mussarela, parmesão, gorgonzola e provolone",
+      "tags": [],
+      "pratoDoDia": ["quinta"]
+    },
+    {
+      "id": 8,
+      "nome": "Coca-Cola 350ml",
+      "categoria": "Bebidas",
+      "preco": 5.50,
+      "imagem": "https://via.placeholder.com/200/C44569/FFFFFF?text=Refri",
+      "descricao": "Refrigerante gelado",
+      "tags": [],
+      "pratoDoDia": []
+    },
+    {
+      "id": 9,
+      "nome": "Suco de Laranja",
+      "categoria": "Bebidas",
+      "preco": 6.00,
+      "imagem": "https://via.placeholder.com/200/F8B500/FFFFFF?text=Suco",
+      "descricao": "Suco natural de laranja",
+      "tags": [],
+      "pratoDoDia": []
+    },
+    {
+      "id": 10,
+      "nome": "Água Mineral",
+      "categoria": "Bebidas",
+      "preco": 3.50,
+      "imagem": "https://via.placeholder.com/200/3498DB/FFFFFF?text=Água",
+      "descricao": "Água mineral 500ml",
+      "tags": [],
+      "pratoDoDia": []
+    },
+    {
+      "id": 11,
+      "nome": "Batata Frita",
+      "categoria": "Acompanhamentos",
+      "preco": 12.00,
+      "imagem": "https://via.placeholder.com/200/FFD93D/FFFFFF?text=Batata",
+      "descricao": "Porção de batata frita crocante",
+      "tags": ["popular"],
+      "pratoDoDia": ["sexta"]
+    },
+    {
+      "id": 12,
+      "nome": "Onion Rings",
+      "categoria": "Acompanhamentos",
+      "preco": 14.00,
+      "imagem": "https://via.placeholder.com/200/FFA07A/FFFFFF?text=Onion",
+      "descricao": "Anéis de cebola empanados",
+      "tags": [],
+      "pratoDoDia": []
+    },
+    {
+      "id": 13,
+      "nome": "Molho Especial",
+      "categoria": "Acompanhamentos",
+      "preco": 3.00,
+      "imagem": "https://via.placeholder.com/200/FF6347/FFFFFF?text=Molho",
+      "descricao": "Molho especial da casa",
+      "tags": [],
+      "pratoDoDia": []
+    }
+  ],
+  "pedidos": [],
+  "pedidosFinalizados": [],
+  "motoboys": [
+    {
+      "id": "MOT001",
+      "nome": "Carlos Mendes",
+      "telefone": "(11) 91111-1111",
+      "placa": "ABC-1234",
+      "status": "disponível",
+      "pedidosAtribuidos": []
+    },
+    {
+      "id": "MOT002",
+      "nome": "Roberto Silva",
+      "telefone": "(11) 92222-2222",
+      "placa": "DEF-5678",
+      "status": "disponível",
+      "pedidosAtribuidos": []
+    },
+    {
+      "id": "MOT003",
+      "nome": "Paulo Santos",
+      "telefone": "(11) 93333-3333",
+      "placa": "GHI-9012",
+      "status": "disponível",
+      "pedidosAtribuidos": []
+    },
+    {
+      "id": "MOT004",
+      "nome": "André Costa",
+      "telefone": "(11) 94444-4444",
+      "placa": "JKL-3456",
+      "status": "disponível",
+      "pedidosAtribuidos": []
+    }
+  ],
+  "categorias": [
+    {
+      "id": 1,
+      "nome": "Lanches",
+      "ativa": true
+    },
+    {
+      "id": 2,
+      "nome": "Pizzas",
+      "ativa": true
+    },
+    {
+      "id": 3,
+      "nome": "Bebidas",
+      "ativa": true
+    },
+    {
+      "id": 4,
+      "nome": "Acompanhamentos",
+      "ativa": true
+    }
+  ],
+  "proximoNumeroPedido": 1,
+  "proximoNumeroPedidoOnline": 1,
+  "proximoNumeroPedidoBalcao": 1,
+  "configuracao": {
+    "tempoMedioPreparo": 25,
+    "tempoMedioEntrega": 35,
+    "taxaEntrega": 5.00
+  }
+}

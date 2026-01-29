@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel do Gestor - Restaurante Demo</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <div class="logo-section">
+            <img id="logo-img" src="" alt="Logo">
+            <h1>📊 Painel do Gestor</h1>
+        </div>
+        <div class="header-actions">
+            <button class="btn btn-secondary" onclick="window.location.href='cozinha.html'">
+                Ir para Cozinha
+            </button>
+            <button class="btn btn-warning" onclick="resetarDemo()">
+                🔄 Reset Demo
+            </button>
+        </div>
+    </header>
+
+    <nav>
+        <div class="nav-container">
+            <a href="pdv.html" class="nav-link">💰 PDV</a>
+            <a href="cliente.html" class="nav-link">🍽️ Cliente</a>
+            <a href="produtos.html" class="nav-link">🍕 Produto</a>
+            <a href="relatorios.html" class="nav-link">📈 Relatórios</a>
+            <a href="configuracoes.html" class="nav-link">⚙️ Configurações</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- Dashboard Resumido -->
+        <div class="stats-grid" id="dashboard-stats">
+            <div class="stat-card">
+                <div class="stat-label">Pedidos Hoje</div>
+                <div class="stat-value" id="stat-pedidos-hoje">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Valor Total</div>
+                <div class="stat-value" id="stat-valor-total">R$ 0,00</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Em Preparo</div>
+                <div class="stat-value" id="stat-em-preparo">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Ticket Médio</div>
+                <div class="stat-value" id="stat-ticket-medio">R$ 0,00</div>
+            </div>
+        </div>
+
+        <!-- Gráfico de Vendas por Hora -->
+        <div class="chart-container">
+            <h3 style="margin-bottom: 1rem;">Vendas por Hora (Hoje)</h3>
+            <div class="bar-chart" id="vendas-por-hora-chart"></div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab active" onclick="abrirTab('frente-caixa')">💰 Frente de Caixa</button>
+            <button class="tab" onclick="abrirTab('cozinha-readonly')">👨‍🍳 Cozinha</button>
+            <button class="tab" onclick="abrirTab('motoboys')">🏍️ Motoboys</button>
+            <button class="tab" onclick="abrirTab('config')">⚙️ Configuração</button>
+        </div>
+
+        <!-- Tab: Frente de Caixa -->
+        <div id="tab-frente-caixa" class="tab-content active">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Frente de Caixa</h2>
+                    <div style="display: flex; gap: 1rem;">
+                        <button class="btn btn-primary" onclick="gerarPedidoAleatorio()">
+                            ➕ Gerar Pedido Aleatório
+                        </button>
+                        <button class="btn btn-secondary" onclick="abrirModalNovoPedido('mesa')">
+                            🍽️ Novo Pedido (Mesa)
+                        </button>
+                        <button class="btn btn-secondary" onclick="abrirModalNovoPedido('online')">
+                            📱 Novo Pedido (Online)
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3 style="margin-bottom: 1rem;">Pedidos Ativos</h3>
+                <div id="pedidos-ativos-container" class="grid grid-2"></div>
+                <div id="sem-pedidos-ativos" style="text-align: center; padding: 2rem; color: var(--text-light); display: none;">
+                    Nenhum pedido ativo no momento.
+                </div>
+            </div>
+
+            <div class="card">
+                <h3 style="margin-bottom: 1rem;">Caixa do Dia</h3>
+                <div class="grid grid-3">
+                    <div class="stat-card">
+                        <div class="stat-label">Total do Dia</div>
+                        <div class="stat-value" id="caixa-total-dia">R$ 0,00</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Pix</div>
+                        <div class="stat-value" id="caixa-pix">R$ 0,00</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Cartão</div>
+                        <div class="stat-value" id="caixa-cartao">R$ 0,00</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Dinheiro</div>
+                        <div class="stat-value" id="caixa-dinheiro">R$ 0,00</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab: Cozinha (Readonly) -->
+        <div id="tab-cozinha-readonly" class="tab-content">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Visão da Cozinha (Somente Leitura)</h2>
+                    <button class="btn btn-secondary" onclick="window.location.href='cozinha.html'">
+                        Ir para Cozinha
+                    </button>
+                </div>
+            </div>
+            <div id="cozinha-readonly-container" class="grid grid-2"></div>
+        </div>
+
+        <!-- Tab: Motoboys -->
+        <div id="tab-motoboys" class="tab-content">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Gerenciar Motoboys</h2>
+                    <button class="btn btn-primary" onclick="abrirModalMotoboy()">
+                        ➕ Adicionar Motoboy
+                    </button>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3 style="margin-bottom: 1rem;">Lista de Motoboys</h3>
+                <div id="motoboys-container" class="grid grid-3"></div>
+            </div>
+
+            <div class="card">
+                <h3 style="margin-bottom: 1rem;">Atribuir Pedidos</h3>
+                <div id="atribuicao-pedidos-container" class="grid grid-2"></div>
+            </div>
+        </div>
+
+        <!-- Tab: Configuração -->
+        <div id="tab-config" class="tab-content">
+            <div class="card">
+                <h2 class="card-title">Configurações</h2>
+                <div class="form-group">
+                    <button class="btn btn-danger" onclick="resetarDemo()">
+                        🔄 Resetar Dados da Demo
+                    </button>
+                    <p style="margin-top: 0.5rem; color: var(--text-light);">
+                        Restaura todos os dados fictícios para o estado inicial.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Detalhes do Pedido -->
+    <div id="modal-pedido" class="modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="fecharModal('modal-pedido')">&times;</button>
+            <h2 id="modal-pedido-titulo">Detalhes do Pedido</h2>
+            <div id="modal-pedido-conteudo"></div>
+        </div>
+    </div>
+
+    <!-- Modal: Novo Motoboy -->
+    <div id="modal-motoboy" class="modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="fecharModal('modal-motoboy')">&times;</button>
+            <h2 id="modal-motoboy-titulo">Adicionar Motoboy</h2>
+            <form id="form-motoboy">
+                <input type="hidden" id="motoboy-id-editar">
+                <div class="form-group">
+                    <label for="motoboy-nome">Nome *</label>
+                    <input type="text" id="motoboy-nome" required>
+                </div>
+                <div class="form-group">
+                    <label for="motoboy-telefone">Telefone *</label>
+                    <input type="tel" id="motoboy-telefone" required placeholder="(11) 98765-4321" oninput="formatarTelefone(this)">
+                </div>
+                <div class="form-group">
+                    <label for="motoboy-placa">Placa *</label>
+                    <input type="text" id="motoboy-placa" required placeholder="ABC-1234" maxlength="8" style="text-transform: uppercase;">
+                </div>
+                <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                    <button type="submit" class="btn btn-primary">Salvar</button>
+                    <button type="button" class="btn btn-secondary" onclick="fecharModal('modal-motoboy')">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="data.js"></script>
+    <script src="websocket-sim.js"></script>
+    <script>
+        let updateInterval = null;
+
+        // Carregar dados do restaurante
+        const restaurante = dataManager.getRestaurante();
+        document.getElementById('logo-img').src = restaurante.logo;
+
+        // Abrir tab
+        function abrirTab(tabId) {
+            // Esconder todas as tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            // Mostrar tab selecionada
+            document.getElementById(`tab-${tabId}`).classList.add('active');
+            event.target.classList.add('active');
+
+            // Carregar dados da tab
+            if (tabId === 'frente-caixa') {
+                carregarPedidosAtivos();
+                carregarCaixa();
+            } else if (tabId === 'cozinha-readonly') {
+                carregarCozinhaReadonly();
+            } else if (tabId === 'motoboys') {
+                carregarMotoboys();
+                carregarAtribuicaoPedidos();
+            }
+        }
+
+        // Atualizar dashboard
+        function atualizarDashboard() {
+            const stats = dataManager.getEstatisticasHoje();
+            document.getElementById('stat-pedidos-hoje').textContent = stats.pedidosHoje;
+            document.getElementById('stat-valor-total').textContent = `R$ ${stats.valorTotal.toFixed(2).replace('.', ',')}`;
+            document.getElementById('stat-em-preparo').textContent = stats.pedidosEmPreparo;
+            
+            const ticketMedio = dataManager.getTicketMedio();
+            document.getElementById('stat-ticket-medio').textContent = `R$ ${ticketMedio.toFixed(2).replace('.', ',')}`;
+        }
+
+        // Carregar gráfico de vendas
+        function carregarGraficoVendas() {
+            const vendasPorHora = dataManager.getVendasPorHora();
+            const maxVenda = Math.max(...vendasPorHora, 1);
+            const chart = document.getElementById('vendas-por-hora-chart');
+            
+            chart.innerHTML = '';
+            
+            for (let i = 0; i < 24; i++) {
+                const bar = document.createElement('div');
+                bar.className = 'bar';
+                const altura = (vendasPorHora[i] / maxVenda) * 100;
+                bar.style.height = `${Math.max(altura, 5)}%`;
+                bar.title = `${String(i).padStart(2, '0')}h: R$ ${vendasPorHora[i].toFixed(2)}`;
+                
+                const label = document.createElement('div');
+                label.className = 'bar-label';
+                label.textContent = `${String(i).padStart(2, '0')}h`;
+                bar.appendChild(label);
+                
+                chart.appendChild(bar);
+            }
+        }
+
+        // Carregar pedidos ativos
+        function carregarPedidosAtivos() {
+            const pedidos = dataManager.getPedidos();
+            const container = document.getElementById('pedidos-ativos-container');
+            const semPedidos = document.getElementById('sem-pedidos-ativos');
+
+            if (pedidos.length === 0) {
+                container.innerHTML = '';
+                semPedidos.style.display = 'block';
+                return;
+            }
+
+            semPedidos.style.display = 'none';
+            container.innerHTML = '';
+
+            pedidos.forEach(pedido => {
+                const temBebida = dataManager.temBebida(pedido);
+                const card = document.createElement('div');
+                card.className = `card pedido-card status-${pedido.status}`;
+                
+                const total = pedido.itens.reduce((sum, item) => sum + (item.preco * item.quantidade), 0);
+                
+                card.innerHTML = `
+                    <div class="pedido-header">
+                        <div>
+                            <div class="pedido-numero">
+                                ${pedido.id} ${temBebida ? '🥤' : ''}
+                            </div>
+                            <div class="pedido-info">
+                                <div><strong>Cliente:</strong> ${pedido.cliente}</div>
+                                <div><strong>Tipo:</strong> ${pedido.tipo === 'entrega' ? 'Entrega' : 'Retirada'}</div>
+                                <div><strong>Status:</strong> <span class="badge badge-${pedido.status === 'recebido' ? 'info' : pedido.status === 'preparando' ? 'warning' : 'success'}">${pedido.status}</span></div>
+                            </div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="font-size: 1.25rem; font-weight: 600; color: var(--primary-color);">
+                                R$ ${total.toFixed(2).replace('.', ',')}
+                            </div>
+                            <div style="font-size: 0.875rem; color: var(--text-light); margin-top: 0.25rem;">
+                                ${pedido.pagamento}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="pedido-itens">
+                        ${pedido.itens.map(item => `
+                            <div class="pedido-item">
+                                <span>${item.quantidade}x ${item.nome}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div class="pedido-acoes">
+                        <button class="btn btn-small btn-primary" onclick="verDetalhesPedido('${pedido.id}')">
+                            Ver Detalhes
+                        </button>
+                        ${pedido.status === 'recebido' ? `
+                            <button class="btn btn-small btn-secondary" onclick="enviarPedido('${pedido.id}')">
+                                Enviar
+                            </button>
+                        ` : ''}
+                        <button class="btn btn-small btn-danger" onclick="cancelarPedido('${pedido.id}')">
+                            Cancelar
+                        </button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // Carregar caixa
+        function carregarCaixa() {
+            const hoje = new Date().toISOString().split('T')[0];
+            const pedidosHoje = dataManager.getPedidosFinalizados().filter(p => 
+                p.dataCriacao.startsWith(hoje)
+            );
+
+            const total = pedidosHoje.reduce((sum, p) => sum + (p.valorTotal || 0), 0);
+            const pix = pedidosHoje.filter(p => p.pagamento === 'Pix').reduce((sum, p) => sum + (p.valorTotal || 0), 0);
+            const cartao = pedidosHoje.filter(p => p.pagamento === 'Cartão').reduce((sum, p) => sum + (p.valorTotal || 0), 0);
+            const dinheiro = pedidosHoje.filter(p => p.pagamento === 'Dinheiro').reduce((sum, p) => sum + (p.valorTotal || 0), 0);
+
+            document.getElementById('caixa-total-dia').textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
+            document.getElementById('caixa-pix').textContent = `R$ ${pix.toFixed(2).replace('.', ',')}`;
+            document.getElementById('caixa-cartao').textContent = `R$ ${cartao.toFixed(2).replace('.', ',')}`;
+            document.getElementById('caixa-dinheiro').textContent = `R$ ${dinheiro.toFixed(2).replace('.', ',')}`;
+        }
+
+        // Carregar cozinha readonly
+        function carregarCozinhaReadonly() {
+            const pedidos = dataManager.getPedidos();
+            const container = document.getElementById('cozinha-readonly-container');
+            
+            if (pedidos.length === 0) {
+                container.innerHTML = '<div class="card"><p style="text-align: center; color: var(--text-light);">Nenhum pedido no momento.</p></div>';
+                return;
+            }
+
+            container.innerHTML = '';
+            pedidos.forEach(pedido => {
+                const card = document.createElement('div');
+                card.className = `card pedido-card status-${pedido.status}`;
+                
+                card.innerHTML = `
+                    <div class="pedido-header">
+                        <div class="pedido-numero">${pedido.id}</div>
+                        <span class="badge badge-${pedido.status === 'recebido' ? 'info' : pedido.status === 'preparando' ? 'warning' : 'success'}">${pedido.status}</span>
+                    </div>
+                    <div class="pedido-info">
+                        <div><strong>Cliente:</strong> ${pedido.cliente}</div>
+                        <div><strong>Itens:</strong> ${pedido.itens.map(i => `${i.quantidade}x ${i.nome}`).join(', ')}</div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // Carregar motoboys
+        function carregarMotoboys() {
+            const motoboys = dataManager.getMotoboys();
+            const container = document.getElementById('motoboys-container');
+            
+            container.innerHTML = '';
+            motoboys.forEach(motoboy => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                
+                card.innerHTML = `
+                    <div class="card-header">
+                        <h3>${motoboy.nome}</h3>
+                        <span class="badge badge-${motoboy.status === 'disponível' ? 'success' : 'warning'}">${motoboy.status}</span>
+                    </div>
+                    <div class="pedido-info">
+                        <div><strong>Telefone:</strong> ${motoboy.telefone}</div>
+                        <div><strong>Placa:</strong> ${motoboy.placa}</div>
+                        <div><strong>Pedidos:</strong> ${motoboy.pedidosAtribuidos.length}</div>
+                    </div>
+                    <div class="pedido-acoes" style="margin-top: 1rem;">
+                        <button class="btn btn-small btn-secondary" onclick="editarMotoboy('${motoboy.id}')">
+                            Editar
+                        </button>
+                        <button class="btn btn-small btn-danger" onclick="removerMotoboy('${motoboy.id}')">
+                            Remover
+                        </button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // Carregar atribuição de pedidos
+        function carregarAtribuicaoPedidos() {
+            const pedidos = dataManager.getPedidos().filter(p => p.tipo === 'entrega' && p.status !== 'pronto');
+            const motoboys = dataManager.getMotoboys();
+            const container = document.getElementById('atribuicao-pedidos-container');
+            
+            container.innerHTML = '';
+            
+            pedidos.forEach(pedido => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.innerHTML = `
+                    <div class="pedido-header">
+                        <div class="pedido-numero">${pedido.id}</div>
+                        <div class="pedido-info">
+                            <div><strong>Cliente:</strong> ${pedido.cliente}</div>
+                            <div><strong>Endereço:</strong> ${pedido.endereco}</div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Atribuir Motoboy:</label>
+                        <select id="motoboy-${pedido.id}" class="form-group" style="width: 100%; margin-bottom: 0.5rem;">
+                            <option value="">Selecione...</option>
+                            ${motoboys.map(m => `
+                                <option value="${m.id}" ${pedido.motoboyId === m.id ? 'selected' : ''}>
+                                    ${m.nome} - ${m.status}
+                                </option>
+                            `).join('')}
+                        </select>
+                        <button class="btn btn-small btn-primary" onclick="atribuirMotoboy('${pedido.id}')">
+                            Atribuir
+                        </button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // Ver detalhes do pedido
+        function verDetalhesPedido(pedidoId) {
+            const pedido = dataManager.getPedido(pedidoId);
+            if (!pedido) return;
+
+            const total = pedido.itens.reduce((sum, item) => sum + (item.preco * item.quantidade), 0);
+            
+            document.getElementById('modal-pedido-titulo').textContent = `Pedido ${pedido.id}`;
+            document.getElementById('modal-pedido-conteudo').innerHTML = `
+                <div class="pedido-info">
+                    <div><strong>Cliente:</strong> ${pedido.cliente}</div>
+                    <div><strong>Telefone:</strong> ${pedido.telefone}</div>
+                    <div><strong>Tipo:</strong> ${pedido.tipo === 'entrega' ? 'Entrega' : 'Retirada'}</div>
+                    ${pedido.endereco ? `<div><strong>Endereço:</strong> ${pedido.endereco}</div>` : ''}
+                    <div><strong>Status:</strong> ${pedido.status}</div>
+                    <div><strong>Pagamento:</strong> ${pedido.pagamento}</div>
+                    ${pedido.observacoes ? `<div><strong>Observações:</strong> ${pedido.observacoes}</div>` : ''}
+                </div>
+                <div class="pedido-itens" style="margin-top: 1rem;">
+                    <h4>Itens:</h4>
+                    ${pedido.itens.map(item => `
+                        <div class="pedido-item">
+                            <span>${item.quantidade}x ${item.nome}</span>
+                            <span>R$ ${(item.preco * item.quantidade).toFixed(2).replace('.', ',')}</span>
+                        </div>
+                    `).join('')}
+                </div>
+                <div style="text-align: right; margin-top: 1rem; padding-top: 1rem; border-top: 2px solid var(--border-color);">
+                    <strong style="font-size: 1.25rem;">Total: R$ ${total.toFixed(2).replace('.', ',')}</strong>
+                </div>
+            `;
+            document.getElementById('modal-pedido').classList.add('active');
+        }
+
+        // Enviar pedido
+        function enviarPedido(pedidoId) {
+            if (confirm(`Deseja enviar o pedido ${pedidoId} para a cozinha?`)) {
+                dataManager.atualizarStatusPedido(pedidoId, 'preparando');
+                carregarPedidosAtivos();
+            }
+        }
+
+        // Cancelar pedido
+        function cancelarPedido(pedidoId) {
+            if (confirm(`Tem certeza que deseja cancelar o pedido ${pedidoId}?`)) {
+                dataManager.cancelarPedido(pedidoId);
+                carregarPedidosAtivos();
+                atualizarDashboard();
+            }
+        }
+
+        // Atribuir motoboy
+        function atribuirMotoboy(pedidoId) {
+            const select = document.getElementById(`motoboy-${pedidoId}`);
+            const motoboyId = select.value;
+            
+            if (!motoboyId) {
+                alert('Por favor, selecione um motoboy!');
+                return;
+            }
+
+            if (dataManager.atribuirMotoboy(pedidoId, motoboyId)) {
+                alert('Motoboy atribuído com sucesso!');
+                carregarAtribuicaoPedidos();
+                carregarMotoboys();
+            }
+        }
+
+        // Abrir modal motoboy
+        function abrirModalMotoboy(motoboyId = null) {
+            document.getElementById('motoboy-id-editar').value = motoboyId || '';
+            document.getElementById('form-motoboy').reset();
+            
+            if (motoboyId) {
+                const motoboy = dataManager.getMotoboy(motoboyId);
+                if (motoboy) {
+                    document.getElementById('modal-motoboy-titulo').textContent = 'Editar Motoboy';
+                    document.getElementById('motoboy-nome').value = motoboy.nome;
+                    document.getElementById('motoboy-telefone').value = motoboy.telefone;
+                    document.getElementById('motoboy-placa').value = motoboy.placa;
+                }
+            } else {
+                document.getElementById('modal-motoboy-titulo').textContent = 'Adicionar Motoboy';
+            }
+            
+            document.getElementById('modal-motoboy').classList.add('active');
+        }
+
+        // Editar motoboy
+        function editarMotoboy(motoboyId) {
+            abrirModalMotoboy(motoboyId);
+        }
+
+        // Remover motoboy
+        function removerMotoboy(motoboyId) {
+            if (confirm('Tem certeza que deseja remover este motoboy?')) {
+                dataManager.removerMotoboy(motoboyId);
+                carregarMotoboys();
+                carregarAtribuicaoPedidos();
+            }
+        }
+
+        // Form motoboy
+        document.getElementById('form-motoboy').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const motoboyId = document.getElementById('motoboy-id-editar').value;
+            const dados = {
+                nome: document.getElementById('motoboy-nome').value,
+                telefone: document.getElementById('motoboy-telefone').value,
+                placa: document.getElementById('motoboy-placa').value.toUpperCase()
+            };
+
+            if (motoboyId) {
+                dataManager.atualizarMotoboy(motoboyId, dados);
+            } else {
+                dataManager.adicionarMotoboy(dados);
+            }
+
+            fecharModal('modal-motoboy');
+            carregarMotoboys();
+            carregarAtribuicaoPedidos();
+        });
+
+        // Fechar modal
+        function fecharModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        // Fechar modal ao clicar fora
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    this.classList.remove('active');
+                }
+            });
+        });
+
+        // Gerar pedido aleatório
+        function gerarPedidoAleatorio() {
+            const pedido = window.gerarPedidoAleatorio ? window.gerarPedidoAleatorio() : null;
+            if (pedido) {
+                alert(`Pedido ${pedido.id} gerado com sucesso!`);
+                carregarPedidosAtivos();
+                atualizarDashboard();
+                carregarGraficoVendas();
+            } else {
+                alert('Função de gerar pedido aleatório não disponível. Use a página de cliente para criar pedidos.');
+            }
+        }
+
+        // Resetar demo
+        function resetarDemo() {
+            if (confirm('Tem certeza que deseja resetar todos os dados da demo? Esta ação não pode ser desfeita.')) {
+                dataManager.resetData();
+                alert('Dados resetados com sucesso!');
+                location.reload();
+            }
+        }
+
+        // Format telefone
+        function formatarTelefone(input) {
+            let value = input.value.replace(/\D/g, '');
+            if (value.length <= 11) {
+                if (value.length <= 10) {
+                    value = value.replace(/^(\d{2})(\d{4})(\d{4}).*/, '($1) $2-$3');
+                } else {
+                    value = value.replace(/^(\d{2})(\d{5})(\d{4}).*/, '($1) $2-$3');
+                }
+            }
+            input.value = value;
+        }
+
+        // Inicializar
+        atualizarDashboard();
+        carregarGraficoVendas();
+        carregarPedidosAtivos();
+        carregarCaixa();
+
+        // Atualização automática
+        if (updateInterval) clearInterval(updateInterval);
+        updateInterval = setInterval(() => {
+            atualizarDashboard();
+            carregarPedidosAtivos();
+            carregarCaixa();
+            carregarGraficoVendas();
+        }, 15000); // A cada 15 segundos
+    </script>
+</body>
+</html>

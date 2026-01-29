@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fazer Pedido - Restaurante Demo</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <nav>
+        <div class="nav-container">
+            <a href="pdv.html" class="nav-link">💰 PDV</a>
+            <a href="cliente.html" class="nav-link active">🍽️ Cliente</a>
+            <a href="entregador.html" class="nav-link">🏍️ Entregador</a>
+            <a href="produtos.html" class="nav-link">🍕 Produto</a>
+            <a href="relatorios.html" class="nav-link">📈 Relatórios</a>
+            <a href="configuracoes.html" class="nav-link">⚙️ Configurações</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Faça Seu Pedido</h2>
+            </div>
+
+            <form id="pedido-form">
+                <!-- Dados do Cliente -->
+                <div class="form-group">
+                    <label for="nome-cliente">Nome *</label>
+                    <input type="text" id="nome-cliente" required placeholder="Seu nome completo">
+                </div>
+
+                <div class="form-group">
+                    <label for="telefone-cliente">Telefone *</label>
+                    <input type="tel" id="telefone-cliente" required placeholder="(11) 98765-4321" 
+                           pattern="[\(]\d{2}[\)]\s\d{4,5}[\-]\d{4}" 
+                           oninput="formatarTelefone(this)">
+                </div>
+
+                <!-- Tipo de Pedido -->
+                <div class="form-group">
+                    <label>Tipo de Pedido *</label>
+                    <div class="radio-group">
+                        <label>
+                            <input type="radio" name="tipo-pedido" value="retirada" checked onchange="toggleEndereco()">
+                            <span>Retirada</span>
+                        </label>
+                        <label>
+                            <input type="radio" name="tipo-pedido" value="entrega" onchange="toggleEndereco()">
+                            <span>Entrega</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Endereço (apenas para entrega) -->
+                <div class="form-group" id="endereco-group" style="display: none;">
+                    <label for="endereco">Endereço de Entrega *</label>
+                    <input type="text" id="endereco" placeholder="Rua, número, bairro">
+                </div>
+
+                <!-- Seleção de Produtos por Categoria -->
+                <div class="form-group">
+                    <label>Selecione os Produtos</label>
+                    <div id="categorias-produtos"></div>
+                </div>
+
+                <!-- Itens Selecionados -->
+                <div class="form-group">
+                    <label>Itens do Pedido</label>
+                    <div id="itens-selecionados" class="card" style="background: var(--light-color);">
+                        <p style="text-align: center; color: var(--text-light);">Nenhum item selecionado</p>
+                    </div>
+                    <div id="total-pedido" style="text-align: right; margin-top: 1rem; font-size: 1.25rem; font-weight: 600; color: var(--primary-color);">
+                        Total: R$ 0,00
+                    </div>
+                </div>
+
+                <!-- Observações -->
+                <div class="form-group">
+                    <label for="observacoes">Observações</label>
+                    <textarea id="observacoes" placeholder="Ex: Sem cebola, bem passado, etc."></textarea>
+                </div>
+
+                <!-- Forma de Pagamento -->
+                <div class="form-group">
+                    <label>Forma de Pagamento *</label>
+                    <div class="radio-group">
+                        <label>
+                            <input type="radio" name="pagamento" value="Pix" checked>
+                            <span>Pix</span>
+                        </label>
+                        <label>
+                            <input type="radio" name="pagamento" value="Cartão">
+                            <span>Cartão</span>
+                        </label>
+                        <label>
+                            <input type="radio" name="pagamento" value="Dinheiro">
+                            <span>Dinheiro</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Botões -->
+                <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                    <button type="submit" class="btn btn-primary" style="flex: 1;">
+                        Confirmar Pedido
+                    </button>
+                    <button type="button" class="btn btn-secondary" onclick="limparPedido()">
+                        Limpar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="data.js"></script>
+    <script src="websocket-sim.js"></script>
+    <script>
+        // Carregar dados do restaurante
+        const restaurante = dataManager.getRestaurante();
+        // Header removido - elementos não existem mais
+        // const logoImg = document.getElementById('logo-img');
+        // if (logoImg) logoImg.src = restaurante.logo;
+        // const restauranteNome = document.getElementById('restaurante-nome');
+        // if (restauranteNome) restauranteNome.textContent = restaurante.nome;
+
+        // Itens selecionados
+        let itensSelecionados = {};
+
+        // Função para sanitizar ID
+        function sanitizarId(texto) {
+            return texto.replace(/[^a-zA-Z0-9]/g, '-');
+        }
+
+        // Carregar cardápio por categoria com acordeão
+        function carregarCardapio() {
+            const cardapio = dataManager.getCardapio();
+            const categorias = [...new Set(cardapio.map(p => p.categoria))];
+            const container = document.getElementById('categorias-produtos');
+
+            categorias.forEach((categoria, index) => {
+                const produtos = cardapio.filter(p => p.categoria === categoria);
+                const categoriaId = sanitizarId(categoria);
+                
+                const categoriaDiv = document.createElement('div');
+                categoriaDiv.className = 'categoria-acordeon mb-2';
+                categoriaDiv.innerHTML = `
+                    <div class="categoria-header" onclick="toggleCategoria('${categoriaId}')">
+                        <h3 style="margin: 0; flex: 1;">${categoria}</h3>
+                        <span class="categoria-arrow" id="arrow-${categoriaId}" style="transform: ${index === 0 ? 'rotate(0deg)' : 'rotate(-90deg)'};">${index === 0 ? '▼' : '▶'}</span>
+                    </div>
+                    <div class="categoria-content" id="content-${categoriaId}" style="display: ${index === 0 ? 'block' : 'none'};">
+                        <div class="grid grid-3" id="produtos-${categoriaId}"></div>
+                    </div>
+                `;
+
+                const produtosDiv = categoriaDiv.querySelector(`#produtos-${categoriaId}`);
+                
+                produtos.forEach(produto => {
+                    const diaAtual = new Date().toLocaleDateString('pt-BR', { weekday: 'long' });
+                    const diasSemana = ['domingo', 'segunda', 'terça', 'quarta', 'quinta', 'sexta', 'sábado'];
+                    const diaAtualLower = diasSemana[new Date().getDay()];
+                    const isPratoDoDia = produto.pratoDoDia && produto.pratoDoDia.includes(diaAtualLower);
+
+                    const produtoCard = document.createElement('div');
+                    produtoCard.className = 'produto-card';
+                    produtoCard.innerHTML = `
+                        <img src="${produto.imagem}" alt="${produto.nome}" class="produto-imagem">
+                        <div class="produto-body">
+                            <div class="produto-nome">${produto.nome}</div>
+                            ${isPratoDoDia ? '<span class="prato-do-dia-badge">🥘 Prato do Dia</span>' : ''}
+                            <div class="produto-categoria">${produto.categoria}</div>
+                            <div class="produto-preco">R$ ${produto.preco.toFixed(2).replace('.', ',')}</div>
+                            <p class="produto-descricao">${produto.descricao}</p>
+                            <div style="display: flex; gap: 0.5rem; align-items: center;">
+                                <button type="button" class="btn btn-small btn-secondary" onclick="adicionarItem(${produto.id})">+ Adicionar</button>
+                                <span id="qtd-${produto.id}" style="font-weight: 600; min-width: 50px; text-align: center;">0</span>
+                                <button type="button" class="btn btn-small btn-danger" onclick="removerItem(${produto.id})">- Remover</button>
+                            </div>
+                        </div>
+                    `;
+                    produtosDiv.appendChild(produtoCard);
+                });
+
+                container.appendChild(categoriaDiv);
+            });
+        }
+
+        // Toggle categoria (expandir/colapsar)
+        function toggleCategoria(categoria) {
+            const content = document.getElementById(`content-${categoria}`);
+            const arrow = document.getElementById(`arrow-${categoria}`);
+            
+            if (content.style.display === 'none' || !content.style.display) {
+                content.style.display = 'block';
+                arrow.textContent = '▼';
+                arrow.style.transform = 'rotate(0deg)';
+            } else {
+                content.style.display = 'none';
+                arrow.textContent = '▶';
+                arrow.style.transform = 'rotate(-90deg)';
+            }
+        }
+
+        // Adicionar item ao pedido
+        function adicionarItem(produtoId) {
+            const produto = dataManager.getProduto(produtoId);
+            if (!produto) return;
+
+            if (!itensSelecionados[produtoId]) {
+                itensSelecionados[produtoId] = {
+                    produtoId: produto.id,
+                    nome: produto.nome,
+                    quantidade: 0,
+                    preco: produto.preco
+                };
+            }
+            itensSelecionados[produtoId].quantidade++;
+            atualizarInterface();
+        }
+
+        // Remover item do pedido
+        function removerItem(produtoId) {
+            if (itensSelecionados[produtoId]) {
+                itensSelecionados[produtoId].quantidade--;
+                if (itensSelecionados[produtoId].quantidade <= 0) {
+                    delete itensSelecionados[produtoId];
+                }
+                atualizarInterface();
+            }
+        }
+
+        // Atualizar interface
+        function atualizarInterface() {
+            // Atualizar quantidades
+            Object.keys(itensSelecionados).forEach(produtoId => {
+                const qtdElement = document.getElementById(`qtd-${produtoId}`);
+                if (qtdElement) {
+                    qtdElement.textContent = itensSelecionados[produtoId].quantidade;
+                }
+            });
+
+            // Atualizar lista de itens
+            const container = document.getElementById('itens-selecionados');
+            const totalElement = document.getElementById('total-pedido');
+            const itens = Object.values(itensSelecionados);
+            
+            if (itens.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: var(--text-light);">Nenhum item selecionado</p>';
+                totalElement.textContent = 'Total: R$ 0,00';
+            } else {
+                container.innerHTML = itens.map(item => `
+                    <div class="pedido-item">
+                        <span>${item.nome} x${item.quantidade}</span>
+                        <span style="font-weight: 600;">R$ ${(item.preco * item.quantidade).toFixed(2).replace('.', ',')}</span>
+                    </div>
+                `).join('');
+                
+                const total = itens.reduce((sum, item) => sum + (item.preco * item.quantidade), 0);
+                totalElement.textContent = `Total: R$ ${total.toFixed(2).replace('.', ',')}`;
+            }
+        }
+
+        // Toggle endereço
+        function toggleEndereco() {
+            const tipo = document.querySelector('input[name="tipo-pedido"]:checked').value;
+            const enderecoGroup = document.getElementById('endereco-group');
+            const enderecoInput = document.getElementById('endereco');
+            
+            if (tipo === 'entrega') {
+                enderecoGroup.style.display = 'block';
+                enderecoInput.required = true;
+            } else {
+                enderecoGroup.style.display = 'none';
+                enderecoInput.required = false;
+                enderecoInput.value = '';
+            }
+        }
+
+        // Formatar telefone
+        function formatarTelefone(input) {
+            let value = input.value.replace(/\D/g, '');
+            if (value.length <= 11) {
+                if (value.length <= 10) {
+                    value = value.replace(/^(\d{2})(\d{4})(\d{4}).*/, '($1) $2-$3');
+                } else {
+                    value = value.replace(/^(\d{2})(\d{5})(\d{4}).*/, '($1) $2-$3');
+                }
+            }
+            input.value = value;
+        }
+
+        // Limpar pedido
+        function limparPedido() {
+            if (confirm('Deseja limpar todos os itens do pedido?')) {
+                itensSelecionados = {};
+                document.getElementById('pedido-form').reset();
+                toggleEndereco();
+                atualizarInterface();
+                
+                // Resetar quantidades
+                const cardapio = dataManager.getCardapio();
+                cardapio.forEach(produto => {
+                    const qtdElement = document.getElementById(`qtd-${produto.id}`);
+                    if (qtdElement) qtdElement.textContent = '0';
+                });
+            }
+        }
+
+        // Submeter formulário
+        document.getElementById('pedido-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const itens = Object.values(itensSelecionados).filter(item => item.quantidade > 0);
+            
+            if (itens.length === 0) {
+                return;
+            }
+
+            const tipo = document.querySelector('input[name="tipo-pedido"]:checked').value;
+            const endereco = tipo === 'entrega' ? document.getElementById('endereco').value : null;
+
+            if (tipo === 'entrega' && !endereco) {
+                return;
+            }
+
+            const pedido = {
+                cliente: document.getElementById('nome-cliente').value,
+                telefone: document.getElementById('telefone-cliente').value,
+                tipo: tipo,
+                endereco: endereco,
+                itens: itens,
+                observacoes: document.getElementById('observacoes').value,
+                pagamento: document.querySelector('input[name="pagamento"]:checked').value,
+                tipoVenda: 'online' // Identificar que foi criado via pedido online
+            };
+
+            const novoPedido = dataManager.adicionarPedido(pedido);
+            
+            // Redirecionar para entregador
+            window.location.href = `entregador.html?id=${novoPedido.id}`;
+        });
+
+        // Inicializar
+        carregarCardapio();
+    </script>
+</body>
+</html>

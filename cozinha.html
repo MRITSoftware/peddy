@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel da Cozinha - Restaurante Demo</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <div class="logo-section">
+            <img id="logo-img" src="" alt="Logo">
+            <h1>👨‍🍳 Painel da Cozinha</h1>
+        </div>
+        <div class="header-actions">
+            <button class="btn btn-secondary" onclick="window.location.href='gestor.html'">
+                Ir para Gestão
+            </button>
+        </div>
+    </header>
+
+    <nav>
+        <div class="nav-container">
+            <a href="pdv.html" class="nav-link">💰 PDV</a>
+            <a href="cliente.html" class="nav-link">🍽️ Cliente</a>
+            <a href="produtos.html" class="nav-link">🍕 Produto</a>
+            <a href="relatorios.html" class="nav-link">📈 Relatórios</a>
+            <a href="configuracoes.html" class="nav-link">⚙️ Configurações</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Pedidos Ativos</h2>
+                <span class="badge badge-info" id="total-pedidos">0 pedidos</span>
+            </div>
+        </div>
+
+        <div id="pedidos-container" class="grid grid-2">
+            <!-- Pedidos serão inseridos aqui -->
+        </div>
+
+        <div id="sem-pedidos" class="card" style="text-align: center; display: none;">
+            <p style="color: var(--text-light); font-size: 1.125rem;">
+                Nenhum pedido no momento. Aguardando novos pedidos...
+            </p>
+        </div>
+    </div>
+
+    <script src="data.js"></script>
+    <script src="websocket-sim.js"></script>
+    <script>
+        let updateInterval = null;
+
+        // Carregar dados do restaurante
+        const restaurante = dataManager.getRestaurante();
+        document.getElementById('logo-img').src = restaurante.logo;
+
+        // Formatar tempo decorrido
+        function formatarTempo(dataCriacao) {
+            const agora = new Date();
+            const criacao = new Date(dataCriacao);
+            const diferenca = Math.floor((agora - criacao) / 1000);
+            const minutos = Math.floor(diferenca / 60);
+            const segundos = diferenca % 60;
+            return `${String(minutos).padStart(2, '0')}:${String(segundos).padStart(2, '0')}`;
+        }
+
+        // Verificar se tem bebida
+        function temBebida(pedido) {
+            return dataManager.temBebida(pedido);
+        }
+
+        // Obter cor do status
+        function getCorStatus(status) {
+            switch(status) {
+                case 'recebido': return '#3498DB';
+                case 'preparando': return '#F39C12';
+                case 'pronto': return '#27AE60';
+                default: return '#95A5A6';
+            }
+        }
+
+        // Obter texto do status
+        function getTextoStatus(status) {
+            switch(status) {
+                case 'recebido': return 'Recebido';
+                case 'preparando': return 'Preparando';
+                case 'pronto': return 'Pronto';
+                default: return status;
+            }
+        }
+
+        // Renderizar pedidos
+        function renderizarPedidos() {
+            const pedidos = dataManager.getPedidos();
+            const container = document.getElementById('pedidos-container');
+            const semPedidos = document.getElementById('sem-pedidos');
+            const totalPedidos = document.getElementById('total-pedidos');
+
+            totalPedidos.textContent = `${pedidos.length} pedido${pedidos.length !== 1 ? 's' : ''}`;
+
+            if (pedidos.length === 0) {
+                container.innerHTML = '';
+                semPedidos.style.display = 'block';
+                return;
+            }
+
+            semPedidos.style.display = 'none';
+            container.innerHTML = '';
+
+            // Ordenar pedidos: recebido primeiro, depois por tempo de criação
+            const pedidosOrdenados = [...pedidos].sort((a, b) => {
+                if (a.status === 'recebido' && b.status !== 'recebido') return -1;
+                if (a.status !== 'recebido' && b.status === 'recebido') return 1;
+                return new Date(a.dataCriacao) - new Date(b.dataCriacao);
+            });
+
+            pedidosOrdenados.forEach(pedido => {
+                const corStatus = getCorStatus(pedido.status);
+                const textoStatus = getTextoStatus(pedido.status);
+                const tempo = formatarTempo(pedido.dataCriacao);
+                const temBebidaPedido = temBebida(pedido);
+
+                const pedidoCard = document.createElement('div');
+                pedidoCard.className = `card pedido-card status-${pedido.status}`;
+                pedidoCard.style.borderLeftColor = corStatus;
+
+                pedidoCard.innerHTML = `
+                    <div class="pedido-header">
+                        <div>
+                            <div class="pedido-numero" style="color: ${corStatus};">
+                                ${pedido.id}
+                                ${temBebidaPedido ? ' 🥤' : ''}
+                            </div>
+                            <div class="pedido-info">
+                                <div><strong>Cliente:</strong> ${pedido.cliente}</div>
+                                <div><strong>Tipo:</strong> ${pedido.tipo === 'entrega' ? 'Entrega' : 'Retirada'}</div>
+                                <div><strong>Pagamento:</strong> ${pedido.pagamento}</div>
+                            </div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div class="timer" style="color: ${corStatus}; margin-bottom: 0.5rem;">${tempo}</div>
+                            <span class="badge" style="background: ${corStatus}; color: white;">
+                                ${textoStatus}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="pedido-itens">
+                        <h4 style="margin-bottom: 0.5rem;">Itens:</h4>
+                        ${pedido.itens.map(item => `
+                            <div class="pedido-item">
+                                <span><strong>${item.quantidade}x</strong> ${item.nome}</span>
+                                <span>R$ ${(item.preco * item.quantidade).toFixed(2).replace('.', ',')}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+
+                    ${pedido.observacoes ? `
+                        <div class="pedido-observacoes">
+                            <strong>⚠️ Observações:</strong> ${pedido.observacoes}
+                        </div>
+                    ` : ''}
+
+                    ${pedido.endereco ? `
+                        <div style="margin-top: 0.5rem; padding: 0.5rem; background: var(--light-color); border-radius: 6px;">
+                            <strong>📍 Endereço:</strong> ${pedido.endereco}
+                        </div>
+                    ` : ''}
+
+                    <div class="pedido-acoes">
+                        ${pedido.status === 'recebido' ? `
+                            <button class="btn btn-primary" onclick="iniciarPreparo('${pedido.id}')">
+                                👨‍🍳 Iniciar Preparo
+                            </button>
+                            <button class="btn btn-warning" onclick="faltaItem('${pedido.id}')">
+                                ⚠️ Falta Item
+                            </button>
+                        ` : ''}
+                        
+                        ${pedido.status === 'preparando' ? `
+                            <button class="btn btn-success" onclick="finalizarPedido('${pedido.id}')">
+                                ✅ Finalizar
+                            </button>
+                            <button class="btn btn-warning" onclick="faltaItem('${pedido.id}')">
+                                ⚠️ Falta Item
+                            </button>
+                        ` : ''}
+
+                        ${pedido.status === 'pronto' ? `
+                            <button class="btn btn-success" onclick="finalizarPedido('${pedido.id}')">
+                                ✅ Finalizar
+                            </button>
+                        ` : ''}
+                    </div>
+                `;
+
+                container.appendChild(pedidoCard);
+            });
+
+            // Atualizar timers
+            atualizarTimers();
+        }
+
+        // Atualizar timers
+        function atualizarTimers() {
+            const pedidos = dataManager.getPedidos();
+            pedidos.forEach(pedido => {
+                const card = document.querySelector(`[onclick*="${pedido.id}"]`)?.closest('.pedido-card');
+                if (card) {
+                    const timerElement = card.querySelector('.timer');
+                    if (timerElement) {
+                        const tempo = formatarTempo(pedido.dataCriacao);
+                        timerElement.textContent = tempo;
+                    }
+                }
+            });
+        }
+
+        // Iniciar preparo
+        function iniciarPreparo(pedidoId) {
+            if (confirm(`Deseja iniciar o preparo do pedido ${pedidoId}?`)) {
+                dataManager.atualizarStatusPedido(pedidoId, 'preparando');
+                renderizarPedidos();
+                
+                // Notificar atualização
+                if (typeof websocketSim !== 'undefined') {
+                    websocketSim.simularAtualizacaoPedido(pedidoId);
+                }
+            }
+        }
+
+        // Falta item
+        function faltaItem(pedidoId) {
+            const pedido = dataManager.getPedido(pedidoId);
+            if (!pedido) return;
+
+            const itens = pedido.itens.map(item => item.nome).join(', ');
+            alert(`⚠️ ATENÇÃO: Verificar disponibilidade dos itens do pedido ${pedidoId}:\n\n${itens}\n\nA equipe foi notificada!`);
+        }
+
+        // Finalizar pedido
+        function finalizarPedido(pedidoId) {
+            if (confirm(`Deseja finalizar o pedido ${pedidoId}? O pedido será removido da cozinha.`)) {
+                dataManager.finalizarPedido(pedidoId);
+                renderizarPedidos();
+                
+                // Notificar atualização
+                if (typeof websocketSim !== 'undefined') {
+                    websocketSim.simularAtualizacaoPedido(pedidoId);
+                }
+            }
+        }
+
+        // Iniciar atualização automática
+        function iniciarAtualizacao() {
+            if (updateInterval) clearInterval(updateInterval);
+            
+            // Atualizar pedidos a cada 10 segundos
+            updateInterval = setInterval(() => {
+                renderizarPedidos();
+            }, 10000);
+
+            // Atualizar timers a cada segundo
+            setInterval(() => {
+                atualizarTimers();
+            }, 1000);
+        }
+
+        // Registrar listener para atualizações via WebSocket simulado
+        if (typeof websocketSim !== 'undefined') {
+            websocketSim.onPedidoUpdate((pedido) => {
+                renderizarPedidos();
+            });
+
+            websocketSim.onNovoPedido((pedido) => {
+                renderizarPedidos();
+                // Notificação visual
+                if ('Notification' in window && Notification.permission === 'granted') {
+                    new Notification(`Novo Pedido: ${pedido.id}`, {
+                        body: `Cliente: ${pedido.cliente}`,
+                        icon: restaurante.logo
+                    });
+                }
+            });
+        }
+
+        // Solicitar permissão para notificações
+        if ('Notification' in window && Notification.permission === 'default') {
+            Notification.requestPermission();
+        }
+
+        // Inicializar
+        renderizarPedidos();
+        iniciarAtualizacao();
+    </script>
+</body>
+</html>

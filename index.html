@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restaurante Demo - Sistema de Gestão</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <nav>
+        <div class="nav-container">
+            <a href="pdv.html" class="nav-link">💰 PDV</a>
+            <a href="cliente.html" class="nav-link">🍽️ Cliente</a>
+            <a href="entregador.html" class="nav-link">🏍️ Entregador</a>
+            <a href="produtos.html" class="nav-link">🍕 Produto</a>
+            <a href="relatorios.html" class="nav-link">📈 Relatórios</a>
+            <a href="configuracoes.html" class="nav-link">⚙️ Configurações</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="card" style="text-align: center; padding: 3rem;">
+            <h2 style="margin-bottom: 1rem; color: var(--primary-color);">Sistema de Gestão de Restaurante</h2>
+            <p style="font-size: 1.125rem; color: var(--text-light); margin-bottom: 2rem;">
+                Sistema completo de gestão de pedidos para demonstração
+            </p>
+        </div>
+
+        <div class="grid grid-2" style="margin-top: 2rem;">
+            <!-- Cliente -->
+            <div class="card produto-card" onclick="window.location.href='cliente.html'" style="cursor: pointer;">
+                <div class="produto-body" style="text-align: center;">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">🍽️</div>
+                    <h3 class="produto-nome">Área do Cliente</h3>
+                    <p class="produto-descricao">
+                        Faça seu pedido online. Escolha entre entrega ou retirada.
+                    </p>
+                    <button class="btn btn-primary" style="width: 100%; margin-top: 1rem;">
+                        Fazer Pedido
+                    </button>
+                </div>
+            </div>
+
+            <!-- PDV -->
+            <div class="card produto-card" onclick="window.location.href='pdv.html'" style="cursor: pointer;">
+                <div class="produto-body" style="text-align: center;">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">💰</div>
+                    <h3 class="produto-nome">PDV - Ponto de Venda</h3>
+                    <p class="produto-descricao">
+                        Sistema de vendas rápido para balcão e caixa.
+                    </p>
+                    <button class="btn btn-primary" style="width: 100%; margin-top: 1rem;">
+                        Abrir PDV
+                    </button>
+                </div>
+            </div>
+
+            <!-- Gestor -->
+            <div class="card produto-card" onclick="window.location.href='gestor.html'" style="cursor: pointer;">
+                <div class="produto-body" style="text-align: center;">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">📊</div>
+                    <h3 class="produto-nome">Painel do Gestor</h3>
+                    <p class="produto-descricao">
+                        Gerencie pedidos, motoboys e visualize estatísticas em tempo real.
+                    </p>
+                    <button class="btn btn-primary" style="width: 100%; margin-top: 1rem;">
+                        Ir para Gestão
+                    </button>
+                </div>
+            </div>
+
+            <!-- Produtos -->
+            <div class="card produto-card" onclick="window.location.href='produtos.html'" style="cursor: pointer;">
+                <div class="produto-body" style="text-align: center;">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">🍕</div>
+                    <h3 class="produto-nome">Gerenciar Produtos</h3>
+                    <p class="produto-descricao">
+                        Adicione, edite ou remova produtos do cardápio.
+                    </p>
+                    <button class="btn btn-primary" style="width: 100%; margin-top: 1rem;">
+                        Gerenciar Produtos
+                    </button>
+                </div>
+            </div>
+
+            <!-- Relatórios -->
+            <div class="card produto-card" onclick="window.location.href='relatorios.html'" style="cursor: pointer;">
+                <div class="produto-body" style="text-align: center;">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">📈</div>
+                    <h3 class="produto-nome">Relatórios</h3>
+                    <p class="produto-descricao">
+                        Visualize relatórios de vendas, produtos mais vendidos e análises.
+                    </p>
+                    <button class="btn btn-primary" style="width: 100%; margin-top: 1rem;">
+                        Ver Relatórios
+                    </button>
+                </div>
+            </div>
+
+            <!-- Demo Info -->
+            <div class="card" style="background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); color: white;">
+                <div style="text-align: center;">
+                    <h3 style="margin-bottom: 1rem;">ℹ️ Informações</h3>
+                    <p style="margin-bottom: 1rem;">
+                        Este é um sistema de <strong>demonstração</strong> com dados fictícios.
+                    </p>
+                    <p style="font-size: 0.875rem;">
+                        Todos os dados são armazenados localmente no navegador.<br>
+                        Use o botão "Reset Demo" no painel do gestor para restaurar dados iniciais.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="data.js"></script>
+    <script>
+        // Carregar dados do restaurante
+        const restaurante = dataManager.getRestaurante();
+        // Header removido - elementos não existem mais
+        // const logoImg = document.getElementById('logo-img');
+        // if (logoImg) logoImg.src = restaurante.logo;
+        // const restauranteNome = document.getElementById('restaurante-nome');
+        // if (restauranteNome) restauranteNome.textContent = restaurante.nome;
+    </script>
+</body>
+</html>
