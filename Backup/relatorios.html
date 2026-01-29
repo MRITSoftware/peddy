@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relatórios - Restaurante Demo</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <nav>
+        <div class="nav-container">
+            <a href="pdv.html" class="nav-link">💰 PDV</a>
+            <a href="cliente.html" class="nav-link">🍽️ Cliente</a>
+            <a href="entregador.html" class="nav-link">🏍️ Entregador</a>
+            <a href="produtos.html" class="nav-link">🍕 Produto</a>
+            <a href="relatorios.html" class="nav-link active">📈 Relatórios</a>
+            <a href="configuracoes.html" class="nav-link">⚙️ Configurações</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- Filtros -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Filtros</h2>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="data-inicio">Data Início</label>
+                    <input type="date" id="data-inicio" onchange="atualizarRelatorios()">
+                </div>
+                <div class="form-group">
+                    <label for="data-fim">Data Fim</label>
+                    <input type="date" id="data-fim" onchange="atualizarRelatorios()">
+                </div>
+                <div class="form-group" style="display: flex; align-items: flex-end;">
+                    <button class="btn btn-primary" onclick="atualizarRelatorios()">
+                        Filtrar
+                    </button>
+                    <button class="btn btn-secondary" onclick="resetarFiltros()" style="margin-left: 0.5rem;">
+                        Limpar
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cards de Resumo -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-label">Total de Vendas</div>
+                <div class="stat-value" id="total-vendas">R$ 0,00</div>
+                <div style="font-size: 0.875rem; color: var(--text-light); margin-top: 0.5rem;" id="total-vendas-count">
+                    0 pedidos
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Produto Mais Vendido</div>
+                <div class="stat-value" id="produto-mais-vendido" style="font-size: 1.5rem;">-</div>
+                <div style="font-size: 0.875rem; color: var(--text-light); margin-top: 0.5rem;" id="produto-mais-vendido-qtd">
+                    0 unidades
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Ticket Médio</div>
+                <div class="stat-value" id="ticket-medio">R$ 0,00</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Tempo Médio de Entrega</div>
+                <div class="stat-value" id="tempo-medio-entrega">0 min</div>
+            </div>
+        </div>
+
+        <!-- Gráfico de Formas de Pagamento -->
+        <div class="chart-container">
+            <h3 style="margin-bottom: 1rem;">Distribuição por Forma de Pagamento</h3>
+            <div id="pagamento-chart" style="display: flex; justify-content: center; align-items: center; min-height: 300px;">
+                <canvas id="pagamento-canvas" width="400" height="400"></canvas>
+            </div>
+            <div id="pagamento-legend" style="display: flex; justify-content: center; gap: 2rem; margin-top: 1rem; flex-wrap: wrap;"></div>
+        </div>
+
+        <!-- Tabela de Pedidos -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Pedidos do Período</h2>
+                <button class="btn btn-primary" onclick="exportarCSV()">
+                    📥 Exportar CSV
+                </button>
+            </div>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Data/Hora Criação</th>
+                            <th>Data/Hora Finalização</th>
+                            <th>Cliente</th>
+                            <th>Tipo</th>
+                            <th>Itens</th>
+                            <th>Valor Total</th>
+                            <th>Pagamento</th>
+                            <th>Status</th>
+                            <th>Tempo Entrega</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabela-pedidos">
+                        <tr>
+                            <td colspan="10" style="text-align: center; padding: 2rem; color: var(--text-light);">
+                                Nenhum pedido no período selecionado.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <!-- Paginação -->
+            <div id="paginacao-container" style="display: none; margin-top: 1rem; padding: 1rem; display: flex; justify-content: center; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+                <button class="btn btn-secondary" id="btn-pagina-anterior" onclick="irParaPagina(paginaAtual - 1)" disabled>« Anterior</button>
+                <div id="paginacao-numeros" style="display: flex; gap: 0.25rem; flex-wrap: wrap;"></div>
+                <button class="btn btn-secondary" id="btn-pagina-proxima" onclick="irParaPagina(paginaAtual + 1)" disabled>Próxima »</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="data.js"></script>
+    <script>
+        // Carregar dados do restaurante
+        const restaurante = dataManager.getRestaurante();
+        // Header removido - elemento não existe mais
+        // const logoImg = document.getElementById('logo-img');
+        // if (logoImg) logoImg.src = restaurante.logo;
+
+        // Inicializar datas (últimos 7 dias)
+        function inicializarDatas() {
+            const hoje = new Date();
+            const seteDiasAtras = new Date(hoje);
+            seteDiasAtras.setDate(seteDiasAtras.getDate() - 7);
+
+            document.getElementById('data-fim').value = hoje.toISOString().split('T')[0];
+            document.getElementById('data-inicio').value = seteDiasAtras.toISOString().split('T')[0];
+        }
+
+        // Obter pedidos filtrados
+        function obterPedidosFiltrados() {
+            const dataInicio = document.getElementById('data-inicio').value;
+            const dataFim = document.getElementById('data-fim').value;
+
+            // Apenas pedidos finalizados (status = "finalizado")
+            let pedidos = dataManager.getPedidosFinalizados().filter(p => 
+                p.status === 'finalizado'
+            );
+
+            if (dataInicio) {
+                pedidos = pedidos.filter(p => p.dataCriacao >= dataInicio);
+            }
+            if (dataFim) {
+                const dataFimLimite = new Date(dataFim);
+                dataFimLimite.setHours(23, 59, 59, 999);
+                pedidos = pedidos.filter(p => p.dataCriacao <= dataFimLimite.toISOString());
+            }
+
+            return pedidos;
+        }
+
+        // Atualizar relatórios
+        function atualizarRelatorios() {
+            const pedidos = obterPedidosFiltrados();
+            
+            // Total de vendas
+            const totalVendas = pedidos.reduce((sum, p) => sum + (p.valorTotal || 0), 0);
+            document.getElementById('total-vendas').textContent = `R$ ${totalVendas.toFixed(2).replace('.', ',')}`;
+            document.getElementById('total-vendas-count').textContent = `${pedidos.length} pedido${pedidos.length !== 1 ? 's' : ''}`;
+
+            // Produto mais vendido
+            const vendas = {};
+            pedidos.forEach(pedido => {
+                pedido.itens.forEach(item => {
+                    if (!vendas[item.produtoId]) {
+                        vendas[item.produtoId] = { quantidade: 0, nome: item.nome };
+                    }
+                    vendas[item.produtoId].quantidade += item.quantidade;
+                });
+            });
+
+            let maisVendido = null;
+            let maiorQuantidade = 0;
+            Object.keys(vendas).forEach(produtoId => {
+                if (vendas[produtoId].quantidade > maiorQuantidade) {
+                    maiorQuantidade = vendas[produtoId].quantidade;
+                    maisVendido = vendas[produtoId];
+                }
+            });
+
+            if (maisVendido) {
+                document.getElementById('produto-mais-vendido').textContent = maisVendido.nome;
+                document.getElementById('produto-mais-vendido-qtd').textContent = `${maiorQuantidade} unidades`;
+            } else {
+                document.getElementById('produto-mais-vendido').textContent = '-';
+                document.getElementById('produto-mais-vendido-qtd').textContent = '0 unidades';
+            }
+
+            // Ticket médio
+            const ticketMedio = pedidos.length > 0 ? 
+                pedidos.reduce((sum, p) => sum + (p.valorTotal || 0), 0) / pedidos.length : 0;
+            document.getElementById('ticket-medio').textContent = `R$ ${ticketMedio.toFixed(2).replace('.', ',')}`;
+
+            // Tempo médio de entrega
+            const entregas = pedidos.filter(p => p.tipo === 'entrega' && p.tempoEntrega);
+            const tempoMedio = entregas.length > 0 ?
+                Math.round(entregas.reduce((sum, p) => sum + p.tempoEntrega, 0) / entregas.length) : 0;
+            document.getElementById('tempo-medio-entrega').textContent = `${tempoMedio} min`;
+
+            // Gráfico de pagamento
+            atualizarGraficoPagamento(pedidos);
+
+            // Tabela
+            atualizarTabela(pedidos);
+        }
+
+        // Atualizar gráfico de pagamento
+        function atualizarGraficoPagamento(pedidos) {
+            const pagamentos = {};
+
+            pedidos.forEach(pedido => {
+                const forma = pedido.pagamento || 'Não informado';
+                if (!pagamentos[forma]) {
+                    pagamentos[forma] = 0;
+                }
+                pagamentos[forma] += pedido.valorTotal || 0;
+            });
+
+            const total = Object.values(pagamentos).reduce((sum, val) => sum + val, 0);
+            const legend = document.getElementById('pagamento-legend');
+            legend.innerHTML = '';
+
+            if (total === 0) {
+                legend.innerHTML = '<p style="color: var(--text-light);">Sem dados para exibir</p>';
+                return;
+            }
+
+            const cores = {
+                'Pix': '#4ECDC4',
+                'Cartão': '#FF6B6B',
+                'Dinheiro': '#FCE38A',
+                'Débito': '#95E1D3',
+                'Crédito': '#AA96DA',
+                'VR': '#FCBAD3',
+                'Não informado': '#E6E1D8'
+            };
+            
+            // Gerar cor automática para formas não mapeadas
+            const coresDisponiveis = ['#4ECDC4', '#FF6B6B', '#FCE38A', '#95E1D3', '#AA96DA', '#FCBAD3', '#E6E1D8', '#C44569', '#F8B500', '#3498DB'];
+            let indiceCor = 0;
+
+            // Criar visualização simples com barras
+            const chart = document.getElementById('pagamento-chart');
+            chart.innerHTML = '<div style="display: flex; flex-direction: column; gap: 1rem; width: 100%; max-width: 500px;">';
+
+            Object.keys(pagamentos).forEach(tipo => {
+                const porcentagem = total > 0 ? (pagamentos[tipo] / total) * 100 : 0;
+                let cor = cores[tipo];
+                if (!cor) {
+                    cor = coresDisponiveis[indiceCor % coresDisponiveis.length];
+                    indiceCor++;
+                }
+
+                chart.innerHTML += `
+                    <div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                            <span style="font-weight: 600;">${tipo}</span>
+                            <span style="color: var(--text-light);">R$ ${pagamentos[tipo].toFixed(2).replace('.', ',')} (${porcentagem.toFixed(1)}%)</span>
+                        </div>
+                        <div style="height: 30px; background: var(--border-color); border-radius: 4px; overflow: hidden;">
+                            <div style="height: 100%; width: ${porcentagem}%; background: ${cor}; transition: width 0.3s;"></div>
+                        </div>
+                    </div>
+                `;
+
+                legend.innerHTML += `
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <div style="width: 20px; height: 20px; background: ${cor}; border-radius: 4px;"></div>
+                        <span>${tipo}</span>
+                    </div>
+                `;
+            });
+
+            chart.innerHTML += '</div>';
+        }
+
+        // Variáveis de paginação
+        let paginaAtual = 1;
+        const registrosPorPagina = 10;
+        let todosPedidosFiltrados = [];
+
+        // Atualizar tabela
+        function atualizarTabela(pedidos) {
+            todosPedidosFiltrados = pedidos;
+            paginaAtual = 1;
+            renderizarTabela();
+        }
+
+        function renderizarTabela() {
+            const tbody = document.getElementById('tabela-pedidos');
+            const containerPaginacao = document.getElementById('paginacao-container');
+            
+            if (todosPedidosFiltrados.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="10" style="text-align: center; padding: 2rem; color: var(--text-light);">
+                            Nenhum pedido no período selecionado.
+                        </td>
+                    </tr>
+                `;
+                containerPaginacao.style.display = 'none';
+                return;
+            }
+
+            // Calcular paginação
+            const totalPaginas = Math.ceil(todosPedidosFiltrados.length / registrosPorPagina);
+            const inicio = (paginaAtual - 1) * registrosPorPagina;
+            const fim = inicio + registrosPorPagina;
+            const pedidosPagina = todosPedidosFiltrados.slice(inicio, fim);
+
+            tbody.innerHTML = pedidosPagina.map(pedido => {
+                const dataCriacao = new Date(pedido.dataCriacao);
+                const dataCriacaoFormatada = dataCriacao.toLocaleDateString('pt-BR') + ' ' + 
+                                            dataCriacao.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+                
+                let dataFinalizacaoFormatada = '-';
+                if (pedido.dataFinalizacao) {
+                    const dataFinalizacao = new Date(pedido.dataFinalizacao);
+                    dataFinalizacaoFormatada = dataFinalizacao.toLocaleDateString('pt-BR') + ' ' + 
+                                             dataFinalizacao.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+                }
+                
+                const itens = pedido.itens.map(item => `${item.quantidade}x ${item.nome}`).join(', ');
+                const tempoEntrega = pedido.tempoEntrega ? `${pedido.tempoEntrega} min` : '-';
+                const formaPagamento = pedido.pagamento || 'Não informado';
+
+                return `
+                    <tr>
+                        <td>${pedido.id}</td>
+                        <td>${dataCriacaoFormatada}</td>
+                        <td>${dataFinalizacaoFormatada}</td>
+                        <td>${pedido.cliente}</td>
+                        <td>${pedido.tipo === 'entrega' ? 'Entrega' : 'Retirada'}</td>
+                        <td>${itens}</td>
+                        <td>R$ ${(pedido.valorTotal || 0).toFixed(2).replace('.', ',')}</td>
+                        <td>${formaPagamento}</td>
+                        <td><span class="badge badge-${pedido.status === 'finalizado' || pedido.status === 'entregue' || pedido.status === 'retirado' ? 'success' : 'info'}">${pedido.statusEntrega || pedido.status}</span></td>
+                        <td>${tempoEntrega}</td>
+                    </tr>
+                `;
+            }).join('');
+
+            // Atualizar controles de paginação
+            atualizarPaginacao(totalPaginas);
+        }
+
+        function atualizarPaginacao(totalPaginas) {
+            const containerPaginacao = document.getElementById('paginacao-container');
+            const numerosPaginacao = document.getElementById('paginacao-numeros');
+            const btnAnterior = document.getElementById('btn-pagina-anterior');
+            const btnProxima = document.getElementById('btn-pagina-proxima');
+
+            if (totalPaginas <= 1) {
+                containerPaginacao.style.display = 'none';
+                return;
+            }
+
+            containerPaginacao.style.display = 'flex';
+            btnAnterior.disabled = paginaAtual === 1;
+            btnProxima.disabled = paginaAtual === totalPaginas;
+
+            numerosPaginacao.innerHTML = '';
+            const maxBotoes = 7;
+            let inicio = Math.max(1, paginaAtual - Math.floor(maxBotoes / 2));
+            let fim = Math.min(totalPaginas, inicio + maxBotoes - 1);
+            if (fim - inicio < maxBotoes - 1) {
+                inicio = Math.max(1, fim - maxBotoes + 1);
+            }
+
+            if (inicio > 1) {
+                const btn = document.createElement('button');
+                btn.className = 'btn btn-secondary';
+                btn.textContent = '1';
+                btn.onclick = () => irParaPagina(1);
+                numerosPaginacao.appendChild(btn);
+                if (inicio > 2) {
+                    const span = document.createElement('span');
+                    span.textContent = '...';
+                    span.style.padding = '0.5rem';
+                    numerosPaginacao.appendChild(span);
+                }
+            }
+
+            for (let i = inicio; i <= fim; i++) {
+                const btn = document.createElement('button');
+                btn.className = 'btn ' + (i === paginaAtual ? 'btn-primary' : 'btn-secondary');
+                btn.textContent = String(i);
+                btn.onclick = () => irParaPagina(i);
+                numerosPaginacao.appendChild(btn);
+            }
+
+            if (fim < totalPaginas) {
+                if (fim < totalPaginas - 1) {
+                    const span = document.createElement('span');
+                    span.textContent = '...';
+                    span.style.padding = '0.5rem';
+                    numerosPaginacao.appendChild(span);
+                }
+                const btn = document.createElement('button');
+                btn.className = 'btn btn-secondary';
+                btn.textContent = String(totalPaginas);
+                btn.onclick = () => irParaPagina(totalPaginas);
+                numerosPaginacao.appendChild(btn);
+            }
+        }
+
+        function irParaPagina(pagina) {
+            const totalPaginas = Math.ceil(todosPedidosFiltrados.length / registrosPorPagina);
+            if (pagina < 1 || pagina > totalPaginas) return;
+            paginaAtual = pagina;
+            renderizarTabela();
+            // Scroll para o topo da tabela
+            document.querySelector('.table-container').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        // Exportar CSV
+        function exportarCSV() {
+            const pedidos = obterPedidosFiltrados();
+            
+            if (pedidos.length === 0) {
+                return;
+            }
+
+            let csv = 'ID,Data/Hora Criação,Data/Hora Finalização,Cliente,Tipo,Itens,Valor Total,Pagamento,Status,Tempo Entrega\n';
+            
+            pedidos.forEach(pedido => {
+                const dataCriacao = new Date(pedido.dataCriacao);
+                const dataCriacaoFormatada = dataCriacao.toLocaleDateString('pt-BR') + ' ' + 
+                                            dataCriacao.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+                let dataFinalizacaoFormatada = '-';
+                if (pedido.dataFinalizacao) {
+                    const dataFinalizacao = new Date(pedido.dataFinalizacao);
+                    dataFinalizacaoFormatada = dataFinalizacao.toLocaleDateString('pt-BR') + ' ' + 
+                                             dataFinalizacao.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+                }
+                const itens = pedido.itens.map(item => `${item.quantidade}x ${item.nome}`).join('; ');
+                const tempoEntrega = pedido.tempoEntrega ? `${pedido.tempoEntrega} min` : '-';
+                const formaPagamento = pedido.pagamento || 'Não informado';
+                
+                csv += `${pedido.id},${dataCriacaoFormatada},${dataFinalizacaoFormatada},"${pedido.cliente}",${pedido.tipo},"${itens}",${pedido.valorTotal || 0},${formaPagamento},${pedido.status},${tempoEntrega}\n`;
+            });
+
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', `relatorio_${new Date().toISOString().split('T')[0]}.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // Resetar filtros
+        function resetarFiltros() {
+            inicializarDatas();
+            atualizarRelatorios();
+        }
+
+        // Inicializar
+        inicializarDatas();
+        atualizarRelatorios();
+    </script>
+</body>
+</html>

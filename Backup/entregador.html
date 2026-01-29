@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Entregador - Restaurante Demo</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .container {
+            padding-left: 0;
+            padding-right: 0;
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="nav-container">
+            <a href="pdv.html" class="nav-link">💰 PDV</a>
+            <a href="cliente.html" class="nav-link">🍽️ Cliente</a>
+            <a href="entregador.html" class="nav-link active">🏍️ Entregador</a>
+            <a href="produtos.html" class="nav-link">🍕 Produto</a>
+            <a href="relatorios.html" class="nav-link">📈 Relatórios</a>
+            <a href="configuracoes.html" class="nav-link">⚙️ Configurações</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="card">
+            <div class="card-header" style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem;">
+                <div>
+                    <h2 class="card-title">Entregadores</h2>
+                    <p style="color: var(--text-light); margin-top: 0.25rem;">
+                        Cada bloco representa um motoboy cadastrado. Use essa area para atribuir pedidos.
+                    </p>
+                </div>
+                <button type="button" class="btn btn-secondary" onclick="limparTodasAtribuicoes()" title="Remove todas as atribuições. Os pedidos voltam para a tela Pedidos no PDV.">
+                    🗑️ Limpar todas as atribuições
+                </button>
+            </div>
+        </div>
+
+        <div id="entregadores-vazio" class="card" style="display: none;">
+            <p style="color: var(--text-light); margin: 0;">
+                Nenhum entregador cadastrado. Cadastre em Configurações.
+            </p>
+        </div>
+
+        <div id="entregadores-container" class="grid grid-3"></div>
+    </div>
+
+    <!-- Modal: Forma de Pagamento (mesma ação do Finalizar Venda) -->
+    <div id="modal-pagamento-entregador" class="modal">
+        <div class="modal-content" style="max-width: 420px; width: 90%;">
+            <button class="modal-close" onclick="fecharModalPagamentoEntregador()">&times;</button>
+            <h2 style="margin-bottom: 1rem;">💳 Forma de Pagamento</h2>
+            <p style="color: var(--text-light); font-size: 0.875rem; margin-bottom: 1rem;">
+                Selecione a forma de pagamento para finalizar o pedido.
+            </p>
+            <div class="radio-group" style="display: flex; flex-direction: column; gap: 0.5rem;">
+                <label style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem; border-radius: 8px; cursor: pointer;">
+                    <input type="radio" name="pagamento-finalizar-entregador" value="Dinheiro">
+                    <span>Dinheiro</span>
+                </label>
+                <label style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem; border-radius: 8px; cursor: pointer;">
+                    <input type="radio" name="pagamento-finalizar-entregador" value="Pix" checked>
+                    <span>Pix</span>
+                </label>
+                <label style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem; border-radius: 8px; cursor: pointer;">
+                    <input type="radio" name="pagamento-finalizar-entregador" value="Débito">
+                    <span>Débito</span>
+                </label>
+                <label style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem; border-radius: 8px; cursor: pointer;">
+                    <input type="radio" name="pagamento-finalizar-entregador" value="Crédito">
+                    <span>Crédito</span>
+                </label>
+                <label style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem; border-radius: 8px; cursor: pointer;">
+                    <input type="radio" name="pagamento-finalizar-entregador" value="VR">
+                    <span>VR</span>
+                </label>
+            </div>
+            <div style="margin-top: 1rem; display: flex; gap: 0.5rem; justify-content: flex-end;">
+                <button type="button" class="btn btn-secondary" onclick="fecharModalPagamentoEntregador()">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="confirmarPagamentoFinalizarEntregador()">Confirmar e Finalizar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Troco (pagamento em dinheiro) -->
+    <div id="modal-troco-entregador" class="modal">
+        <div class="modal-content" style="max-width: 400px; width: 90%;">
+            <button class="modal-close" onclick="fecharModalTrocoEntregador()">&times;</button>
+            <h2 style="margin-bottom: 1rem;">💵 Pagamento em dinheiro</h2>
+            <p style="color: var(--text-color); margin-bottom: 0.5rem;">Total: <strong id="modal-troco-entregador-total">R$ 0,00</strong></p>
+            <div class="form-group" style="margin-bottom: 1rem;">
+                <label for="modal-troco-entregador-recebido" style="display: block; margin-bottom: 0.5rem;">Valor recebido</label>
+                <input type="number" id="modal-troco-entregador-recebido" step="0.01" min="0" placeholder="0,00"
+                       style="width: 100%; padding: 0.75rem; border: 2px solid var(--border-color); border-radius: 8px; font-size: 1rem; box-sizing: border-box;"
+                       oninput="atualizarTrocoExibidoEntregador()" onkeypress="if(event.key==='Enter'){ event.preventDefault(); confirmarTrocoFinalizarEntregador(); }">
+            </div>
+            <p style="color: var(--text-color); margin-bottom: 1rem;">Troco: <strong id="modal-troco-entregador-valor">R$ 0,00</strong></p>
+            <p id="modal-troco-entregador-insuficiente" style="display: none; color: var(--danger-color); font-size: 0.875rem; margin-bottom: 1rem;">Valor insuficiente.</p>
+            <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
+                <button type="button" class="btn btn-secondary" onclick="fecharModalTrocoEntregador()">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="btn-modal-troco-entregador-finalizar" disabled onclick="confirmarTrocoFinalizarEntregador()">Finalizar</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="data.js"></script>
+    <script>
+        const STORAGE_ENTREGADORES = 'peddy_entregadores';
+
+        // Carregar dados do restaurante
+        const restaurante = dataManager.getRestaurante();
+        // Header removido - elementos não existem mais
+        // const logoImg = document.getElementById('logo-img');
+        // if (logoImg) logoImg.src = restaurante.logo;
+        // const restauranteNome = document.getElementById('restaurante-nome');
+        // if (restauranteNome) restauranteNome.textContent = restaurante.nome;
+
+        function carregarEntregadores() {
+            try {
+                let salvo = JSON.parse(localStorage.getItem(STORAGE_ENTREGADORES) || '[]');
+                if (!Array.isArray(salvo)) salvo = [];
+                let alterado = false;
+                salvo = salvo.map((e, i) => {
+                    if (!e.id) {
+                        alterado = true;
+                        return { ...e, id: 'ENT' + Date.now() + '-' + i };
+                    }
+                    return e;
+                });
+                if (alterado) localStorage.setItem(STORAGE_ENTREGADORES, JSON.stringify(salvo));
+                return salvo;
+            } catch {
+                return [];
+            }
+        }
+
+        function formatarTempoDecorrido(dataAtribuicao) {
+            if (!dataAtribuicao) return '—';
+            const d = new Date(dataAtribuicao);
+            const diff = Math.max(0, Math.floor((Date.now() - d.getTime()) / 1000));
+            const h = Math.floor(diff / 3600);
+            const m = Math.floor((diff % 3600) / 60);
+            const s = diff % 60;
+            if (h > 0) return h + 'h ' + m + 'm ' + s + 's';
+            if (m > 0) return m + ' min ' + s + ' s';
+            return s + ' s';
+        }
+
+        function getPedidosAtivosPorEntregador() {
+            const pedidos = dataManager.getPedidos().filter(p =>
+                p.status !== 'finalizado' && p.status !== 'entregue' && p.status !== 'retirado' && p.entregadorId
+            );
+            const porEntregador = {};
+            pedidos.forEach(p => {
+                const eid = p.entregadorId;
+                if (!porEntregador[eid]) porEntregador[eid] = [];
+                porEntregador[eid].push(p);
+            });
+            return porEntregador;
+        }
+
+        function renderizarEntregadores() {
+            const container = document.getElementById('entregadores-container');
+            const vazio = document.getElementById('entregadores-vazio');
+            const entregadores = carregarEntregadores();
+            const pedidosPorEntregador = getPedidosAtivosPorEntregador();
+
+            if (entregadores.length === 0) {
+                container.innerHTML = '';
+                vazio.style.display = 'block';
+                return;
+            }
+
+            vazio.style.display = 'none';
+            container.innerHTML = entregadores.map((entregador) => {
+                const pedidos = pedidosPorEntregador[entregador.id] || [];
+                const lista = pedidos.length === 0
+                    ? '<p style="color: var(--text-light); margin: 0;">Sem pedidos atribuídos.</p>'
+                    : pedidos.map(p => `
+                        <div class="card" style="padding: 0.75rem; margin-bottom: 0.5rem; background: var(--light-color); border: 1px solid var(--border-color);">
+                            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+                                <div>
+                                    <strong>📋 ${p.id}</strong>
+                                    <div style="font-size: 0.875rem; color: var(--text-light);">${p.cliente || '—'}</div>
+                                </div>
+                                <div style="font-size: 1rem; font-weight: 600; color: var(--primary-color); font-variant-numeric: tabular-nums;" 
+                                     data-atribuicao="${p.dataAtribuicao || ''}">
+                                    ⏱️ ${formatarTempoDecorrido(p.dataAtribuicao)}
+                                </div>
+                                <button type="button" class="btn btn-primary btn-small" onclick="event.stopPropagation(); finalizarPedidoEntregador('${p.id}')">Finalizar</button>
+                            </div>
+                        </div>
+                    `).join('');
+                return `
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <h3 class="card-title">${entregador.nome}</h3>
+                            <p style="color: var(--text-light); margin-top: 0.25rem;">Placa: ${entregador.placa}</p>
+                        </div>
+                    </div>
+                    <div style="border: 2px dashed var(--border-color); border-radius: 8px; padding: 1rem; min-height: 120px;">
+                        ${lista}
+                    </div>
+                </div>
+            `;
+            }).join('');
+        }
+
+        function atualizarTimers() {
+            document.querySelectorAll('[data-atribuicao]').forEach(el => {
+                const dt = el.getAttribute('data-atribuicao');
+                if (dt) el.innerHTML = '⏱️ ' + formatarTempoDecorrido(dt);
+            });
+        }
+
+        let finalizarAposPagamentoEntregador = null;
+        let finalizarAposTrocoEntregador = null;
+
+        function totalDePedidosEntregador(pedidoIds) {
+            let t = 0;
+            const ids = Array.isArray(pedidoIds) ? pedidoIds : [pedidoIds];
+            ids.forEach(id => {
+                const p = dataManager.getPedido(id);
+                if (!p || !p.itens) return;
+                p.itens.forEach(i => {
+                    t += (parseFloat(i.preco) || 0) * (Math.floor(parseInt(i.quantidade) || 0));
+                });
+            });
+            return t;
+        }
+
+        function abrirModalPagamentoParaFinalizarEntregador(pedidoId, aoConfirmar) {
+            const total = totalDePedidosEntregador(pedidoId);
+            finalizarAposPagamentoEntregador = { pedidoId, aoConfirmar, total };
+            document.querySelector('input[name="pagamento-finalizar-entregador"][value="Pix"]').checked = true;
+            document.getElementById('modal-pagamento-entregador').classList.add('active');
+        }
+
+        function fecharModalPagamentoEntregador() {
+            document.getElementById('modal-pagamento-entregador').classList.remove('active');
+            finalizarAposPagamentoEntregador = null;
+        }
+
+        function confirmarPagamentoFinalizarEntregador() {
+            if (!finalizarAposPagamentoEntregador) return;
+            const forma = document.querySelector('input[name="pagamento-finalizar-entregador"]:checked');
+            const pagamento = forma ? forma.value : 'Pix';
+
+            if (pagamento === 'Dinheiro') {
+                document.getElementById('modal-pagamento-entregador').classList.remove('active');
+                finalizarAposTrocoEntregador = {
+                    pedidoId: finalizarAposPagamentoEntregador.pedidoId,
+                    aoConfirmar: finalizarAposPagamentoEntregador.aoConfirmar,
+                    total: finalizarAposPagamentoEntregador.total
+                };
+                finalizarAposPagamentoEntregador = null;
+                abrirModalTrocoEntregador();
+                return;
+            }
+
+            const p = dataManager.getPedido(finalizarAposPagamentoEntregador.pedidoId);
+            if (p) p.pagamento = pagamento;
+            const aoConfirmar = finalizarAposPagamentoEntregador.aoConfirmar;
+            finalizarAposPagamentoEntregador = null;
+            document.getElementById('modal-pagamento-entregador').classList.remove('active');
+            aoConfirmar(pagamento);
+        }
+
+        function abrirModalTrocoEntregador() {
+            if (!finalizarAposTrocoEntregador) return;
+            const total = finalizarAposTrocoEntregador.total;
+            document.getElementById('modal-troco-entregador-total').textContent = 'R$ ' + total.toFixed(2).replace('.', ',');
+            document.getElementById('modal-troco-entregador-recebido').value = '';
+            document.getElementById('modal-troco-entregador-valor').textContent = 'R$ 0,00';
+            document.getElementById('modal-troco-entregador-insuficiente').style.display = 'block';
+            document.getElementById('btn-modal-troco-entregador-finalizar').disabled = true;
+            document.getElementById('modal-troco-entregador').classList.add('active');
+            setTimeout(() => document.getElementById('modal-troco-entregador-recebido').focus(), 100);
+        }
+
+        function fecharModalTrocoEntregador() {
+            document.getElementById('modal-troco-entregador').classList.remove('active');
+            finalizarAposTrocoEntregador = null;
+        }
+
+        function atualizarTrocoExibidoEntregador() {
+            if (!finalizarAposTrocoEntregador) return;
+            const inp = document.getElementById('modal-troco-entregador-recebido');
+            const recebido = parseFloat(String(inp.value).replace(',', '.')) || 0;
+            const total = finalizarAposTrocoEntregador.total;
+            const troco = Math.max(0, recebido - total);
+            document.getElementById('modal-troco-entregador-valor').textContent = 'R$ ' + troco.toFixed(2).replace('.', ',');
+            const insuf = document.getElementById('modal-troco-entregador-insuficiente');
+            const btn = document.getElementById('btn-modal-troco-entregador-finalizar');
+            if (recebido < total) {
+                insuf.style.display = 'block';
+                if (btn) btn.disabled = true;
+            } else {
+                insuf.style.display = 'none';
+                if (btn) btn.disabled = false;
+            }
+        }
+
+        function confirmarTrocoFinalizarEntregador() {
+            if (!finalizarAposTrocoEntregador) return;
+            const inp = document.getElementById('modal-troco-entregador-recebido');
+            const recebido = parseFloat(String(inp.value).replace(',', '.')) || 0;
+            if (recebido < finalizarAposTrocoEntregador.total) return;
+            const p = dataManager.getPedido(finalizarAposTrocoEntregador.pedidoId);
+            if (p) p.pagamento = 'Dinheiro';
+            const aoConfirmar = finalizarAposTrocoEntregador.aoConfirmar;
+            finalizarAposTrocoEntregador = null;
+            document.getElementById('modal-troco-entregador').classList.remove('active');
+            aoConfirmar('Dinheiro');
+        }
+
+        function finalizarPedidoEntregador(pedidoId) {
+            if (!pedidoId) return;
+            const pedido = dataManager.getPedido(pedidoId);
+            if (!pedido) return;
+            if (pedido.status === 'finalizado' || pedido.status === 'entregue' || pedido.status === 'retirado') {
+                renderizarEntregadores();
+                return;
+            }
+            if (dataManager.precisaModalPagamento(pedido)) {
+                abrirModalPagamentoParaFinalizarEntregador(pedidoId, function(pagamento) {
+                    dataManager.finalizarPedido(pedidoId);
+                    renderizarEntregadores();
+                });
+            } else {
+                dataManager.finalizarPedido(pedidoId);
+                renderizarEntregadores();
+            }
+        }
+
+        function limparTodasAtribuicoes() {
+            if (!confirm('Remover todas as atribuições de pedidos aos entregadores? Os pedidos continuam existindo e voltam para a tela Pedidos no PDV.')) return;
+            const qtd = dataManager.limparAtribuicoesEntregadores();
+            renderizarEntregadores();
+            alert(qtd > 0 ? qtd + ' atribuiç' + (qtd === 1 ? 'ão removida.' : 'ões removidas.') : 'Nenhuma atribuição para remover.');
+        }
+
+        renderizarEntregadores();
+        setInterval(function() {
+            atualizarTimers();
+        }, 1000);
+        setInterval(renderizarEntregadores, 5000);
+    </script>
+</body>
+</html>

@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciar Produtos - Restaurante Demo</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <nav>
+        <div class="nav-container">
+            <a href="pdv.html" class="nav-link">💰 PDV</a>
+            <a href="cliente.html" class="nav-link">🍽️ Cliente</a>
+            <a href="entregador.html" class="nav-link">🏍️ Entregador</a>
+            <a href="produtos.html" class="nav-link active">🍕 Produto</a>
+            <a href="relatorios.html" class="nav-link">📈 Relatórios</a>
+            <a href="configuracoes.html" class="nav-link">⚙️ Configurações</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Produtos do Cardápio</h2>
+                <div style="display: flex; gap: 1rem;">
+                    <button class="btn btn-secondary" onclick="window.location.href='categorias.html'">
+                        📁 Gerenciar Categorias
+                    </button>
+                    <button class="btn btn-primary" onclick="abrirModalProduto()">
+                        ➕ Adicionar Produto
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab active" onclick="abrirTab('ativos')">Ativos</button>
+            <button class="tab" onclick="abrirTab('inativos')">Inativos</button>
+        </div>
+
+        <!-- Tab: Ativos -->
+        <div id="tab-ativos" class="tab-content active">
+            <div id="produtos-ativos-container" class="grid grid-4"></div>
+            <div id="sem-produtos-ativos" style="text-align: center; padding: 2rem; color: var(--text-light); display: none;">
+                Nenhum produto ativo no momento.
+            </div>
+        </div>
+
+        <!-- Tab: Inativos -->
+        <div id="tab-inativos" class="tab-content">
+            <div id="produtos-inativos-container" class="grid grid-4"></div>
+            <div id="sem-produtos-inativos" style="text-align: center; padding: 2rem; color: var(--text-light); display: none;">
+                Nenhum produto inativo no momento.
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Produto -->
+    <div id="modal-produto" class="modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="fecharModal('modal-produto')">&times;</button>
+            <h2 id="modal-produto-titulo">Adicionar Produto</h2>
+            <form id="form-produto">
+                <input type="hidden" id="produto-id-editar">
+                <div class="form-group">
+                    <label for="produto-codigo">Código do Produto</label>
+                    <input type="text" id="produto-codigo" placeholder="Ex: PROD001, 123456">
+                </div>
+                <div class="form-group">
+                    <label for="produto-nome">Nome *</label>
+                    <input type="text" id="produto-nome" required placeholder="Ex: Hambúrguer Clássico">
+                </div>
+                <div class="form-group">
+                    <label for="produto-categoria">Categoria *</label>
+                    <select id="produto-categoria" required>
+                        <option value="">Selecione...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="produto-preco">Preço (R$) *</label>
+                    <input type="number" id="produto-preco" required min="0" step="0.01" placeholder="18.90">
+                </div>
+                <div class="form-group">
+                    <label for="produto-imagem">URL da Imagem</label>
+                    <input type="url" id="produto-imagem" placeholder="https://via.placeholder.com/200">
+                </div>
+                <div class="form-group">
+                    <label for="produto-descricao">Descrição</label>
+                    <textarea id="produto-descricao" placeholder="Descrição do produto"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="produto-prato-do-dia">
+                        Prato do Dia
+                    </label>
+                </div>
+                <div class="form-group" id="dias-semana-group" style="display: none;">
+                    <label>Dias da Semana:</label>
+                    <div class="checkbox-group">
+                        <label><input type="checkbox" name="dias-semana" value="segunda"> Segunda</label>
+                        <label><input type="checkbox" name="dias-semana" value="terça"> Terça</label>
+                        <label><input type="checkbox" name="dias-semana" value="quarta"> Quarta</label>
+                        <label><input type="checkbox" name="dias-semana" value="quinta"> Quinta</label>
+                        <label><input type="checkbox" name="dias-semana" value="sexta"> Sexta</label>
+                        <label><input type="checkbox" name="dias-semana" value="sábado"> Sábado</label>
+                        <label><input type="checkbox" name="dias-semana" value="domingo"> Domingo</label>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                    <button type="submit" class="btn btn-primary">Salvar</button>
+                    <button type="button" class="btn btn-secondary" onclick="fecharModal('modal-produto')">Cancelar</button>
+                    <button type="button" class="btn btn-danger" id="btn-remover-produto" style="display: none;" onclick="removerProduto()">Remover</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="data.js"></script>
+    <script>
+        // Carregar dados do restaurante
+        const restaurante = dataManager.getRestaurante();
+        // Header removido - elemento não existe mais
+        // const logoImg = document.getElementById('logo-img');
+        // if (logoImg) logoImg.src = restaurante.logo;
+
+        // Carregar categorias no select
+        function carregarCategoriasSelect() {
+            const select = document.getElementById('produto-categoria');
+            const categorias = dataManager.getCategorias().filter(c => c.ativa);
+            
+            // Limpar opções existentes (exceto a primeira)
+            select.innerHTML = '<option value="">Selecione...</option>';
+            
+            categorias.forEach(categoria => {
+                const option = document.createElement('option');
+                option.value = categoria.nome;
+                option.textContent = categoria.nome;
+                select.appendChild(option);
+            });
+        }
+
+        // Abrir tab
+        function abrirTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            document.getElementById(`tab-${tabId}`).classList.add('active');
+            event.target.classList.add('active');
+
+            if (tabId === 'ativos') {
+                carregarProdutos(true);
+            } else {
+                carregarProdutos(false);
+            }
+        }
+
+        // Carregar produtos
+        function carregarProdutos(ativos = true) {
+            const produtos = dataManager.getCardapio();
+            const container = ativos ? 
+                document.getElementById('produtos-ativos-container') : 
+                document.getElementById('produtos-inativos-container');
+            const semProdutos = ativos ?
+                document.getElementById('sem-produtos-ativos') :
+                document.getElementById('sem-produtos-inativos');
+
+            // Por enquanto, todos os produtos são ativos (não temos campo inativo)
+            // Mas vamos mostrar todos na aba "Ativos" e vazia na "Inativos" para demonstração
+            const produtosFiltrados = ativos ? produtos : [];
+
+            if (produtosFiltrados.length === 0) {
+                container.innerHTML = '';
+                semProdutos.style.display = 'block';
+                return;
+            }
+
+            semProdutos.style.display = 'none';
+            container.innerHTML = '';
+
+            // URL padrão para imagem (usando data URI SVG para evitar problemas de CORS e loops)
+            const imagemPadrao = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI0NDQ0NDQyIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IiM2NjY2NjYiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5TZW0gSW1hZ2VtPC90ZXh0Pjwvc3ZnPg==';
+            
+            produtosFiltrados.forEach(produto => {
+                const diaAtual = new Date().toLocaleDateString('pt-BR', { weekday: 'long' });
+                const diasSemana = ['domingo', 'segunda', 'terça', 'quarta', 'quinta', 'sexta', 'sábado'];
+                const diaAtualLower = diasSemana[new Date().getDay()];
+                const isPratoDoDia = produto.pratoDoDia && produto.pratoDoDia.includes(diaAtualLower);
+
+                const card = document.createElement('div');
+                card.className = 'produto-card';
+                
+                // Usar imagem padrão se não houver imagem ou se estiver vazia
+                const imagemUrl = (produto.imagem && produto.imagem.trim()) ? produto.imagem.trim() : imagemPadrao;
+                
+                // Escapar HTML para evitar problemas de XSS
+                const escapeHtml = (text) => {
+                    if (!text) return '';
+                    const div = document.createElement('div');
+                    div.textContent = text;
+                    return div.innerHTML;
+                };
+                
+                // Criar elemento de imagem separadamente para evitar loops no onerror
+                const img = document.createElement('img');
+                img.src = imagemUrl;
+                img.alt = escapeHtml(produto.nome);
+                img.className = 'produto-imagem';
+                img.onerror = function() {
+                    // Se a imagem falhar e não for a imagem padrão, usar a padrão e remover o handler
+                    if (this.src !== imagemPadrao) {
+                        this.src = imagemPadrao;
+                        this.onerror = null; // Remover handler para evitar loop
+                    }
+                };
+                
+                card.innerHTML = `
+                    <div class="produto-body">
+                        ${produto.codigo ? `<div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 0.5rem; font-weight: 600;">Código: ${escapeHtml(produto.codigo)}</div>` : ''}
+                        <div class="produto-nome">${escapeHtml(produto.nome)}</div>
+                        ${isPratoDoDia ? '<span class="prato-do-dia-badge">🥘 Prato do Dia</span>' : ''}
+                        <div class="produto-categoria">${escapeHtml(produto.categoria)}</div>
+                        <div class="produto-preco">R$ ${produto.preco.toFixed(2).replace('.', ',')}</div>
+                        <p class="produto-descricao">${escapeHtml(produto.descricao || 'Sem descrição')}</p>
+                        ${produto.pratoDoDia && produto.pratoDoDia.length > 0 ? `
+                            <div style="font-size: 0.75rem; color: var(--text-light); margin-top: 0.5rem;">
+                                <strong>Prato do dia:</strong> ${escapeHtml(produto.pratoDoDia.join(', '))}
+                            </div>
+                        ` : ''}
+                        <div style="display: flex; gap: 0.5rem; margin-top: 1rem;">
+                            <button class="btn btn-small btn-secondary" onclick="editarProduto(${produto.id})" style="flex: 1;">
+                                Editar
+                            </button>
+                            <button class="btn btn-small btn-danger" onclick="confirmarRemoverProduto(${produto.id})">
+                                Remover
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                // Inserir a imagem no início do card
+                card.insertBefore(img, card.firstChild);
+                container.appendChild(card);
+            });
+        }
+
+        // Abrir modal produto
+        function abrirModalProduto(produtoId = null) {
+            // Carregar categorias antes de abrir o modal
+            carregarCategoriasSelect();
+            
+            document.getElementById('produto-id-editar').value = produtoId || '';
+            document.getElementById('form-produto').reset();
+            document.getElementById('dias-semana-group').style.display = 'none';
+            document.getElementById('btn-remover-produto').style.display = 'none';
+
+            // Limpar checkboxes de dias
+            document.querySelectorAll('input[name="dias-semana"]').forEach(cb => {
+                cb.checked = false;
+            });
+
+            if (produtoId) {
+                const produto = dataManager.getProduto(produtoId);
+                if (produto) {
+                    document.getElementById('modal-produto-titulo').textContent = 'Editar Produto';
+                    document.getElementById('produto-codigo').value = produto.codigo || '';
+                    document.getElementById('produto-nome').value = produto.nome;
+                    document.getElementById('produto-categoria').value = produto.categoria;
+                    document.getElementById('produto-preco').value = produto.preco;
+                    document.getElementById('produto-imagem').value = produto.imagem || '';
+                    document.getElementById('produto-descricao').value = produto.descricao || '';
+                    
+                    if (produto.pratoDoDia && produto.pratoDoDia.length > 0) {
+                        document.getElementById('produto-prato-do-dia').checked = true;
+                        document.getElementById('dias-semana-group').style.display = 'block';
+                        produto.pratoDoDia.forEach(dia => {
+                            const checkbox = document.querySelector(`input[name="dias-semana"][value="${dia}"]`);
+                            if (checkbox) checkbox.checked = true;
+                        });
+                    }
+                    
+                    document.getElementById('btn-remover-produto').style.display = 'inline-block';
+                }
+            } else {
+                document.getElementById('modal-produto-titulo').textContent = 'Adicionar Produto';
+            }
+
+            document.getElementById('modal-produto').classList.add('active');
+        }
+
+        // Toggle dias da semana
+        document.getElementById('produto-prato-do-dia').addEventListener('change', function() {
+            document.getElementById('dias-semana-group').style.display = this.checked ? 'block' : 'none';
+            if (!this.checked) {
+                document.querySelectorAll('input[name="dias-semana"]').forEach(cb => {
+                    cb.checked = false;
+                });
+            }
+        });
+
+        // Editar produto
+        function editarProduto(produtoId) {
+            abrirModalProduto(produtoId);
+        }
+
+        // Confirmar remover produto
+        function confirmarRemoverProduto(produtoId) {
+            const produto = dataManager.getProduto(produtoId);
+            if (produto && confirm(`Tem certeza que deseja remover "${produto.nome}"?`)) {
+                dataManager.removerProduto(produtoId);
+                carregarProdutos(true);
+            }
+        }
+
+        // Remover produto
+        function removerProduto() {
+            const produtoId = parseInt(document.getElementById('produto-id-editar').value);
+            if (produtoId) {
+                confirmarRemoverProduto(produtoId);
+                fecharModal('modal-produto');
+            }
+        }
+
+        // Form produto
+        document.getElementById('form-produto').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const produtoId = document.getElementById('produto-id-editar').value;
+            const pratoDoDia = document.getElementById('produto-prato-do-dia').checked;
+            const diasSemana = Array.from(document.querySelectorAll('input[name="dias-semana"]:checked'))
+                .map(cb => cb.value);
+
+            const dados = {
+                codigo: document.getElementById('produto-codigo').value.trim() || null,
+                nome: document.getElementById('produto-nome').value,
+                categoria: document.getElementById('produto-categoria').value,
+                preco: parseFloat(document.getElementById('produto-preco').value),
+                imagem: document.getElementById('produto-imagem').value || null,
+                descricao: document.getElementById('produto-descricao').value || '',
+                pratoDoDia: pratoDoDia ? diasSemana : [],
+                tags: []
+            };
+
+            if (produtoId) {
+                dataManager.atualizarProduto(parseInt(produtoId), dados);
+            } else {
+                dataManager.adicionarProduto(dados);
+            }
+
+            fecharModal('modal-produto');
+            carregarProdutos(true);
+        });
+
+        // Fechar modal
+        function fecharModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        // Fechar modal ao clicar fora
+        document.getElementById('modal-produto').addEventListener('click', function(e) {
+            if (e.target === this) {
+                fecharModal('modal-produto');
+            }
+        });
+
+        // Inicializar
+        carregarCategoriasSelect();
+        carregarProdutos(true);
+    </script>
+</body>
+</html>

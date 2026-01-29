@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configurações - Restaurante Demo</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <nav>
+        <div class="nav-container">
+            <a href="pdv.html" class="nav-link">💰 PDV</a>
+            <a href="cliente.html" class="nav-link">🍽️ Cliente</a>
+            <a href="entregador.html" class="nav-link">🏍️ Entregador</a>
+            <a href="produtos.html" class="nav-link">🍕 Produto</a>
+            <a href="relatorios.html" class="nav-link">📈 Relatórios</a>
+            <a href="configuracoes.html" class="nav-link active">⚙️ Configurações</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Configurações</h2>
+            </div>
+            <p style="color: var(--text-light);">
+                Cadastre entregadores e defina o numero de mesas do restaurante.
+            </p>
+        </div>
+
+        <div class="grid grid-2">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Cadastro de Entregadores</h3>
+                </div>
+                <form id="form-entregadores">
+                    <div class="form-group">
+                        <label for="entregador-nome">Nome</label>
+                        <input type="text" id="entregador-nome" placeholder="Ex: Joao Silva" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="entregador-placa">Placa da moto</label>
+                        <input type="text" id="entregador-placa" placeholder="Ex: ABC1D23" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        Cadastrar Entregador
+                    </button>
+                </form>
+
+                <div class="mt-2">
+                    <h4 style="margin-bottom: 0.5rem;">Entregadores cadastrados</h4>
+                    <div id="lista-entregadores" style="display: grid; gap: 0.5rem;"></div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Cadastro de Mesas</h3>
+                </div>
+                <form id="form-mesas">
+                    <div class="form-group">
+                        <label for="numero-mesas">Numero de Mesas</label>
+                        <input type="number" id="numero-mesas" min="0" placeholder="Ex: 10" required>
+                    </div>
+                    <button type="submit" class="btn btn-secondary">
+                        Salvar Numero de Mesas
+                    </button>
+                </form>
+                <div class="mt-2">
+                    <strong>Total configurado:</strong>
+                    <span id="total-mesas">-</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="data.js"></script>
+    <script>
+        // Carregar dados do restaurante
+        const restaurante = dataManager.getRestaurante();
+        // Header removido - elementos não existem mais
+        // const logoImg = document.getElementById('logo-img');
+        // if (logoImg) logoImg.src = restaurante.logo;
+        // const restauranteNome = document.getElementById('restaurante-nome');
+        // if (restauranteNome) restauranteNome.textContent = restaurante.nome;
+
+        const STORAGE_ENTREGADORES = 'peddy_entregadores';
+        const STORAGE_MESAS = 'peddy_numero_mesas';
+
+        const formEntregadores = document.getElementById('form-entregadores');
+        const inputNome = document.getElementById('entregador-nome');
+        const inputPlaca = document.getElementById('entregador-placa');
+        const listaEntregadores = document.getElementById('lista-entregadores');
+
+        const formMesas = document.getElementById('form-mesas');
+        const inputNumeroMesas = document.getElementById('numero-mesas');
+        const totalMesas = document.getElementById('total-mesas');
+
+        function carregarEntregadores() {
+            try {
+                const salvo = JSON.parse(localStorage.getItem(STORAGE_ENTREGADORES) || '[]');
+                return Array.isArray(salvo) ? salvo : [];
+            } catch {
+                return [];
+            }
+        }
+
+        function salvarEntregadores(entregadores) {
+            localStorage.setItem(STORAGE_ENTREGADORES, JSON.stringify(entregadores));
+        }
+
+        function renderizarEntregadores() {
+            let entregadores = carregarEntregadores();
+            if (entregadores.length === 0) {
+                listaEntregadores.innerHTML = '<span style="color: var(--text-light);">Nenhum entregador cadastrado.</span>';
+                return;
+            }
+            // Garantir que todos tenham id (migração para entregadores antigos)
+            let alterado = false;
+            entregadores = entregadores.map((e, i) => {
+                if (!e.id) {
+                    alterado = true;
+                    return { ...e, id: 'ENT' + Date.now() + '-' + i };
+                }
+                return e;
+            });
+            if (alterado) salvarEntregadores(entregadores);
+
+            listaEntregadores.innerHTML = entregadores.map(entregador => `
+                <div class="card" style="padding: 0.75rem;">
+                    <strong>${entregador.nome}</strong><br>
+                    <span style="color: var(--text-light);">Placa: ${entregador.placa}</span>
+                </div>
+            `).join('');
+        }
+
+        formEntregadores.addEventListener('submit', (event) => {
+            event.preventDefault();
+            const nome = inputNome.value.trim();
+            const placa = inputPlaca.value.trim();
+
+            if (!nome || !placa) {
+                return;
+            }
+
+            const entregadores = carregarEntregadores();
+            const id = 'ENT' + Date.now() + '-' + entregadores.length;
+            entregadores.push({ id, nome, placa });
+            salvarEntregadores(entregadores);
+            renderizarEntregadores();
+
+            inputNome.value = '';
+            inputPlaca.value = '';
+            inputNome.focus();
+        });
+
+        formMesas.addEventListener('submit', (event) => {
+            event.preventDefault();
+            const quantidade = Number(inputNumeroMesas.value);
+            if (Number.isNaN(quantidade) || quantidade < 0) {
+                return;
+            }
+            localStorage.setItem(STORAGE_MESAS, String(quantidade));
+            totalMesas.textContent = String(quantidade);
+        });
+
+        function carregarMesas() {
+            const salvo = localStorage.getItem(STORAGE_MESAS);
+            if (salvo === null || salvo === '') {
+                totalMesas.textContent = '-';
+                return;
+            }
+            totalMesas.textContent = salvo;
+        }
+
+        renderizarEntregadores();
+        carregarMesas();
+    </script>
+</body>
+</html>

@@ -1,0 +1,21 @@
+{
+  "name": "restaurante-demo",
+  "version": "1.0.0",
+  "description": "Sistema de Gestão de Restaurante com banco de dados JSON",
+  "main": "api-server.js",
+  "scripts": {
+    "start": "node api-server.js",
+    "dev": "node api-server.js"
+  },
+  "keywords": [
+    "restaurante",
+    "pdv",
+    "gestao"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5"
+  }
+}

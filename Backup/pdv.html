@@ -1,0 +1,3525 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDV - Ponto de Venda - Restaurante Demo</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="pdv.css">
+</head>
+<body>
+    <nav>
+        <div class="nav-container">
+            <a href="pdv.html" class="nav-link active">💰 PDV</a>
+            <a href="cliente.html" class="nav-link">🍽️ Cliente</a>
+            <a href="entregador.html" class="nav-link">🏍️ Entregador</a>
+            <a href="produtos.html" class="nav-link">🍕 Produto</a>
+            <a href="relatorios.html" class="nav-link">📈 Relatórios</a>
+            <a href="configuracoes.html" class="nav-link">⚙️ Configurações</a>
+        </div>
+    </nav>
+
+    <!-- Barra de contadores (abaixo do menu) -->
+    <div class="pdv-contadores-bar" id="pdv-contadores-bar">
+        <div class="pdv-contadores-bar-inner">
+            <div class="pdv-contadores-data-hora">
+                <span class="pdv-contadores-data" id="pdv-contadores-data"></span>
+                <span class="pdv-contadores-hora" id="pdv-contadores-hora"></span>
+            </div>
+            <div class="pdv-contadores-blocos">
+                <div class="pdv-contador-bloco pdv-contador-total">
+                    <div class="pdv-contador-titulo">Total hoje</div>
+                    <div class="pdv-contador-ratio" id="pdv-contador-total">0</div>
+                    <div class="pdv-contador-legenda">Pedido</div>
+                </div>
+                <div class="pdv-contador-bloco">
+                    <div class="pdv-contador-titulo">Pedidos Online</div>
+                    <div class="pdv-contador-ratio" id="pdv-contador-online">0</div>
+                    <div class="pdv-contador-legenda">Pedido</div>
+                </div>
+                <div class="pdv-contador-bloco">
+                    <div class="pdv-contador-titulo">Pedidos Balcão</div>
+                    <div class="pdv-contador-ratio" id="pdv-contador-balcao">0</div>
+                    <div class="pdv-contador-legenda">Pedido</div>
+                </div>
+                <div class="pdv-contador-bloco">
+                    <div class="pdv-contador-titulo">Pedidos Mesa</div>
+                    <div class="pdv-contador-ratio" id="pdv-contador-mesa">0</div>
+                    <div class="pdv-contador-legenda">Pedido</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="pdv-container produtos-colapsados entregadores-colapsados mesas-colapsadas pedidos-colapsados" id="pdv-container">
+            <!-- Carrinho -->
+            <div class="pdv-carrinho">
+                <!-- Parte Esquerda: Itens do Carrinho -->
+                <div class="carrinho-esquerda">
+                    <div class="carrinho-header" style="display: flex; align-items: flex-end; gap: 1rem; flex-wrap: wrap;">
+                        <div style="flex-shrink: 0;">
+                            <h2 class="card-title" style="margin: 0;">🛒 Carrinho</h2>
+                            <div id="carrinho-contador" style="font-size: 0.875rem; color: var(--text-light); margin-top: 0.25rem;">
+                                0 itens
+                            </div>
+                        </div>
+                        
+                        <!-- Campos de Pesquisa -->
+                        <div id="campos-pesquisa-container" style="display: flex; gap: 0.75rem; flex: 1; min-width: 300px; flex-wrap: wrap; align-items: flex-end;">
+                            <div class="form-group" style="flex: 1; min-width: 150px; margin-bottom: 0;">
+                                <label for="pesquisa-pedido" style="font-size: 0.875rem; margin-bottom: 0.5rem; display: block;">🔍 Pedido</label>
+                                <input type="text" id="pesquisa-pedido" placeholder="N° do pedido..." 
+                                       style="width: 100%; padding: 0.5rem; border: 2px solid var(--border-color); border-radius: 8px; font-size: 0.875rem; height: 40px; box-sizing: border-box;">
+                            </div>
+                            <div class="form-group" style="flex: 1; min-width: 150px; margin-bottom: 0;">
+                                <label for="pesquisa-mesa" style="font-size: 0.875rem; margin-bottom: 0.5rem; display: block;">🪑 Mesa</label>
+                                <div style="display: flex; gap: 0.5rem; align-items: center;">
+                                    <input type="text" id="pesquisa-mesa" placeholder="N° da mesa..." 
+                                           style="flex: 1; padding: 0.5rem; border: 2px solid var(--border-color); border-radius: 8px; font-size: 0.875rem; height: 40px; box-sizing: border-box;">
+                                    <button class="btn btn-secondary" onclick="limparCarrinho()" 
+                                            style="padding: 0.5rem; min-width: 40px; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;"
+                                            title="Limpar carrinho" aria-label="Limpar carrinho">
+                                        🗑️
+                                    </button>
+                                    <button class="btn btn-success" id="btn-imprimir-pedido" onclick="imprimirPedido()"
+                                            style="padding: 0.5rem; min-width: 40px; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;"
+                                            title="Imprimir Pedido" aria-label="Imprimir Pedido">
+                                        🖨️
+                                    </button>
+                                    <button class="btn btn-info" id="btn-lupa-pedido" onclick="abrirModalDetalhesPedido()"
+                                            style="padding: 0.5rem; min-width: 40px; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; background: var(--primary-color); color: white; border-color: var(--primary-color);"
+                                            title="Ver detalhes do pedido" aria-label="Ver detalhes do pedido">
+                                        🔍
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="carrinho-itens-container" id="carrinho-itens">
+                        <div class="carrinho-vazio">
+                            <div class="carrinho-vazio-icon">🛒</div>
+                            <p>Carrinho vazio</p>
+                            <p style="font-size: 0.875rem; margin-top: 0.5rem;">Clique nos produtos para adicionar</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Parte Direita: Total e Formulário -->
+                <div class="carrinho-direita">
+                    <div class="carrinho-total">
+                        <div class="carrinho-total-label">Total</div>
+                        <div class="carrinho-total-valor" id="carrinho-total">R$ 0,00</div>
+                    </div>
+
+                    <div class="carrinho-form">
+                        <div class="form-group" style="margin-top: 0;">
+                            <label style="margin-bottom: 0.5rem; display: block;">Tipo de Venda</label>
+                            <div style="display: flex; flex-direction: row; gap: 0.5rem; flex-wrap: wrap;">
+                                <button type="button" class="btn btn-secondary" onclick="selecionarTipoVenda('balcao')" id="btn-tipo-balcao" style="flex: 1; min-width: 0; justify-content: center;">
+                                    🏪 Balcão
+                                </button>
+                                <button type="button" class="btn btn-secondary" onclick="selecionarTipoVenda('online')" id="btn-tipo-online" style="flex: 1; min-width: 0; justify-content: center;">
+                                    💻 Online
+                                </button>
+                            </div>
+                            <input type="hidden" id="tipo-venda-pdv" value="">
+                        </div>
+
+                        <!-- Campos específicos para Balcão -->
+                        <div id="campos-balcao" style="display: none; margin-top: 1rem;">
+                            <div class="form-group" style="margin-top: 0;">
+                                <label for="numero-pedido-balcao">N° Pedido</label>
+                                <input type="text" id="numero-pedido-balcao" readonly style="background: var(--light-color); cursor: not-allowed;">
+                            </div>
+                            <div class="form-group">
+                                <label for="nome-cliente-balcao">Nome do Cliente</label>
+                                <input type="text" id="nome-cliente-balcao" placeholder="Digite o nome do cliente">
+                            </div>
+                        </div>
+
+                        <div style="display: flex; flex-direction: column; gap: 0.5rem; margin-top: 1rem; flex-shrink: 0;">
+                            <button class="btn btn-info" style="width: 100%; padding: 1rem; font-size: 1.125rem; box-sizing: border-box; max-width: 100%; background: var(--primary-color); color: white;" 
+                                    onclick="criarPedido()" id="btn-criar-pedido">
+                                Criar / Salvar
+                            </button>
+
+                            <button class="btn btn-secondary" style="width: 100%; padding: 1rem; font-size: 1.125rem; box-sizing: border-box; max-width: 100%;" id="btn-enviar-pedido" onclick="abrirModalEnviarPedido()">
+                                Enviar Pedido
+                            </button>
+
+                            <button class="btn btn-primary" style="width: 100%; padding: 1rem; font-size: 1.125rem; box-sizing: border-box; max-width: 100%;" 
+                                    onclick="finalizarVenda()" id="btn-finalizar">
+                                Finalizar Venda
+                            </button>
+                            <button class="btn btn-secondary" style="width: 100%; padding: 1rem; font-size: 1.125rem; box-sizing: border-box; max-width: 100%;" 
+                                    onclick="abrirModalCancelarPedido()" id="btn-cancelar-pedido">
+                                Cancelar Pedido
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Área de Produtos -->
+            <div class="pdv-lateral-wrapper">
+                <!-- Botão Abrir/Fechar PDV -->
+                <div class="pdv-caixa-wrapper" style="margin-bottom: 0.5rem;">
+                    <button class="btn pdv-caixa-toggle" id="btn-toggle-caixa" onclick="toggleCaixaPdv()" title="Abrir/Fechar Caixa" aria-label="Abrir/Fechar Caixa">
+                        <span id="caixa-icon">✕</span>
+                    </button>
+                </div>
+                <div class="pdv-produtos-wrapper">
+                    <button class="btn btn-secondary pdv-produtos-toggle" id="btn-toggle-produtos" onclick="toggleProdutosPdv()" title="Mostrar Produtos" aria-label="Mostrar Produtos">
+                        🍕
+                    </button>
+                    <div class="pdv-produtos-conteudo">
+                    <!-- Campo de Pesquisa -->
+                    <div class="card" style="padding: 0.75rem; margin-bottom: 0.75rem;">
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label for="pesquisa-produto" style="font-size: 0.875rem; margin-bottom: 0.5rem;">🔍 Pesquisar Produto</label>
+                            <div style="display: flex; gap: 0.5rem;">
+                                <input type="text" id="pesquisa-produto" placeholder="Digite o nome ou código do produto..." 
+                                       style="flex: 1;" oninput="filtrarProdutos()">
+                                <button class="btn btn-secondary" onclick="limparPesquisa()" style="white-space: nowrap;">
+                                    Limpar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Categorias -->
+                    <div class="tabs">
+                        <button class="tab active" onclick="filtrarCategoria('Todas')" id="tab-Todas">
+                            Todas
+                        </button>
+                    </div>
+
+                    <div class="pdv-produtos">
+                        <div id="produtos-pdv-container" class="grid grid-3" style="margin-top: 1rem;"></div>
+                    </div>
+                    </div>
+                </div>
+
+                <div class="pdv-entregadores-wrapper">
+                    <button class="btn btn-secondary pdv-entregadores-toggle" id="btn-toggle-entregadores" onclick="toggleEntregadoresPdv()" title="Mostrar Entregadores" aria-label="Mostrar Entregadores">
+                        🏍️
+                    </button>
+                    <div class="pdv-entregadores-conteudo">
+                        <div class="card" style="padding: 0.75rem; margin-bottom: 0.75rem;">
+                            <h3 class="card-title" style="margin-bottom: 0.5rem;">Entregadores</h3>
+                            <p style="color: var(--text-light); font-size: 0.875rem; margin: 0;">
+                                Atribua pedidos aos motoboys cadastrados.
+                            </p>
+                        </div>
+                        <div id="entregadores-pdv-vazio" style="color: var(--text-light); font-size: 0.875rem; display: none;">
+                            Nenhum entregador cadastrado.
+                        </div>
+                        <div id="entregadores-pdv-container" class="pdv-entregadores-lista"></div>
+                    </div>
+                </div>
+
+                <div class="pdv-mesas-wrapper">
+                    <button class="btn btn-secondary pdv-mesas-toggle" id="btn-toggle-mesas" onclick="toggleMesasPdv()" title="Mostrar Mesas" aria-label="Mostrar Mesas">
+                        🪑
+                    </button>
+                    <div class="pdv-mesas-conteudo">
+                        <div class="card" style="padding: 0.5rem; margin-bottom: 0.5rem; flex-shrink: 0;">
+                            <h3 class="card-title" style="margin-bottom: 0.25rem; font-size: 1rem;">Mesas</h3>
+                            <p style="color: var(--text-light); font-size: 0.75rem; margin: 0;">
+                                Visualize o status das mesas.
+                            </p>
+                        </div>
+                        <div id="mesas-pdv-vazio" style="color: var(--text-light); font-size: 0.875rem; display: none;">
+                            Nenhuma mesa configurada.
+                        </div>
+                        <div id="mesas-pdv-container" class="pdv-mesas-lista"></div>
+                    </div>
+                </div>
+                <div class="pdv-pedidos-wrapper">
+                    <button class="btn btn-secondary pdv-pedidos-toggle" id="btn-toggle-pedidos" onclick="togglePedidosPdv()" title="Mostrar Pedidos" aria-label="Mostrar Pedidos">
+                        📋
+                    </button>
+                    <div class="pdv-pedidos-conteudo">
+                        <div class="card" style="padding: 0.5rem; margin-bottom: 0.5rem; flex-shrink: 0;">
+                            <h3 class="card-title" style="margin-bottom: 0.25rem; font-size: 1rem;">Pedidos</h3>
+                            <p style="color: var(--text-light); font-size: 0.75rem; margin: 0;">
+                                Visualize o status dos pedidos.
+                            </p>
+                        </div>
+                        <div id="pedidos-pdv-vazio" style="color: var(--text-light); font-size: 0.875rem; display: none;">
+                            Nenhum pedido encontrado.
+                        </div>
+                        <div id="pedidos-pdv-container" class="pdv-pedidos-lista"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Cliente Online -->
+    <div id="modal-cliente-online" class="modal">
+        <div class="modal-content" style="max-width: 90%; width: 900px; max-height: 95vh; overflow-y: auto;">
+            <button class="modal-close" onclick="fecharModalCliente()">&times;</button>
+            <h2 style="margin-bottom: 1.5rem;">💻 Pedido Online</h2>
+            
+            <form id="pedido-online-form">
+                <!-- Dados do Cliente -->
+                <div class="form-group">
+                    <label for="nome-cliente-online">Nome *</label>
+                    <input type="text" id="nome-cliente-online" required placeholder="Nome completo do cliente">
+                </div>
+
+                <div class="form-group">
+                    <label for="telefone-cliente-online">Telefone *</label>
+                    <input type="tel" id="telefone-cliente-online" required placeholder="(11) 98765-4321" 
+                           pattern="[\(]\d{2}[\)]\s\d{4,5}[\-]\d{4}" 
+                           oninput="formatarTelefoneOnline(this)">
+                </div>
+
+                <!-- Tipo de Pedido -->
+                <div class="form-group">
+                    <label>Tipo de Pedido *</label>
+                    <div class="radio-group">
+                        <label>
+                            <input type="radio" name="tipo-pedido-online" value="retirada" checked onchange="toggleEnderecoOnline()">
+                            <span>Retirada</span>
+                        </label>
+                        <label>
+                            <input type="radio" name="tipo-pedido-online" value="entrega" onchange="toggleEnderecoOnline()">
+                            <span>Entrega</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Endereço (apenas para entrega) -->
+                <div class="form-group" id="endereco-group-online" style="display: none;">
+                    <label for="endereco-online">Endereço de Entrega *</label>
+                    <input type="text" id="endereco-online" placeholder="Rua, número, bairro">
+                </div>
+
+                <!-- Seleção de Produtos por Categoria -->
+                <div class="form-group">
+                    <label>Selecione os Produtos</label>
+                    <div id="categorias-produtos-online"></div>
+                </div>
+
+                <!-- Itens Selecionados -->
+                <div class="form-group">
+                    <label>Itens do Pedido</label>
+                    <div id="itens-selecionados-online" class="card" style="background: var(--light-color);">
+                        <p style="text-align: center; color: var(--text-light);">Nenhum item selecionado</p>
+                    </div>
+                    <div id="total-pedido-online" style="text-align: right; margin-top: 1rem; font-size: 1.25rem; font-weight: 600; color: var(--primary-color);">
+                        Total: R$ 0,00
+                    </div>
+                </div>
+
+                <!-- Observações -->
+                <div class="form-group">
+                    <label for="observacoes-online">Observações</label>
+                    <textarea id="observacoes-online" placeholder="Ex: Sem cebola, bem passado, etc."></textarea>
+                </div>
+
+                <!-- Forma de Pagamento -->
+                <div class="form-group">
+                    <label>Forma de Pagamento *</label>
+                    <div class="radio-group">
+                        <label>
+                            <input type="radio" name="pagamento-online" value="Pix" checked>
+                            <span>Pix</span>
+                        </label>
+                        <label>
+                            <input type="radio" name="pagamento-online" value="Cartão">
+                            <span>Cartão</span>
+                        </label>
+                        <label>
+                            <input type="radio" name="pagamento-online" value="Dinheiro">
+                            <span>Dinheiro</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Botões -->
+                <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                    <button type="submit" class="btn btn-primary" style="flex: 1;">
+                        Realizar Pedido
+                    </button>
+                    <button type="button" class="btn btn-secondary" onclick="limparPedidoOnline()">
+                        Limpar
+                    </button>
+                    <button type="button" class="btn btn-secondary" onclick="fecharModalCliente()">
+                        Cancelar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Detalhes do Pedido (Lupa) -->
+    <div id="modal-detalhes-pedido" class="modal">
+        <div class="modal-content" style="max-width: 560px; width: 95%; max-height: 90vh; overflow-y: auto;">
+            <button class="modal-close" onclick="fecharModalDetalhesPedido()">&times;</button>
+            <h2 style="margin-bottom: 1rem;">🔍 Detalhes do Pedido</h2>
+            <div id="modal-detalhes-vazio" style="display: none; color: var(--text-light); padding: 1.5rem; text-align: center;">
+                <p style="margin-bottom: 0.5rem;">Nenhum pedido selecionado.</p>
+                <p style="font-size: 0.875rem;">Digite o número do pedido no campo ao lado da lupa e clique em 🔍, ou carregue um pedido no carrinho.</p>
+            </div>
+            <div id="modal-detalhes-conteudo" style="display: none;"></div>
+        </div>
+    </div>
+
+    <!-- Modal: Forma de Pagamento (ao finalizar balcão/mesa) -->
+    <div id="modal-pagamento-finalizar" class="modal">
+        <div class="modal-content" style="max-width: 420px; width: 90%;">
+            <button class="modal-close" onclick="fecharModalPagamentoFinalizar()">&times;</button>
+            <h2 style="margin-bottom: 1rem;">💳 Forma de Pagamento</h2>
+            <p style="color: var(--text-light); font-size: 0.875rem; margin-bottom: 1rem;">
+                Selecione a forma de pagamento para finalizar o pedido.
+            </p>
+            <div class="radio-group" style="display: flex; flex-direction: column; gap: 0.5rem;">
+                <label style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem; border-radius: 8px; cursor: pointer;">
+                    <input type="radio" name="pagamento-finalizar" value="Dinheiro">
+                    <span>Dinheiro</span>
+                </label>
+                <label style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem; border-radius: 8px; cursor: pointer;">
+                    <input type="radio" name="pagamento-finalizar" value="Pix" checked>
+                    <span>Pix</span>
+                </label>
+                <label style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem; border-radius: 8px; cursor: pointer;">
+                    <input type="radio" name="pagamento-finalizar" value="Débito">
+                    <span>Débito</span>
+                </label>
+                <label style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem; border-radius: 8px; cursor: pointer;">
+                    <input type="radio" name="pagamento-finalizar" value="Crédito">
+                    <span>Crédito</span>
+                </label>
+                <label style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem; border-radius: 8px; cursor: pointer;">
+                    <input type="radio" name="pagamento-finalizar" value="VR">
+                    <span>VR</span>
+                </label>
+            </div>
+            
+            <!-- Botão Dividir Conta -->
+            <div style="margin-top: 1rem; margin-bottom: 1rem;">
+                <button type="button" class="btn btn-secondary" onclick="toggleDividirConta()" id="btn-dividir-conta" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+                    <span style="font-size: 1.25rem;">👥</span>
+                    <span>Dividir Conta</span>
+                </button>
+            </div>
+
+            <!-- Seção Dividir Conta (inicialmente oculta) -->
+            <div id="dividir-conta-section" style="display: none; margin-top: 1rem; padding: 1rem; background: var(--light-color); border-radius: 8px; border: 2px solid var(--border-color);">
+                <div class="form-group" style="margin-bottom: 1rem;">
+                    <label for="dividir-conta-pessoas" style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Número de pessoas</label>
+                    <input type="number" id="dividir-conta-pessoas" min="1" value="2" step="1" 
+                           style="width: 100%; padding: 0.75rem; border: 2px solid var(--border-color); border-radius: 8px; font-size: 1rem; box-sizing: border-box;"
+                           oninput="calcularDivisaoConta()">
+                </div>
+                <div style="padding: 0.75rem; background: white; border-radius: 6px; border: 1px solid var(--border-color);">
+                    <div style="font-size: 0.875rem; color: var(--text-light); margin-bottom: 0.25rem;">Total da conta:</div>
+                    <div id="dividir-conta-total" style="font-size: 1.25rem; font-weight: 700; color: var(--primary-color); margin-bottom: 0.75rem;">R$ 0,00</div>
+                    <div style="font-size: 0.875rem; color: var(--text-light); margin-bottom: 0.25rem;">Valor por pessoa:</div>
+                    <div id="dividir-conta-por-pessoa" style="font-size: 1.5rem; font-weight: 700; color: var(--success-color);">R$ 0,00</div>
+                </div>
+            </div>
+
+            <div style="margin-top: 1rem; display: flex; gap: 0.5rem; justify-content: flex-end;">
+                <button type="button" class="btn btn-secondary" onclick="fecharModalPagamentoFinalizar()">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="btn-confirmar-pagamento" onclick="confirmarPagamentoFinalizar()">Confirmar e Finalizar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Pagamento Individual (conta dividida) -->
+    <div id="modal-pagamento-individual" class="modal">
+        <div class="modal-content" style="max-width: 420px; width: 90%;">
+            <button class="modal-close" onclick="fecharModalPagamentoIndividual()">&times;</button>
+            <h2 style="margin-bottom: 1rem;">💳 Pagamento Individual</h2>
+            <div style="margin-bottom: 1rem; padding: 1rem; background: var(--light-color); border-radius: 8px; border: 2px solid var(--border-color);">
+                <div style="font-size: 0.875rem; color: var(--text-light); margin-bottom: 0.25rem;">Pagamento:</div>
+                <div id="pagamento-individual-numero" style="font-size: 1.5rem; font-weight: 700; color: var(--primary-color); margin-bottom: 0.75rem;">1 pagamento</div>
+                <div style="font-size: 0.875rem; color: var(--text-light); margin-bottom: 0.25rem;">Valor por pessoa:</div>
+                <div id="pagamento-individual-valor" style="font-size: 1.75rem; font-weight: 700; color: var(--success-color);">R$ 0,00</div>
+            </div>
+            <p style="color: var(--text-light); font-size: 0.875rem; margin-bottom: 1rem;">
+                Selecione a forma de pagamento.
+            </p>
+            <div class="radio-group" style="display: flex; flex-direction: column; gap: 0.5rem;">
+                <label style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem; border-radius: 8px; cursor: pointer;">
+                    <input type="radio" name="pagamento-individual" value="Dinheiro">
+                    <span>Dinheiro</span>
+                </label>
+                <label style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem; border-radius: 8px; cursor: pointer;">
+                    <input type="radio" name="pagamento-individual" value="Pix" checked>
+                    <span>Pix</span>
+                </label>
+                <label style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem; border-radius: 8px; cursor: pointer;">
+                    <input type="radio" name="pagamento-individual" value="Débito">
+                    <span>Débito</span>
+                </label>
+                <label style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem; border-radius: 8px; cursor: pointer;">
+                    <input type="radio" name="pagamento-individual" value="Crédito">
+                    <span>Crédito</span>
+                </label>
+                <label style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem; border-radius: 8px; cursor: pointer;">
+                    <input type="radio" name="pagamento-individual" value="VR">
+                    <span>VR</span>
+                </label>
+            </div>
+            <div style="margin-top: 1rem; display: flex; gap: 0.5rem; justify-content: flex-end;">
+                <button type="button" class="btn btn-secondary" onclick="fecharModalPagamentoIndividual()">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="finalizarPagamentoIndividual()">Finalizar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Troco (pagamento em dinheiro) -->
+    <div id="modal-troco" class="modal">
+        <div class="modal-content" style="max-width: 400px; width: 90%;">
+            <button class="modal-close" onclick="fecharModalTroco()">&times;</button>
+            <h2 style="margin-bottom: 1rem;">💵 Pagamento em dinheiro</h2>
+            <p style="color: var(--text-color); margin-bottom: 0.5rem;">Total: <strong id="modal-troco-total">R$ 0,00</strong></p>
+            <div class="form-group" style="margin-bottom: 1rem;">
+                <label for="modal-troco-recebido" style="display: block; margin-bottom: 0.5rem;">Valor recebido</label>
+                <input type="number" id="modal-troco-recebido" step="0.01" min="0" placeholder="0,00"
+                       style="width: 100%; padding: 0.75rem; border: 2px solid var(--border-color); border-radius: 8px; font-size: 1rem; box-sizing: border-box;"
+                       oninput="atualizarTrocoExibido()" onkeypress="if(event.key==='Enter'){ event.preventDefault(); confirmarTrocoFinalizar(); }">
+            </div>
+            <p style="color: var(--text-color); margin-bottom: 1rem;">Troco: <strong id="modal-troco-valor">R$ 0,00</strong></p>
+            <p id="modal-troco-insuficiente" style="display: none; color: var(--danger-color); font-size: 0.875rem; margin-bottom: 1rem;">Valor insuficiente.</p>
+            <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
+                <button type="button" class="btn btn-secondary" onclick="fecharModalTroco()">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="btn-modal-troco-finalizar" disabled onclick="confirmarTrocoFinalizar()">Finalizar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Confirmar cancelamento de pedido -->
+    <div id="modal-cancelar-pedido" class="modal">
+        <div class="modal-content" style="max-width: 400px; width: 90%;">
+            <button class="modal-close" onclick="fecharModalCancelarPedido()">&times;</button>
+            <h2 style="margin-bottom: 1rem;">❌ Cancelar Pedido</h2>
+            <p id="modal-cancelar-texto" style="color: var(--text-color); margin-bottom: 1.5rem;">
+                Deseja realmente cancelar o pedido?
+            </p>
+            <div style="display: flex; gap: 0.75rem; justify-content: flex-end;">
+                <button type="button" class="btn btn-secondary" onclick="fecharModalCancelarPedido()">Não</button>
+                <button type="button" class="btn btn-primary" style="background: var(--danger-color); border-color: var(--danger-color);" onclick="confirmarCancelarPedido()">Sim</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Aviso - comanda em aberto -->
+    <div id="modal-aviso-comanda" class="modal">
+        <div class="modal-content" style="max-width: 420px; width: 90%;">
+            <button class="modal-close" onclick="fecharModalAvisoComanda()">&times;</button>
+            <h2 style="margin-bottom: 1rem;">⚠️ Comanda em aberto</h2>
+            <p id="modal-aviso-comanda-texto" style="color: var(--text-color); margin-bottom: 1.5rem;">
+                Salve a comanda em aberto antes de iniciar um novo pedido.
+            </p>
+            <div style="display: flex; justify-content: flex-end;">
+                <button type="button" class="btn btn-primary" onclick="fecharModalAvisoComanda()">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Aviso - pedido não impresso -->
+    <div id="modal-aviso-nao-impresso" class="modal">
+        <div class="modal-content" style="max-width: 420px; width: 90%;">
+            <button class="modal-close" onclick="fecharModalAvisoNaoImpresso()">&times;</button>
+            <h2 style="margin-bottom: 1rem;">⚠️ Pedido não impresso</h2>
+            <p id="modal-aviso-nao-impresso-texto" style="color: var(--text-color); margin-bottom: 1.5rem;">
+                Este pedido ainda não foi impresso. Deseja finalizar mesmo assim?
+            </p>
+            <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
+                <button type="button" class="btn btn-secondary" onclick="fecharModalAvisoNaoImpresso()">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="confirmarFinalizarSemImpressao()">Sim, finalizar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Selecionar Entregador (Enviar Pedido) -->
+    <div id="modal-entregador" class="modal">
+        <div class="modal-content" style="max-width: 480px; width: 90%;">
+            <button class="modal-close" onclick="fecharModalEntregador()">&times;</button>
+            <h2 style="margin-bottom: 1rem;">🏍️ Selecionar Entregador</h2>
+            <p style="color: var(--text-light); font-size: 0.875rem; margin-bottom: 1rem;">
+                Escolha o motoboy para atribuir o pedido.
+            </p>
+            <div id="modal-entregador-vazio" style="display: none; color: var(--text-light); padding: 1rem; text-align: center;">
+                Nenhum entregador cadastrado. Cadastre em Configurações.
+            </div>
+            <div id="modal-entregador-lista" style="display: flex; flex-direction: column; gap: 0.5rem; max-height: 50vh; overflow-y: auto;"></div>
+            <div style="margin-top: 1rem; display: flex; gap: 0.5rem; justify-content: flex-end;">
+                <button type="button" class="btn btn-secondary" onclick="fecharModalEntregador()">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Container para notificações push (canto da tela) -->
+    <div id="pdv-notificacao-container" class="pdv-notificacao-container" aria-live="polite"></div>
+
+    <!-- Modal: Abrir Caixa -->
+    <div id="modal-abrir-caixa" class="modal">
+        <div class="modal-content" style="max-width: 420px; width: 90%;">
+            <button class="modal-close" onclick="fecharModalAbrirCaixa()">&times;</button>
+            <h2 style="margin-bottom: 1rem;">💰 Abrir Caixa</h2>
+            <p style="color: var(--text-color); margin-bottom: 1.5rem;">
+                O caixa será aberto.
+            </p>
+            <div class="form-group" style="margin-bottom: 1.5rem;">
+                <label for="troco-inicial" style="display: block; margin-bottom: 0.5rem; font-weight: 600;">
+                    Dinheiro de troco para iniciar o caixa
+                </label>
+                <input type="number" id="troco-inicial" step="0.01" min="0" placeholder="0,00" 
+                       style="width: 100%; padding: 0.75rem; border: 2px solid var(--border-color); border-radius: 8px; font-size: 1rem; box-sizing: border-box;">
+            </div>
+            <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
+                <button type="button" class="btn btn-secondary" onclick="fecharModalAbrirCaixa()">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="confirmarAbrirCaixa()">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Fechar Caixa -->
+    <div id="modal-fechar-caixa" class="modal">
+        <div class="modal-content" style="max-width: 600px; width: 90%; max-height: 90vh; overflow-y: auto;">
+            <button class="modal-close" onclick="fecharModalFecharCaixa()">&times;</button>
+            <h2 style="margin-bottom: 1rem;">💰 Fechar Caixa</h2>
+            <p style="color: var(--text-color); margin-bottom: 1.5rem;">
+                O caixa será encerrado.
+            </p>
+            
+            <div style="margin-bottom: 1.5rem;">
+                <h3 style="margin-bottom: 0.75rem; font-size: 1.125rem;">Valor Total do Dia</h3>
+                
+                <!-- Valor Inicial de Troco -->
+                <div id="troco-inicial-display" style="margin-bottom: 1rem; padding: 0.75rem; background: var(--light-color); border-radius: 8px; border-left: 4px solid var(--info-color);">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span style="font-weight: 600;">Troco Inicial:</span>
+                        <span id="troco-inicial-valor" style="font-weight: 700; color: var(--info-color);">R$ 0,00</span>
+                    </div>
+                </div>
+                
+                <div id="resumo-caixa-formas-pagamento" style="margin-bottom: 1rem;">
+                    <!-- Será preenchido dinamicamente -->
+                </div>
+                <div style="padding: 1rem; background: var(--light-color); border-radius: 8px; border: 2px solid var(--primary-color);">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span style="font-weight: 700; font-size: 1.125rem;">Total Geral:</span>
+                        <span id="total-geral-caixa" style="font-weight: 700; font-size: 1.25rem; color: var(--primary-color);">R$ 0,00</span>
+                    </div>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 0.5rem; justify-content: flex-end; margin-top: 1.5rem;">
+                <button type="button" class="btn btn-secondary" onclick="imprimirRelatorioCaixa()">📄 Imprimir Relatório</button>
+                <button type="button" class="btn btn-secondary" onclick="fecharModalFecharCaixa()">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="confirmarFecharCaixa()">Encerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="data.js"></script>
+    <script src="websocket-sim.js"></script>
+    <script>
+        // Carregar dados do restaurante
+        const restaurante = dataManager.getRestaurante();
+        // Logo removido - header foi removido
+        // const logoImg = document.getElementById('logo-img');
+        // if (logoImg) {
+        //     logoImg.src = restaurante.logo;
+        // }
+
+        // Carrinho
+        let carrinho = {};
+        let categoriaAtual = 'Todas';
+        let pesquisaAtual = '';
+        let tipoVendaSelecionado = '';
+        let formaPagamentoSelecionada = 'Pix';
+
+        // Gerenciamento de Caixa
+        const STORAGE_CAIXA = 'peddy_caixa_status';
+        const STORAGE_CAIXA_HISTORICO = 'peddy_caixa_historico';
+
+        function getStatusCaixa() {
+            const status = localStorage.getItem(STORAGE_CAIXA);
+            if (!status) return null;
+            try {
+                return JSON.parse(status);
+            } catch {
+                return null;
+            }
+        }
+
+        function setStatusCaixa(aberto, trocoInicial = 0) {
+            const status = {
+                aberto: aberto,
+                dataHora: new Date().toISOString(),
+                trocoInicial: trocoInicial
+            };
+            localStorage.setItem(STORAGE_CAIXA, JSON.stringify(status));
+            atualizarBotaoCaixa();
+        }
+
+        function atualizarBotaoCaixa() {
+            const btn = document.getElementById('btn-toggle-caixa');
+            const icon = document.getElementById('caixa-icon');
+            const status = getStatusCaixa();
+            
+            if (!status || !status.aberto) {
+                // Caixa fechado
+                btn.className = 'btn pdv-caixa-toggle caixa-fechado';
+                icon.textContent = '✕';
+                btn.title = 'Caixa Fechado - Clique para abrir';
+            } else {
+                // Caixa aberto
+                btn.className = 'btn pdv-caixa-toggle caixa-aberto';
+                icon.textContent = '✓';
+                btn.title = 'Caixa Aberto - Clique para fechar';
+            }
+        }
+
+        function toggleCaixaPdv() {
+            const status = getStatusCaixa();
+            
+            if (!status || !status.aberto) {
+                // Abrir caixa
+                abrirModalAbrirCaixa();
+            } else {
+                // Fechar caixa
+                abrirModalFecharCaixa();
+            }
+        }
+
+        function abrirModalAbrirCaixa() {
+            document.getElementById('modal-abrir-caixa').classList.add('active');
+            document.getElementById('troco-inicial').value = '';
+            document.getElementById('troco-inicial').focus();
+        }
+
+        function fecharModalAbrirCaixa() {
+            document.getElementById('modal-abrir-caixa').classList.remove('active');
+        }
+
+        function confirmarAbrirCaixa() {
+            const trocoInicial = parseFloat(document.getElementById('troco-inicial').value) || 0;
+            
+            if (trocoInicial < 0) {
+                alert('O valor do troco inicial não pode ser negativo.');
+                return;
+            }
+
+            // Registrar abertura do caixa
+            setStatusCaixa(true, trocoInicial);
+            
+            // Salvar no histórico
+            const historico = JSON.parse(localStorage.getItem(STORAGE_CAIXA_HISTORICO) || '[]');
+            historico.push({
+                tipo: 'abertura',
+                dataHora: new Date().toISOString(),
+                trocoInicial: trocoInicial
+            });
+            localStorage.setItem(STORAGE_CAIXA_HISTORICO, JSON.stringify(historico));
+            
+            fecharModalAbrirCaixa();
+        }
+
+        function calcularValoresDia() {
+            const status = getStatusCaixa();
+            
+            // Se não há caixa aberto, retornar valores vazios
+            if (!status || !status.aberto || !status.dataHora) {
+                return {
+                    valoresPorForma: {},
+                    totalGeral: 0,
+                    totalPedidos: 0,
+                    pedidosHoje: []
+                };
+            }
+            
+            // Data/hora de abertura do caixa atual
+            const dataAberturaCaixa = new Date(status.dataHora);
+            const agora = new Date();
+
+            // Buscar todos os pedidos finalizados APÓS a abertura do caixa atual
+            const pedidosFinalizados = dataManager.getPedidosFinalizados();
+            const pedidosHoje = pedidosFinalizados.filter(p => {
+                // Usar dataFinalizacao se existir, senão usar dataCriacao
+                const dataFinalizacao = p.dataFinalizacao ? new Date(p.dataFinalizacao) : null;
+                if (!dataFinalizacao) {
+                    // Se não tem dataFinalizacao, não considerar (pedido não foi finalizado ainda)
+                    return false;
+                }
+                // Considerar apenas pedidos finalizados APÓS a abertura do caixa atual
+                // Usar > ao invés de >= para garantir que pedidos do caixa anterior não sejam incluídos
+                return dataFinalizacao > dataAberturaCaixa && dataFinalizacao <= agora;
+            });
+
+            // Calcular por forma de pagamento
+            const valoresPorForma = {};
+            let totalGeral = 0;
+            let totalPedidos = pedidosHoje.length;
+
+            pedidosHoje.forEach(pedido => {
+                const forma = pedido.pagamento || 'Não informado';
+                const valor = parseFloat(pedido.valorTotal) || 0;
+                
+                if (!valoresPorForma[forma]) {
+                    valoresPorForma[forma] = 0;
+                }
+                valoresPorForma[forma] += valor;
+                totalGeral += valor;
+            });
+
+            return {
+                valoresPorForma,
+                totalGeral,
+                totalPedidos,
+                pedidosHoje
+            };
+        }
+
+        function abrirModalFecharCaixa() {
+            const resumo = calcularValoresDia();
+            const status = getStatusCaixa();
+            const trocoInicial = status && status.trocoInicial ? status.trocoInicial : 0;
+            
+            // Exibir troco inicial
+            document.getElementById('troco-inicial-valor').textContent = `R$ ${trocoInicial.toFixed(2).replace('.', ',')}`;
+            const trocoDisplay = document.getElementById('troco-inicial-display');
+            if (trocoInicial > 0) {
+                trocoDisplay.style.display = 'block';
+            } else {
+                trocoDisplay.style.display = 'none';
+            }
+            
+            // Preencher resumo de formas de pagamento
+            const container = document.getElementById('resumo-caixa-formas-pagamento');
+            container.innerHTML = '';
+            
+            if (Object.keys(resumo.valoresPorForma).length === 0) {
+                container.innerHTML = '<p style="color: var(--text-light); text-align: center; padding: 1rem;">Nenhum pedido finalizado hoje.</p>';
+            } else {
+                const lista = document.createElement('div');
+                lista.style.display = 'flex';
+                lista.style.flexDirection = 'column';
+                lista.style.gap = '0.5rem';
+                
+                Object.entries(resumo.valoresPorForma).forEach(([forma, valor]) => {
+                    const item = document.createElement('div');
+                    item.style.display = 'flex';
+                    item.style.justifyContent = 'space-between';
+                    item.style.padding = '0.75rem';
+                    item.style.background = 'var(--light-color)';
+                    item.style.borderRadius = '6px';
+                    item.innerHTML = `
+                        <span style="font-weight: 600;">${forma}:</span>
+                        <span style="font-weight: 700; color: var(--primary-color);">R$ ${valor.toFixed(2).replace('.', ',')}</span>
+                    `;
+                    lista.appendChild(item);
+                });
+                
+                container.appendChild(lista);
+            }
+            
+            // Atualizar total geral
+            document.getElementById('total-geral-caixa').textContent = `R$ ${resumo.totalGeral.toFixed(2).replace('.', ',')}`;
+            
+            // Armazenar resumo para impressão (incluindo troco inicial)
+            window.resumoCaixaAtual = {
+                ...resumo,
+                trocoInicial: trocoInicial
+            };
+            
+            document.getElementById('modal-fechar-caixa').classList.add('active');
+        }
+
+        function fecharModalFecharCaixa() {
+            document.getElementById('modal-fechar-caixa').classList.remove('active');
+        }
+
+        function confirmarFecharCaixa() {
+            const resumo = window.resumoCaixaAtual || calcularValoresDia();
+            const status = getStatusCaixa();
+            
+            // Registrar fechamento do caixa
+            const historico = JSON.parse(localStorage.getItem(STORAGE_CAIXA_HISTORICO) || '[]');
+            historico.push({
+                tipo: 'fechamento',
+                dataHora: new Date().toISOString(),
+                dataAbertura: status ? status.dataHora : null,
+                trocoInicial: status ? status.trocoInicial : 0,
+                totalGeral: resumo.totalGeral,
+                totalPedidos: resumo.totalPedidos,
+                valoresPorForma: resumo.valoresPorForma
+            });
+            localStorage.setItem(STORAGE_CAIXA_HISTORICO, JSON.stringify(historico));
+            
+            // Fechar caixa - limpar status
+            localStorage.removeItem(STORAGE_CAIXA);
+            atualizarBotaoCaixa();
+            
+            fecharModalFecharCaixa();
+            alert('Caixa encerrado com sucesso!');
+        }
+
+        function imprimirRelatorioCaixa() {
+            const resumo = window.resumoCaixaAtual || calcularValoresDia();
+            const status = getStatusCaixa();
+            const trocoInicial = (resumo.trocoInicial !== undefined) ? resumo.trocoInicial : (status && status.trocoInicial ? status.trocoInicial : 0);
+            const hoje = new Date();
+            const dataFormatada = hoje.toLocaleDateString('pt-BR', {
+                weekday: 'long',
+                day: '2-digit',
+                month: 'long',
+                year: 'numeric'
+            });
+            
+            let html = `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <meta charset="UTF-8">
+                    <title>Relatório do Dia - ${dataFormatada}</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; padding: 20px; }
+                        h1 { text-align: center; margin-bottom: 20px; }
+                        .info-box { background-color: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #2196F3; }
+                        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+                        th, td { padding: 10px; text-align: left; border-bottom: 1px solid #ddd; }
+                        th { background-color: #f2f2f2; font-weight: bold; }
+                        .total { font-weight: bold; font-size: 1.2em; background-color: #e3f2fd; }
+                    </style>
+                </head>
+                <body>
+                    <h1>Relatório do Dia</h1>
+                    <div class="info-box">
+                        <p><strong>Data:</strong> ${dataFormatada}</p>
+                        <p><strong>Total de Pedidos:</strong> ${resumo.totalPedidos}</p>
+                        ${trocoInicial > 0 ? `<p><strong>Troco Inicial:</strong> R$ ${trocoInicial.toFixed(2).replace('.', ',')}</p>` : ''}
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Forma de Pagamento</th>
+                                <th style="text-align: right;">Valor</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+            
+            Object.entries(resumo.valoresPorForma).forEach(([forma, valor]) => {
+                html += `
+                    <tr>
+                        <td>${forma}</td>
+                        <td style="text-align: right;">R$ ${valor.toFixed(2).replace('.', ',')}</td>
+                    </tr>
+                `;
+            });
+            
+            html += `
+                        </tbody>
+                        <tfoot>
+                            <tr class="total">
+                                <td>Total Geral</td>
+                                <td style="text-align: right;">R$ ${resumo.totalGeral.toFixed(2).replace('.', ',')}</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </body>
+                </html>
+            `;
+            
+            const janela = window.open('', '_blank');
+            janela.document.write(html);
+            janela.document.close();
+            janela.print();
+        }
+
+        // Inicializar botão de caixa ao carregar
+        atualizarBotaoCaixa();
+        
+        // Estado da mesa
+        let mesaAberta = null; // null = fechada, número = mesa aberta
+        let pedidoIdCarregado = null; // ID do pedido carregado no carrinho (se houver)
+        let mesaSnapshot = null; // JSON do carrinho ao abrir a mesa (para detectar alterações)
+
+        // Gerar código sequencial para pedido de balcão
+        function gerarCodigoPedidoBalcao() {
+            // Verificar último número usado para pedidos Balcão
+            // Incluir TODOS os pedidos (ativos e finalizados) para garantir sequência única
+            const pedidos = dataManager.getPedidos();
+            const pedidosFinalizados = dataManager.getPedidosFinalizados();
+            const todosPedidos = [...pedidos, ...pedidosFinalizados];
+            // Considerar TODOS os pedidos Balcão, independente do status (números devem ser únicos)
+            const pedidosBalcao = todosPedidos.filter(p => 
+                p.id && p.id.startsWith('B')
+            );
+            
+            let numero = 1; // Primeiro pedido
+            
+            if (pedidosBalcao.length > 0) {
+                // Extrair números dos IDs e encontrar o maior
+                const numeros = pedidosBalcao.map(p => {
+                    const match = p.id.match(/^B(\d+)$/);
+                    return match ? parseInt(match[1]) : 0;
+                }).filter(n => n > 0); // Filtrar valores inválidos
+                
+                if (numeros.length > 0) {
+                    numero = Math.max(...numeros) + 1;
+                }
+            }
+            
+            return `B${String(numero).padStart(3, '0')}`;
+        }
+
+        // Variáveis para o modal de cliente online
+        let itensSelecionadosOnline = {};
+
+        // Função para sanitizar ID
+        function sanitizarId(texto) {
+            return texto.replace(/[^a-zA-Z0-9]/g, '-');
+        }
+
+        // Abrir modal do cliente
+        function abrirModalCliente() {
+            const modal = document.getElementById('modal-cliente-online');
+            modal.classList.add('active');
+            carregarCardapioOnline();
+        }
+
+        // Carregar cardápio no modal
+        function carregarCardapioOnline() {
+            const cardapio = dataManager.getCardapio();
+            const categorias = [...new Set(cardapio.map(p => p.categoria))];
+            const container = document.getElementById('categorias-produtos-online');
+            container.innerHTML = '';
+
+            categorias.forEach((categoria, index) => {
+                const produtos = cardapio.filter(p => p.categoria === categoria);
+                const categoriaId = sanitizarId(categoria);
+                
+                const categoriaDiv = document.createElement('div');
+                categoriaDiv.className = 'categoria-acordeon';
+                categoriaDiv.innerHTML = `
+                    <div class="categoria-header" onclick="toggleCategoriaOnline('${categoriaId}')">
+                        <h3>${categoria}</h3>
+                        <span class="categoria-arrow" id="arrow-online-${categoriaId}" style="transform: ${index === 0 ? 'rotate(0deg)' : 'rotate(-90deg)'};">${index === 0 ? '▼' : '▶'}</span>
+                    </div>
+                    <div class="categoria-content" id="content-online-${categoriaId}" style="display: ${index === 0 ? 'block' : 'none'};">
+                        <div class="grid grid-3" id="produtos-online-${categoriaId}"></div>
+                    </div>
+                `;
+                container.appendChild(categoriaDiv);
+
+                const produtosContainer = document.getElementById(`produtos-online-${categoriaId}`);
+                produtos.forEach(produto => {
+                    const produtoCard = document.createElement('div');
+                    produtoCard.className = 'produto-card';
+                    // Garantir que o card não adiciona ao carrinho ao ser clicado
+                    produtoCard.onclick = (e) => e.stopPropagation();
+                    produtoCard.innerHTML = `
+                        <img src="${produto.imagem || ''}" alt="${produto.nome}" class="produto-imagem" onerror="this.style.display='none'">
+                        <div class="produto-body">
+                            <div class="produto-nome">${produto.nome}</div>
+                            <div class="produto-categoria">${produto.categoria}</div>
+                            <div class="produto-preco">R$ ${produto.preco.toFixed(2).replace('.', ',')}</div>
+                            ${produto.descricao ? `<div class="produto-descricao">${produto.descricao}</div>` : ''}
+                            <div style="display: flex; gap: 0.5rem; align-items: center; margin-top: 1rem;">
+                                <button type="button" class="btn btn-small btn-danger" onclick="event.stopPropagation(); removerItemOnline(${produto.id})">-</button>
+                                <span id="qtd-online-${produto.id}" style="font-weight: 600; min-width: 50px; text-align: center;">0</span>
+                                <button type="button" class="btn btn-small btn-secondary" onclick="event.stopPropagation(); adicionarItemOnline(${produto.id})">+</button>
+                            </div>
+                        </div>
+                    `;
+                    produtosContainer.appendChild(produtoCard);
+                });
+            });
+        }
+
+        // Toggle categoria
+        function toggleCategoriaOnline(categoriaId) {
+            const content = document.getElementById(`content-online-${categoriaId}`);
+            const arrow = document.getElementById(`arrow-online-${categoriaId}`);
+            
+            if (content.style.display === 'none') {
+                content.style.display = 'block';
+                arrow.textContent = '▼';
+                arrow.style.transform = 'rotate(0deg)';
+            } else {
+                content.style.display = 'none';
+                arrow.textContent = '▶';
+                arrow.style.transform = 'rotate(-90deg)';
+            }
+        }
+
+        // Adicionar item
+        function adicionarItemOnline(produtoId) {
+            const produto = dataManager.getProduto(produtoId);
+            if (!produto) return;
+
+            if (!itensSelecionadosOnline[produtoId]) {
+                itensSelecionadosOnline[produtoId] = {
+                    produtoId: produto.id,
+                    nome: produto.nome,
+                    quantidade: 0,
+                    preco: produto.preco
+                };
+            }
+            itensSelecionadosOnline[produtoId].quantidade++;
+            atualizarInterfaceOnline();
+        }
+
+        // Remover item
+        function removerItemOnline(produtoId) {
+            if (itensSelecionadosOnline[produtoId]) {
+                itensSelecionadosOnline[produtoId].quantidade--;
+                if (itensSelecionadosOnline[produtoId].quantidade <= 0) {
+                    delete itensSelecionadosOnline[produtoId];
+                }
+                atualizarInterfaceOnline();
+            }
+        }
+
+        // Atualizar interface
+        function atualizarInterfaceOnline() {
+            Object.keys(itensSelecionadosOnline).forEach(produtoId => {
+                const qtdElement = document.getElementById(`qtd-online-${produtoId}`);
+                if (qtdElement) {
+                    qtdElement.textContent = itensSelecionadosOnline[produtoId].quantidade;
+                }
+            });
+
+            const container = document.getElementById('itens-selecionados-online');
+            const totalElement = document.getElementById('total-pedido-online');
+            const itens = Object.values(itensSelecionadosOnline);
+            
+            if (itens.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: var(--text-light);">Nenhum item selecionado</p>';
+                totalElement.textContent = 'Total: R$ 0,00';
+            } else {
+                container.innerHTML = itens.map(item => `
+                    <div class="pedido-item">
+                        <span>${item.nome} x${item.quantidade}</span>
+                        <span style="font-weight: 600;">R$ ${(item.preco * item.quantidade).toFixed(2).replace('.', ',')}</span>
+                    </div>
+                `).join('');
+                
+                const total = itens.reduce((sum, item) => sum + (item.preco * item.quantidade), 0);
+                totalElement.textContent = `Total: R$ ${total.toFixed(2).replace('.', ',')}`;
+            }
+        }
+
+        // Toggle endereço
+        function toggleEnderecoOnline() {
+            const tipo = document.querySelector('input[name="tipo-pedido-online"]:checked').value;
+            const enderecoGroup = document.getElementById('endereco-group-online');
+            const enderecoInput = document.getElementById('endereco-online');
+            
+            if (tipo === 'entrega') {
+                enderecoGroup.style.display = 'block';
+                enderecoInput.required = true;
+            } else {
+                enderecoGroup.style.display = 'none';
+                enderecoInput.required = false;
+                enderecoInput.value = '';
+            }
+        }
+
+        // Formatar telefone
+        function formatarTelefoneOnline(input) {
+            let value = input.value.replace(/\D/g, '');
+            if (value.length <= 11) {
+                if (value.length <= 10) {
+                    value = value.replace(/^(\d{2})(\d{4})(\d{4}).*/, '($1) $2-$3');
+                } else {
+                    value = value.replace(/^(\d{2})(\d{5})(\d{4}).*/, '($1) $2-$3');
+                }
+            }
+            input.value = value;
+        }
+
+        // Limpar pedido online
+        function limparPedidoOnline() {
+            if (confirm('Deseja limpar todos os itens do pedido?')) {
+                itensSelecionadosOnline = {};
+                document.getElementById('pedido-online-form').reset();
+                toggleEnderecoOnline();
+                atualizarInterfaceOnline();
+                
+                const cardapio = dataManager.getCardapio();
+                cardapio.forEach(produto => {
+                    const qtdElement = document.getElementById(`qtd-online-${produto.id}`);
+                    if (qtdElement) qtdElement.textContent = '0';
+                });
+            }
+        }
+
+        // Submeter formulário online
+        document.getElementById('pedido-online-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const itens = Object.values(itensSelecionadosOnline).filter(item => item.quantidade > 0);
+            
+            if (itens.length === 0) {
+                return;
+            }
+
+            const tipo = document.querySelector('input[name="tipo-pedido-online"]:checked').value;
+            const endereco = tipo === 'entrega' ? document.getElementById('endereco-online').value : null;
+
+            if (tipo === 'entrega' && !endereco) {
+                return;
+            }
+
+            // Preparar itens do pedido no formato correto
+            const itensPedido = itens.map(item => ({
+                produtoId: item.produtoId,
+                nome: item.nome,
+                quantidade: Math.max(1, Math.floor(parseInt(item.quantidade) || 1)),
+                preco: parseFloat(item.preco) || 0
+            }));
+
+            // Criar pedido diretamente (sem passar pelo carrinho)
+            const pedido = {
+                cliente: document.getElementById('nome-cliente-online').value,
+                telefone: document.getElementById('telefone-cliente-online').value,
+                tipo: tipo,
+                endereco: endereco,
+                itens: itensPedido,
+                observacoes: document.getElementById('observacoes-online').value,
+                pagamento: document.querySelector('input[name="pagamento-online"]:checked').value,
+                tipoVenda: 'online' // Identificar que foi criado via pedido online
+            };
+
+            // Criar o pedido diretamente
+            const novoPedido = dataManager.adicionarPedido(pedido);
+
+            // Limpar formulário e itens selecionados
+            itensSelecionadosOnline = {};
+            document.getElementById('pedido-online-form').reset();
+            toggleEnderecoOnline();
+            atualizarInterfaceOnline();
+            
+            // Limpar quantidades dos produtos no modal
+            const cardapio = dataManager.getCardapio();
+            cardapio.forEach(produto => {
+                const qtdElement = document.getElementById(`qtd-online-${produto.id}`);
+                if (qtdElement) qtdElement.textContent = '0';
+            });
+
+            // Fechar modal
+            fecharModalCliente();
+        });
+
+        // Fechar modal do cliente
+        function fecharModalCliente() {
+            const modal = document.getElementById('modal-cliente-online');
+            modal.classList.remove('active');
+        }
+
+        // --- Modal Selecionar Entregador (Enviar Pedido) ---
+        let pedidoIdParaEnviar = null;
+
+        function carregarEntregadoresModal() {
+            let list = [];
+            try {
+                list = JSON.parse(localStorage.getItem('peddy_entregadores') || '[]');
+                if (!Array.isArray(list)) list = [];
+            } catch {
+                list = [];
+            }
+            const vazio = document.getElementById('modal-entregador-vazio');
+            const lista = document.getElementById('modal-entregador-lista');
+            if (list.length === 0) {
+                vazio.style.display = 'block';
+                lista.style.display = 'none';
+                lista.innerHTML = '';
+                return;
+            }
+            vazio.style.display = 'none';
+            lista.style.display = 'flex';
+            let alterado = false;
+            list = list.map((e, i) => {
+                if (!e.id) {
+                    alterado = true;
+                    return { ...e, id: 'ENT' + Date.now() + '-' + i };
+                }
+                return e;
+            });
+            if (alterado) localStorage.setItem('peddy_entregadores', JSON.stringify(list));
+            lista.innerHTML = list.map(ent => `
+                <div class="card" style="padding: 1rem; display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <strong>${ent.nome}</strong>
+                        <div style="color: var(--text-light); font-size: 0.875rem;">Placa: ${ent.placa}</div>
+                    </div>
+                    <button type="button" class="btn btn-primary btn-small" onclick="atribuirPedidoEntregador('${ent.id}')">Atribuir</button>
+                </div>
+            `).join('');
+        }
+
+        function abrirModalEnviarPedido() {
+            if (mesaAberta !== null) {
+                alert('Em mesa, use "Finalizar Venda" para fechar. Enviar é apenas para pedidos de entrega.');
+                return;
+            }
+            pedidoIdParaEnviar = null;
+
+            if (pedidoIdCarregado !== null) {
+                const p = dataManager.getPedido(pedidoIdCarregado);
+                if (p) {
+                    if (p.status === 'finalizado' || p.status === 'entregue' || p.status === 'retirado') {
+                        alert('Este pedido já foi finalizado. Carregue outro pedido para enviar.');
+                        return;
+                    }
+                    pedidoIdParaEnviar = pedidoIdCarregado;
+                }
+            }
+
+            if (!pedidoIdParaEnviar) {
+                const itens = Object.values(carrinho).filter(item => {
+                    const qtd = Math.floor(parseInt(item.quantidade) || 0);
+                    return qtd > 0;
+                });
+                if (itens.length === 0) {
+                    alert('Adicione itens ao carrinho ou carregue um pedido para enviar.');
+                    return;
+                }
+                if (!tipoVendaSelecionado || (tipoVendaSelecionado !== 'balcao' && tipoVendaSelecionado !== 'online')) {
+                    alert('Selecione o tipo de venda (Balcão ou Online) antes de enviar.');
+                    return;
+                }
+                if (tipoVendaSelecionado === 'balcao') {
+                    const nome = document.getElementById('nome-cliente-balcao').value.trim();
+                    if (!nome) {
+                        alert('Digite o nome do cliente (Balcão).');
+                        return;
+                    }
+                }
+                if (tipoVendaSelecionado === 'online' && (!window.dadosClienteOnline || !window.dadosClienteOnline.nome)) {
+                    alert('Preencha os dados do cliente no modal Online antes de enviar.');
+                    return;
+                }
+
+                const itensValidos = Object.values(carrinho)
+                    .filter(item => item.quantidade > 0)
+                    .map(item => ({
+                        produtoId: item.produtoId,
+                        nome: item.nome,
+                        quantidade: Math.max(1, Math.floor(parseInt(item.quantidade) || 1)),
+                        preco: parseFloat(item.preco) || 0
+                    }));
+                if (itensValidos.length === 0) return;
+
+                let nomeCliente = 'Cliente PDV';
+                let numeroPedido = null;
+                let telefoneCliente = '(11) 0000-0000';
+                let tipoPedido = 'retirada';
+                let enderecoPedido = null;
+                let observacoesPedido = '';
+
+                if (tipoVendaSelecionado === 'balcao') {
+                    nomeCliente = document.getElementById('nome-cliente-balcao').value.trim();
+                    numeroPedido = document.getElementById('numero-pedido-balcao').value;
+                } else if (tipoVendaSelecionado === 'online' && window.dadosClienteOnline) {
+                    nomeCliente = window.dadosClienteOnline.nome;
+                    telefoneCliente = window.dadosClienteOnline.telefone || telefoneCliente;
+                    tipoPedido = window.dadosClienteOnline.tipo || 'entrega';
+                    enderecoPedido = window.dadosClienteOnline.endereco || null;
+                    observacoesPedido = window.dadosClienteOnline.observacoes || '';
+                }
+
+                const pedido = {
+                    cliente: nomeCliente,
+                    telefone: telefoneCliente,
+                    tipo: tipoPedido,
+                    endereco: enderecoPedido,
+                    itens: itensValidos,
+                    observacoes: observacoesPedido,
+                    pagamento: null,
+                    numeroPedidoBalcao: numeroPedido || null,
+                    tipoVenda: tipoVendaSelecionado,
+                    origem: 'pdv'
+                };
+                const novo = dataManager.adicionarPedido(pedido);
+                pedidoIdParaEnviar = novo.id;
+
+                carrinho = {};
+                pedidoIdCarregado = null;
+                tipoVendaSelecionado = '';
+                document.getElementById('tipo-venda-pdv').value = '';
+                document.getElementById('campos-balcao').style.display = 'none';
+                document.getElementById('numero-pedido-balcao').value = '';
+                document.getElementById('nome-cliente-balcao').value = '';
+                window.dadosClienteOnline = null;
+                document.querySelectorAll('[id^="btn-tipo-"]').forEach(btn => {
+                    btn.classList.remove('btn-primary');
+                    btn.classList.add('btn-secondary');
+                });
+                atualizarCarrinho();
+                if (typeof websocketSim !== 'undefined') websocketSim.simularNovoPedido(novo);
+            }
+
+            if (!pedidoIdParaEnviar) return;
+
+            carregarEntregadoresModal();
+            document.getElementById('modal-entregador').classList.add('active');
+        }
+
+        function fecharModalEntregador() {
+            document.getElementById('modal-entregador').classList.remove('active');
+            pedidoIdParaEnviar = null;
+        }
+
+        function abrirModalAvisoComanda() {
+            document.getElementById('modal-aviso-comanda').classList.add('active');
+        }
+
+        function fecharModalAvisoComanda() {
+            document.getElementById('modal-aviso-comanda').classList.remove('active');
+        }
+
+        function abrirModalAvisoNaoImpresso(pedidoId, aoFinalizar) {
+            const pedido = dataManager.getPedido(pedidoId);
+            const texto = document.getElementById('modal-aviso-nao-impresso-texto');
+            if (pedido) {
+                texto.textContent = 'O pedido ' + pedidoId + ' ainda não foi impresso. Deseja finalizar mesmo assim?';
+            } else {
+                texto.textContent = 'Este pedido ainda não foi impresso. Deseja finalizar mesmo assim?';
+            }
+            finalizarAposConfirmacaoImpressao = { pedidoId, aoFinalizar };
+            document.getElementById('modal-aviso-nao-impresso').classList.add('active');
+        }
+
+        function fecharModalAvisoNaoImpresso() {
+            document.getElementById('modal-aviso-nao-impresso').classList.remove('active');
+            finalizarAposConfirmacaoImpressao = null;
+        }
+
+        function confirmarFinalizarSemImpressao() {
+            if (!finalizarAposConfirmacaoImpressao) return;
+            const { pedidoId, aoFinalizar } = finalizarAposConfirmacaoImpressao;
+            fecharModalAvisoNaoImpresso();
+            if (aoFinalizar) aoFinalizar();
+        }
+
+        function fecharModalDetalhesPedido() {
+            document.getElementById('modal-detalhes-pedido').classList.remove('active');
+        }
+
+        function abrirModalCancelarPedido() {
+            const texto = document.getElementById('modal-cancelar-texto');
+            if (mesaAberta !== null) {
+                texto.textContent = 'Deseja realmente cancelar todos os pedidos da mesa ' + mesaAberta + '?';
+                document.getElementById('modal-cancelar-pedido').classList.add('active');
+                return;
+            }
+            if (pedidoIdCarregado !== null) {
+                texto.textContent = 'Deseja realmente cancelar o pedido ' + pedidoIdCarregado + '?';
+                document.getElementById('modal-cancelar-pedido').classList.add('active');
+                return;
+            }
+            alert('Carregue um pedido no carrinho (clique em um pedido na lista ou pesquise pelo número) para poder cancelá-lo.');
+        }
+
+        function fecharModalCancelarPedido() {
+            document.getElementById('modal-cancelar-pedido').classList.remove('active');
+        }
+
+        function confirmarCancelarPedido() {
+            fecharModalCancelarPedido();
+            if (mesaAberta !== null) {
+                const pedidosMesa = dataManager.getPedidos().filter(p =>
+                    p.numeroMesa === mesaAberta &&
+                    p.status !== 'finalizado' && p.status !== 'entregue' && p.status !== 'retirado'
+                );
+                pedidosMesa.forEach(p => dataManager.cancelarPedido(p.id));
+                sairDaComandaMesa();
+                carregarPedidosPdv();
+                carregarEntregadoresPdv();
+                return;
+            }
+            if (pedidoIdCarregado === null) return;
+            const id = pedidoIdCarregado;
+            dataManager.cancelarPedido(id);
+            carrinho = {};
+            pedidoIdCarregado = null;
+            tipoVendaSelecionado = '';
+            document.getElementById('tipo-venda-pdv').value = '';
+            document.getElementById('campos-balcao').style.display = 'none';
+            document.getElementById('numero-pedido-balcao').value = '';
+            document.getElementById('nome-cliente-balcao').value = '';
+            window.dadosClienteOnline = null;
+            document.querySelectorAll('[id^="btn-tipo-"]').forEach(btn => {
+                btn.classList.remove('btn-primary');
+                btn.classList.add('btn-secondary');
+            });
+            atualizarCarrinho();
+            carregarPedidosPdv();
+            carregarEntregadoresPdv();
+        }
+
+        let finalizarAposPagamento = null;
+        let finalizarAposTroco = null;
+        let pagamentosDivididos = null; // { pedidoIds, aoConfirmar, total, numPessoas, pagamentoAtual, pagamentos }
+        let finalizarAposConfirmacaoImpressao = null; // { pedidoIds, aoFinalizar }
+
+        function totalDePedidos(pedidoIds) {
+            let t = 0;
+            const ids = Array.isArray(pedidoIds) ? pedidoIds : [pedidoIds];
+            ids.forEach(id => {
+                const p = dataManager.getPedido(id);
+                if (!p || !p.itens) return;
+                p.itens.forEach(i => {
+                    t += (parseFloat(i.preco) || 0) * (Math.floor(parseInt(i.quantidade) || 0));
+                });
+            });
+            return t;
+        }
+
+        function abrirModalPagamentoParaFinalizar(pedidoIds, aoConfirmar, totalOpcional) {
+            const ids = Array.isArray(pedidoIds) ? pedidoIds : [pedidoIds];
+            
+            // Verificar se algum pedido não foi impresso
+            const pedidosNaoImpressos = ids.filter(id => {
+                const p = dataManager.getPedido(id);
+                return p && p.impresso !== true;
+            });
+            
+            if (pedidosNaoImpressos.length > 0) {
+                // Mostrar aviso para o primeiro pedido não impresso
+                const primeiroNaoImpresso = pedidosNaoImpressos[0];
+                abrirModalAvisoNaoImpresso(primeiroNaoImpresso, () => {
+                    // Após confirmar, abrir modal de pagamento normalmente
+                    const total = totalOpcional != null ? totalOpcional : totalDePedidos(ids);
+                    finalizarAposPagamento = { pedidoIds: ids, aoConfirmar, total };
+                    document.querySelector('input[name="pagamento-finalizar"][value="Pix"]').checked = true;
+                    document.getElementById('modal-pagamento-finalizar').classList.add('active');
+                    // Resetar divisão de conta
+                    document.getElementById('dividir-conta-section').style.display = 'none';
+                    document.getElementById('dividir-conta-pessoas').value = '2';
+                    calcularDivisaoConta();
+                });
+                return;
+            }
+            
+            // Todos os pedidos foram impressos - abrir modal normalmente
+            const total = totalOpcional != null ? totalOpcional : totalDePedidos(ids);
+            finalizarAposPagamento = { pedidoIds: ids, aoConfirmar, total };
+            document.querySelector('input[name="pagamento-finalizar"][value="Pix"]').checked = true;
+            document.getElementById('modal-pagamento-finalizar').classList.add('active');
+            // Resetar divisão de conta
+            document.getElementById('dividir-conta-section').style.display = 'none';
+            document.getElementById('dividir-conta-pessoas').value = '2';
+            calcularDivisaoConta();
+        }
+
+        function fecharModalPagamentoFinalizar() {
+            document.getElementById('modal-pagamento-finalizar').classList.remove('active');
+            finalizarAposPagamento = null;
+            // Ocultar seção de divisão
+            document.getElementById('dividir-conta-section').style.display = 'none';
+        }
+
+        function toggleDividirConta() {
+            const section = document.getElementById('dividir-conta-section');
+            const btnConfirmar = document.getElementById('btn-confirmar-pagamento');
+            const isVisible = section.style.display !== 'none';
+            section.style.display = isVisible ? 'none' : 'block';
+            if (!isVisible) {
+                calcularDivisaoConta();
+                setTimeout(() => document.getElementById('dividir-conta-pessoas').focus(), 100);
+            } else {
+                // Quando ocultar, restaurar texto do botão
+                if (btnConfirmar) btnConfirmar.textContent = 'Confirmar e Finalizar';
+            }
+        }
+
+        function calcularDivisaoConta() {
+            if (!finalizarAposPagamento) return;
+            const total = finalizarAposPagamento.total;
+            const pessoasInput = document.getElementById('dividir-conta-pessoas');
+            const numPessoas = parseInt(pessoasInput.value) || 1;
+            if (numPessoas < 1) {
+                pessoasInput.value = '1';
+                return;
+            }
+            const valorPorPessoa = total / numPessoas;
+            document.getElementById('dividir-conta-total').textContent = 'R$ ' + total.toFixed(2).replace('.', ',');
+            document.getElementById('dividir-conta-por-pessoa').textContent = 'R$ ' + valorPorPessoa.toFixed(2).replace('.', ',');
+            
+            // Atualizar texto do botão se divisão estiver visível
+            const section = document.getElementById('dividir-conta-section');
+            const btnConfirmar = document.getElementById('btn-confirmar-pagamento');
+            if (section && btnConfirmar) {
+                if (section.style.display !== 'none' && numPessoas > 1) {
+                    btnConfirmar.textContent = 'Começar Pagamento';
+                } else {
+                    btnConfirmar.textContent = 'Confirmar e Finalizar';
+                }
+            }
+        }
+
+        function confirmarPagamentoFinalizar() {
+            if (!finalizarAposPagamento) return;
+            
+            // Verificar se a conta está dividida
+            const section = document.getElementById('dividir-conta-section');
+            const pessoasInput = document.getElementById('dividir-conta-pessoas');
+            const numPessoas = parseInt(pessoasInput.value) || 1;
+            const isDividida = section && section.style.display !== 'none' && numPessoas > 1;
+            
+            if (isDividida) {
+                // Iniciar fluxo de pagamentos divididos
+                const total = finalizarAposPagamento.total;
+                const valorPorPessoa = total / numPessoas;
+                pagamentosDivididos = {
+                    pedidoIds: finalizarAposPagamento.pedidoIds,
+                    aoConfirmar: finalizarAposPagamento.aoConfirmar,
+                    total: total,
+                    numPessoas: numPessoas,
+                    valorPorPessoa: valorPorPessoa,
+                    pagamentoAtual: 1,
+                    pagamentos: []
+                };
+                finalizarAposPagamento = null;
+                document.getElementById('modal-pagamento-finalizar').classList.remove('active');
+                abrirModalPagamentoIndividual();
+                return;
+            }
+            
+            // Fluxo normal (não dividido)
+            const forma = document.querySelector('input[name="pagamento-finalizar"]:checked');
+            const pagamento = forma ? forma.value : 'Pix';
+
+            if (pagamento === 'Dinheiro') {
+                document.getElementById('modal-pagamento-finalizar').classList.remove('active');
+                finalizarAposTroco = {
+                    pedidoIds: finalizarAposPagamento.pedidoIds,
+                    aoConfirmar: finalizarAposPagamento.aoConfirmar,
+                    total: finalizarAposPagamento.total
+                };
+                finalizarAposPagamento = null;
+                abrirModalTroco();
+                return;
+            }
+
+            finalizarAposPagamento.pedidoIds.forEach(id => {
+                const p = dataManager.getPedido(id);
+                if (p) p.pagamento = pagamento;
+            });
+            const aoConfirmar = finalizarAposPagamento.aoConfirmar;
+            finalizarAposPagamento = null;
+            document.getElementById('modal-pagamento-finalizar').classList.remove('active');
+            aoConfirmar(pagamento);
+        }
+
+        function abrirModalPagamentoIndividual() {
+            if (!pagamentosDivididos) return;
+            const { pagamentoAtual, numPessoas, valorPorPessoa } = pagamentosDivididos;
+            document.getElementById('pagamento-individual-numero').textContent = pagamentoAtual + ' pagamento';
+            document.getElementById('pagamento-individual-valor').textContent = 'R$ ' + valorPorPessoa.toFixed(2).replace('.', ',');
+            document.querySelector('input[name="pagamento-individual"][value="Pix"]').checked = true;
+            document.getElementById('modal-pagamento-individual').classList.add('active');
+        }
+
+        function fecharModalPagamentoIndividual() {
+            document.getElementById('modal-pagamento-individual').classList.remove('active');
+            pagamentosDivididos = null;
+        }
+
+        function finalizarPagamentoIndividual() {
+            if (!pagamentosDivididos) {
+                console.error('pagamentosDivididos não está definido');
+                return;
+            }
+            const forma = document.querySelector('input[name="pagamento-individual"]:checked');
+            const pagamento = forma ? forma.value : 'Pix';
+            
+            // Se for dinheiro, abrir modal de troco primeiro
+            if (pagamento === 'Dinheiro') {
+                document.getElementById('modal-pagamento-individual').classList.remove('active');
+                finalizarAposTroco = {
+                    pedidoIds: [],
+                    aoConfirmar: () => {
+                        // Após confirmar troco, registrar pagamento e continuar
+                        if (!pagamentosDivididos) return;
+                        pagamentosDivididos.pagamentos.push({
+                            numero: pagamentosDivididos.pagamentoAtual,
+                            valor: pagamentosDivididos.valorPorPessoa,
+                            forma: pagamento
+                        });
+                        processarProximoPagamentoIndividual();
+                    },
+                    total: pagamentosDivididos.valorPorPessoa,
+                    isDividido: true
+                };
+                abrirModalTroco();
+                return;
+            }
+            
+            // Registrar pagamento
+            pagamentosDivididos.pagamentos.push({
+                numero: pagamentosDivididos.pagamentoAtual,
+                valor: pagamentosDivididos.valorPorPessoa,
+                forma: pagamento
+            });
+            
+            // Fechar modal antes de processar próximo
+            document.getElementById('modal-pagamento-individual').classList.remove('active');
+            
+            // Processar próximo pagamento (ou finalizar se for o último)
+            setTimeout(() => {
+                processarProximoPagamentoIndividual();
+            }, 100);
+        }
+
+        function processarProximoPagamentoIndividual() {
+            if (!pagamentosDivididos) return;
+            
+            // Verificar se há mais pagamentos
+            if (pagamentosDivididos.pagamentoAtual < pagamentosDivididos.numPessoas) {
+                // Próximo pagamento
+                pagamentosDivididos.pagamentoAtual++;
+                document.getElementById('modal-pagamento-individual').classList.remove('active');
+                setTimeout(() => abrirModalPagamentoIndividual(), 300);
+            } else {
+                // Todos os pagamentos concluídos
+                // Fechar modal primeiro
+                document.getElementById('modal-pagamento-individual').classList.remove('active');
+                
+                // Aplicar forma de pagamento principal (usar a primeira ou mais comum)
+                const formaPrincipal = pagamentosDivididos.pagamentos.length > 0 
+                    ? pagamentosDivididos.pagamentos[0].forma 
+                    : 'Pix';
+                pagamentosDivididos.pedidoIds.forEach(id => {
+                    const p = dataManager.getPedido(id);
+                    if (p) {
+                        p.pagamento = formaPrincipal;
+                        // Salvar detalhes dos pagamentos divididos
+                        if (!p.pagamentosDivididos) p.pagamentosDivididos = pagamentosDivididos.pagamentos;
+                    }
+                });
+                const aoConfirmar = pagamentosDivididos.aoConfirmar;
+                const tempPagamentos = pagamentosDivididos;
+                pagamentosDivididos = null;
+                // Salvar dados antes de finalizar
+                dataManager.saveData();
+                aoConfirmar(formaPrincipal);
+            }
+        }
+
+        function abrirModalTroco() {
+            if (!finalizarAposTroco) return;
+            const total = finalizarAposTroco.total;
+            document.getElementById('modal-troco-total').textContent = 'R$ ' + total.toFixed(2).replace('.', ',');
+            document.getElementById('modal-troco-recebido').value = '';
+            document.getElementById('modal-troco-valor').textContent = 'R$ 0,00';
+            document.getElementById('modal-troco-insuficiente').style.display = 'block';
+            document.getElementById('btn-modal-troco-finalizar').disabled = true;
+            document.getElementById('modal-troco').classList.add('active');
+            setTimeout(() => document.getElementById('modal-troco-recebido').focus(), 100);
+        }
+
+        function fecharModalTroco() {
+            document.getElementById('modal-troco').classList.remove('active');
+            finalizarAposTroco = null;
+        }
+
+        function atualizarTrocoExibido() {
+            if (!finalizarAposTroco) return;
+            const inp = document.getElementById('modal-troco-recebido');
+            const recebido = parseFloat(String(inp.value).replace(',', '.')) || 0;
+            const total = finalizarAposTroco.total;
+            const troco = Math.max(0, recebido - total);
+            document.getElementById('modal-troco-valor').textContent = 'R$ ' + troco.toFixed(2).replace('.', ',');
+            const insuf = document.getElementById('modal-troco-insuficiente');
+            const btn = document.getElementById('btn-modal-troco-finalizar');
+            if (recebido < total) {
+                insuf.style.display = 'block';
+                if (btn) btn.disabled = true;
+            } else {
+                insuf.style.display = 'none';
+                if (btn) btn.disabled = false;
+            }
+        }
+
+        function confirmarTrocoFinalizar() {
+            if (!finalizarAposTroco) return;
+            const inp = document.getElementById('modal-troco-recebido');
+            const recebido = parseFloat(String(inp.value).replace(',', '.')) || 0;
+            if (recebido < finalizarAposTroco.total) return;
+            
+            // Se for pagamento dividido, apenas chamar o callback (que já registra o pagamento)
+            if (finalizarAposTroco.isDividido) {
+                const aoConfirmar = finalizarAposTroco.aoConfirmar;
+                finalizarAposTroco = null;
+                document.getElementById('modal-troco').classList.remove('active');
+                aoConfirmar();
+                return;
+            }
+            
+            // Fluxo normal (não dividido)
+            finalizarAposTroco.pedidoIds.forEach(id => {
+                const p = dataManager.getPedido(id);
+                if (p) p.pagamento = 'Dinheiro';
+            });
+            const aoConfirmar = finalizarAposTroco.aoConfirmar;
+            finalizarAposTroco = null;
+            document.getElementById('modal-troco').classList.remove('active');
+            aoConfirmar('Dinheiro');
+        }
+
+        function abrirModalDetalhesPedido() {
+            const vazio = document.getElementById('modal-detalhes-vazio');
+            const conteudo = document.getElementById('modal-detalhes-conteudo');
+            let pedidos = [];
+            const inputPedido = document.getElementById('pesquisa-pedido');
+            const pedidoIdDigitado = (inputPedido && inputPedido.value.trim()) ? inputPedido.value.trim().toUpperCase() : '';
+
+            if (pedidoIdCarregado) {
+                const p = dataManager.getPedido(pedidoIdCarregado);
+                if (p) pedidos = [p];
+            } else if (pedidoIdDigitado) {
+                const p = dataManager.getPedido(pedidoIdDigitado);
+                if (p) pedidos = [p];
+            } else if (mesaAberta !== null) {
+                pedidos = dataManager.getPedidos().filter(p =>
+                    p.numeroMesa === mesaAberta &&
+                    (p.status === 'recebido' || p.status === 'preparando' || p.status === 'pronto')
+                );
+            }
+
+            if (pedidos.length === 0) {
+                vazio.style.display = 'block';
+                conteudo.style.display = 'none';
+                conteudo.innerHTML = '';
+            } else {
+                vazio.style.display = 'none';
+                conteudo.style.display = 'block';
+                conteudo.innerHTML = pedidos.map(p => {
+                    const total = (p.itens || []).reduce((s, i) => s + (i.preco * (i.quantidade || 1)), 0);
+                    const localEntrega = (p.tipo === 'entrega' && p.endereco) ? p.endereco : 'Retirada no local';
+                    let origemTexto = 'Online';
+                    if (p.origem === 'cliente') origemTexto = 'Online (página cliente)';
+                    else if (p.tipoVenda === 'mesa' || p.numeroMesa) origemTexto = 'Mesa';
+                    else if (p.tipoVenda === 'balcao' || p.numeroPedidoBalcao) origemTexto = 'Balcão';
+                    const itensHtml = (p.itens || []).map(i => {
+                        const qtd = Math.max(1, Math.floor(i.quantidade || 1));
+                        const sub = (i.preco || 0) * qtd;
+                        return `<tr><td>${i.nome || '—'}</td><td style="text-align: center;">${qtd}</td><td>R$ ${(i.preco || 0).toFixed(2).replace('.', ',')}</td><td>R$ ${sub.toFixed(2).replace('.', ',')}</td></tr>`;
+                    }).join('');
+                    return `
+                        <div class="card" style="margin-bottom: 1rem; padding: 1rem;">
+                            <div style="display: grid; gap: 0.5rem;">
+                                <div><strong>Nº Pedido:</strong> ${p.id}</div>
+                                <div><strong>Origem:</strong> ${origemTexto}</div>
+                                <div><strong>Nome:</strong> ${p.cliente || '—'}</div>
+                                <div><strong>Telefone:</strong> ${p.telefone || '—'}</div>
+                                <div><strong>Local de entrega:</strong> ${localEntrega}</div>
+                                <div><strong>Pagamento:</strong> ${p.pagamento || '—'}</div>
+                            </div>
+                            <div style="margin-top: 1rem;">
+                                <strong>Itens:</strong>
+                                <table style="width: 100%; margin-top: 0.5rem; border-collapse: collapse; font-size: 0.875rem;">
+                                    <thead><tr style="border-bottom: 2px solid var(--border-color);"><th style="text-align: left;">Item</th><th style="text-align: center;">Qtd</th><th>Preço</th><th>Subtotal</th></tr></thead>
+                                    <tbody>${itensHtml}</tbody>
+                                </table>
+                                <div style="margin-top: 0.75rem; text-align: right; font-weight: 600; font-size: 1.1rem;">Total: R$ ${total.toFixed(2).replace('.', ',')}</div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            document.getElementById('modal-detalhes-pedido').classList.add('active');
+        }
+
+        function atribuirPedidoEntregador(entregadorId) {
+            if (!pedidoIdParaEnviar || !entregadorId) return;
+            dataManager.atribuirEntregador(pedidoIdParaEnviar, entregadorId);
+            if (pedidoIdCarregado === pedidoIdParaEnviar) {
+                carrinho = {};
+                pedidoIdCarregado = null;
+                tipoVendaSelecionado = '';
+                document.getElementById('tipo-venda-pdv').value = '';
+                document.getElementById('campos-balcao').style.display = 'none';
+                document.getElementById('numero-pedido-balcao').value = '';
+                document.getElementById('nome-cliente-balcao').value = '';
+                window.dadosClienteOnline = null;
+                document.querySelectorAll('[id^="btn-tipo-"]').forEach(btn => {
+                    btn.classList.remove('btn-primary');
+                    btn.classList.add('btn-secondary');
+                });
+                atualizarCarrinho();
+            }
+            fecharModalEntregador();
+            carregarPedidosPdv();
+            carregarEntregadoresPdv();
+        }
+
+        function finalizarPedidoPdv(pedidoId) {
+            if (!pedidoId) return;
+            const pedido = dataManager.getPedido(pedidoId);
+            if (!pedido) return;
+            
+            // Verificar se o pedido foi impresso
+            if (pedido.impresso !== true) {
+                abrirModalAvisoNaoImpresso(pedidoId, () => {
+                    // Após confirmar, continuar com o fluxo normal de finalização
+                    if (dataManager.precisaModalPagamento(pedido)) {
+                        abrirModalPagamentoParaFinalizar(pedidoId, () => {
+                            dataManager.finalizarPedido(pedidoId);
+                            if (pedidoIdCarregado === pedidoId) limparAposFinalizarVenda();
+                            carregarPedidosPdv();
+                            carregarEntregadoresPdv();
+                        });
+                    } else {
+                        dataManager.finalizarPedido(pedidoId);
+                        if (pedidoIdCarregado === pedidoId) limparAposFinalizarVenda();
+                        carregarPedidosPdv();
+                        carregarEntregadoresPdv();
+                    }
+                });
+                return;
+            }
+            
+            // Pedido já foi impresso - continuar normalmente
+            if (dataManager.precisaModalPagamento(pedido)) {
+                abrirModalPagamentoParaFinalizar(pedidoId, () => {
+                    dataManager.finalizarPedido(pedidoId);
+                    if (pedidoIdCarregado === pedidoId) limparAposFinalizarVenda();
+                    carregarPedidosPdv();
+                    carregarEntregadoresPdv();
+                });
+            } else {
+                dataManager.finalizarPedido(pedidoId);
+                if (pedidoIdCarregado === pedidoId) limparAposFinalizarVenda();
+                carregarPedidosPdv();
+                carregarEntregadoresPdv();
+            }
+        }
+
+        // Selecionar forma de pagamento
+        function selecionarPagamento(forma) {
+            formaPagamentoSelecionada = forma;
+        }
+
+        // Selecionar tipo de venda
+        function selecionarTipoVenda(tipo) {
+            if (tipo === 'balcao' || tipo === 'online') {
+                if (mesaAberta !== null) {
+                    if (isMesaDirty()) {
+                        abrirModalAvisoComanda();
+                        return;
+                    }
+                    sairDaComandaMesa();
+                }
+            }
+
+            tipoVendaSelecionado = tipo;
+            
+            document.querySelectorAll('[id^="btn-tipo-"]').forEach(btn => {
+                btn.classList.remove('btn-primary');
+                btn.classList.add('btn-secondary');
+            });
+            
+            const btnSelecionado = document.getElementById(`btn-tipo-${tipo}`);
+            if (btnSelecionado) {
+                btnSelecionado.classList.remove('btn-secondary');
+                btnSelecionado.classList.add('btn-primary');
+            }
+            
+            const camposBalcao = document.getElementById('campos-balcao');
+            if (tipo === 'balcao') {
+                camposBalcao.style.display = 'block';
+                document.getElementById('numero-pedido-balcao').value = gerarCodigoPedidoBalcao();
+                document.getElementById('nome-cliente-balcao').value = '';
+            } else if (tipo === 'online') {
+                camposBalcao.style.display = 'none';
+                abrirModalCliente();
+            } else {
+                camposBalcao.style.display = 'none';
+                document.getElementById('numero-pedido-balcao').value = '';
+                document.getElementById('nome-cliente-balcao').value = '';
+            }
+            
+            document.getElementById('tipo-venda-pdv').value = tipo;
+        }
+
+        // Carregar produtos
+        function carregarProdutos(categoria = 'Todas', pesquisa = '') {
+            const cardapio = dataManager.getCardapio();
+            let produtos = categoria === 'Todas' ? cardapio : cardapio.filter(p => p.categoria === categoria);
+            
+            // Aplicar filtro de pesquisa se houver
+            if (pesquisa.trim() !== '') {
+                const termoPesquisa = pesquisa.toLowerCase().trim();
+                produtos = produtos.filter(p => {
+                    const nomeMatch = p.nome.toLowerCase().includes(termoPesquisa);
+                    const codigoMatch = p.id.toString().includes(termoPesquisa);
+                    return nomeMatch || codigoMatch;
+                });
+            }
+            
+            const container = document.getElementById('produtos-pdv-container');
+
+            if (produtos.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: var(--text-light); padding: 2rem;">Nenhum produto encontrado.</p>';
+                return;
+            }
+
+            container.innerHTML = '';
+
+            produtos.forEach(produto => {
+                const produtoCard = document.createElement('div');
+                produtoCard.className = 'produto-pdv-card';
+                produtoCard.onclick = () => adicionarAoCarrinho(produto.id);
+                produtoCard.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
+                        <div class="produto-nome">${produto.nome}</div>
+                        <div style="font-size: 0.75rem; color: var(--text-light); background: var(--light-color); padding: 0.25rem 0.5rem; border-radius: 4px;">
+                            #${produto.id}
+                        </div>
+                    </div>
+                    <div style="font-size: 0.875rem; color: var(--text-light); margin-bottom: 0.5rem;">
+                        ${produto.categoria}
+                    </div>
+                    <div class="produto-preco">R$ ${produto.preco.toFixed(2).replace('.', ',')}</div>
+                    ${produto.descricao ? `<div style="font-size: 0.75rem; color: var(--text-light); margin-top: 0.5rem;">${produto.descricao}</div>` : ''}
+                `;
+                container.appendChild(produtoCard);
+            });
+        }
+
+        // Filtrar produtos por pesquisa
+        function filtrarProdutos() {
+            const pesquisa = document.getElementById('pesquisa-produto').value;
+            pesquisaAtual = pesquisa;
+            carregarProdutos(categoriaAtual, pesquisa);
+        }
+
+        // Limpar pesquisa
+        function limparPesquisa() {
+            document.getElementById('pesquisa-produto').value = '';
+            pesquisaAtual = '';
+            carregarProdutos(categoriaAtual, '');
+        }
+
+        // Carregar categorias nas tabs
+        function carregarCategorias() {
+            const categorias = dataManager.getCategorias().filter(c => c.ativa);
+            const tabsContainer = document.querySelector('.tabs');
+
+            categorias.forEach(categoria => {
+                const tab = document.createElement('button');
+                tab.className = 'tab';
+                tab.id = `tab-${categoria.nome}`;
+                tab.textContent = categoria.nome;
+                tab.onclick = () => filtrarCategoria(categoria.nome);
+                tabsContainer.appendChild(tab);
+            });
+        }
+
+        // Filtrar por categoria
+        function filtrarCategoria(categoria) {
+            // Atualizar tabs ativas
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.getElementById(`tab-${categoria}`).classList.add('active');
+
+            categoriaAtual = categoria;
+            // Carregar produtos mantendo a pesquisa atual
+            carregarProdutos(categoria, pesquisaAtual);
+        }
+
+        // Adicionar ao carrinho
+        function adicionarAoCarrinho(produtoId) {
+            const produto = dataManager.getProduto(produtoId);
+            if (!produto) {
+                console.error('Produto não encontrado:', produtoId);
+                return;
+            }
+
+            // Preservar quantidade impressa se o item já existir no carrinho
+            const quantidadeImpressaExistente = carrinho[produtoId]?.quantidadeImpressa || 0;
+            
+            if (!carrinho[produtoId]) {
+                // Verificar se é mesa e quantas unidades já foram impressas
+                let quantidadeImpressa = 0;
+                if (mesaAberta !== null) {
+                    quantidadeImpressa = dataManager.getQuantidadeImpressaItem(mesaAberta, produtoId);
+                }
+                
+                carrinho[produtoId] = {
+                    produtoId: produto.id,
+                    nome: produto.nome,
+                    quantidade: 0,
+                    preco: produto.preco,
+                    quantidadeImpressa: quantidadeImpressa,
+                    impresso: quantidadeImpressa > 0
+                };
+            } else {
+                // Preservar quantidade impressa existente
+                if (carrinho[produtoId].quantidadeImpressa === undefined) {
+                    // Se não tinha quantidade impressa, verificar agora
+                    if (mesaAberta !== null) {
+                        carrinho[produtoId].quantidadeImpressa = dataManager.getQuantidadeImpressaItem(mesaAberta, produtoId);
+                    } else {
+                        carrinho[produtoId].quantidadeImpressa = 0;
+                    }
+                    carrinho[produtoId].impresso = carrinho[produtoId].quantidadeImpressa > 0;
+                } else {
+                    // Manter a quantidade impressa existente
+                    carrinho[produtoId].quantidadeImpressa = quantidadeImpressaExistente;
+                    carrinho[produtoId].impresso = quantidadeImpressaExistente > 0;
+                }
+            }
+            
+            // Incrementar quantidade
+            carrinho[produtoId].quantidade++;
+            
+            // Garantir que a quantidade seja um número inteiro válido
+            carrinho[produtoId].quantidade = Math.max(1, Math.floor(parseInt(carrinho[produtoId].quantidade) || 1));
+            
+            atualizarCarrinho();
+        }
+
+        // Remover do carrinho
+        function removerDoCarrinho(produtoId) {
+            if (!carrinho[produtoId]) {
+                console.warn('Produto não está no carrinho:', produtoId);
+                return;
+            }
+            
+            // Decrementar quantidade
+            carrinho[produtoId].quantidade--;
+            
+            // Garantir que a quantidade seja um número inteiro válido
+            const novaQuantidade = Math.max(0, Math.floor(parseInt(carrinho[produtoId].quantidade) || 0));
+            
+            // Remover imediatamente se quantidade for 0 ou menor
+            if (novaQuantidade <= 0) {
+                delete carrinho[produtoId];
+            } else {
+                carrinho[produtoId].quantidade = novaQuantidade;
+            }
+            
+            atualizarCarrinho();
+        }
+
+        // Atualizar carrinho
+        function atualizarCarrinho() {
+            // Remover itens com quantidade 0 ou negativa do carrinho
+            Object.keys(carrinho).forEach(produtoId => {
+                const quantidade = Math.floor(parseInt(carrinho[produtoId].quantidade) || 0);
+                if (quantidade <= 0) {
+                    delete carrinho[produtoId];
+                }
+            });
+            
+            const container = document.getElementById('carrinho-itens');
+            const totalElement = document.getElementById('carrinho-total');
+            const btnFinalizar = document.getElementById('btn-finalizar');
+            const btnImprimirPedido = document.getElementById('btn-imprimir-pedido');
+            const btnCriarPedido = document.getElementById('btn-criar-pedido');
+            const btnEnviarPedido = document.getElementById('btn-enviar-pedido');
+            const btnCancelarPedido = document.getElementById('btn-cancelar-pedido');
+            const contador = document.getElementById('carrinho-contador');
+            const itens = Object.values(carrinho).filter(item => {
+                const qtd = Math.floor(parseInt(item.quantidade) || 0);
+                return qtd > 0;
+            });
+
+            // Atualizar contador
+            const totalItens = itens.reduce((sum, item) => sum + item.quantidade, 0);
+            contador.textContent = `${totalItens} ${totalItens === 1 ? 'item' : 'itens'}`;
+
+            if (itens.length === 0) {
+                container.innerHTML = `
+                    <div class="carrinho-vazio">
+                        <div class="carrinho-vazio-icon">🛒</div>
+                        <p>Carrinho vazio</p>
+                        <p style="font-size: 0.875rem; margin-top: 0.5rem;">Clique nos produtos para adicionar</p>
+                    </div>
+                `;
+                totalElement.textContent = 'R$ 0,00';
+                if (btnFinalizar) btnFinalizar.disabled = false;
+                if (btnImprimirPedido) btnImprimirPedido.disabled = false;
+                if (btnEnviarPedido) btnEnviarPedido.disabled = false;
+                if (btnCancelarPedido) btnCancelarPedido.disabled = false;
+                if (btnCriarPedido) btnCriarPedido.disabled = false;
+            } else {
+                // Verificar se é uma mesa para mostrar controles de impressão por item
+                const isMesa = mesaAberta !== null;
+                
+                container.innerHTML = itens.map(item => {
+                    // Garantir que quantidade e preço sejam números válidos (quantidade como inteiro)
+                    const quantidade = Math.max(1, Math.floor(parseInt(item.quantidade) || 1));
+                    const preco = parseFloat(item.preco) || 0;
+                    const subtotal = preco * quantidade;
+                    
+                    // Verificar quantidade impressa (apenas para mesas)
+                    let quantidadeImpressa = 0;
+                    if (isMesa) {
+                        // Verificar primeiro no carrinho (pode ter sido marcado recentemente)
+                        quantidadeImpressa = item.quantidadeImpressa || 0;
+                        // Se não tem no carrinho, buscar no dataManager
+                        if (quantidadeImpressa === 0) {
+                            quantidadeImpressa = dataManager.getQuantidadeImpressaItem(mesaAberta, item.produtoId);
+                        }
+                        // Atualizar o carrinho com o status correto
+                        item.quantidadeImpressa = quantidadeImpressa;
+                        item.impresso = quantidadeImpressa > 0;
+                    }
+                    
+                    // Gerar bolinhas roxas baseado na quantidade impressa
+                    const bolinhasRoxas = quantidadeImpressa > 0 
+                        ? Array(quantidadeImpressa).fill(0).map(() => '<span class="item-impresso-indicador" title="Unidade já impressa">●</span>').join('')
+                        : '';
+                    
+                    return `
+                        <div class="carrinho-item ${quantidadeImpressa > 0 ? 'item-impresso' : ''}">
+                            <div class="carrinho-item-header">
+                                <div class="carrinho-item-info">
+                                    <div class="carrinho-item-nome" style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+                                        ${bolinhasRoxas}
+                                        <span>${item.nome}</span>
+                                    </div>
+                                    <div class="carrinho-item-detalhes">
+                                        R$ ${preco.toFixed(2).replace('.', ',')} × ${quantidade}
+                                    </div>
+                                </div>
+                                <div class="carrinho-item-subtotal">
+                                    R$ ${subtotal.toFixed(2).replace('.', ',')}
+                                </div>
+                            </div>
+                            <div class="carrinho-item-controles">
+                                ${isMesa ? `
+                                    <button class="btn btn-small btn-success" onclick="event.stopPropagation(); imprimirItemMesa(${item.produtoId})" title="Imprimir este item" style="padding: 0.25rem 0.5rem; min-width: auto;">
+                                        🖨️
+                                    </button>
+                                ` : ''}
+                                <button class="btn btn-small btn-danger" onclick="event.stopPropagation(); removerDoCarrinho(${item.produtoId})" title="Remover">
+                                    -
+                                </button>
+                                <span class="carrinho-item-quantidade">${quantidade}</span>
+                                <button class="btn btn-small btn-secondary" onclick="event.stopPropagation(); adicionarAoCarrinho(${item.produtoId})" title="Adicionar">
+                                    +
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+                // Calcular total com quantidades validadas (garantir números inteiros)
+                const total = itens.reduce((sum, item) => {
+                    const quantidade = Math.max(1, Math.floor(parseInt(item.quantidade) || 1));
+                    const preco = parseFloat(item.preco) || 0;
+                    return sum + (preco * quantidade);
+                }, 0);
+                totalElement.textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
+                if (btnFinalizar) btnFinalizar.disabled = false;
+                if (btnImprimirPedido) btnImprimirPedido.disabled = false;
+                if (btnEnviarPedido) btnEnviarPedido.disabled = false;
+                if (btnCancelarPedido) btnCancelarPedido.disabled = false;
+                if (btnCriarPedido) btnCriarPedido.disabled = false;
+            }
+        }
+
+        // Limpar carrinho
+        function limparCarrinho() {
+            if (Object.keys(carrinho).length === 0) return;
+            
+            if (confirm('Deseja limpar o carrinho?')) {
+                carrinho = {};
+                tipoVendaSelecionado = '';
+                document.getElementById('tipo-venda-pdv').value = '';
+                selecionarPagamento('Pix');
+                
+                // Ocultar e limpar campos de balcão
+                document.getElementById('campos-balcao').style.display = 'none';
+                document.getElementById('numero-pedido-balcao').value = '';
+                document.getElementById('nome-cliente-balcao').value = '';
+                
+                // Resetar botões de tipo de venda
+                document.querySelectorAll('[id^="btn-tipo-"]').forEach(btn => {
+                    btn.classList.remove('btn-primary');
+                    btn.classList.add('btn-secondary');
+                });
+                
+                atualizarCarrinho();
+            }
+        }
+
+        // Criar pedido (salvar sem finalizar)
+        function criarPedido() {
+            const itens = Object.values(carrinho)
+                .filter(item => item.quantidade > 0)
+                .map(item => ({
+                    produtoId: item.produtoId,
+                    nome: item.nome,
+                    quantidade: Math.max(1, Math.floor(parseInt(item.quantidade) || 1)),
+                    preco: parseFloat(item.preco) || 0
+                }));
+
+            // Mesa: atualizar comanda existente ou criar nova se não existir
+            if (mesaAberta !== null) {
+                if (itens.length === 0) return;
+                const pedidosMesa = dataManager.getPedidos().filter(p =>
+                    p.numeroMesa === mesaAberta &&
+                    p.status !== 'finalizado' && p.status !== 'entregue' && p.status !== 'retirado'
+                );
+                
+                if (pedidosMesa.length > 0) {
+                    // Atualizar comanda existente (não criar nova)
+                    const agora = new Date();
+                    const dataComandaGravada = agora.toLocaleString('pt-BR', {
+                        day: '2-digit', month: '2-digit', year: 'numeric',
+                        hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
+                    });
+                    
+                    // Atualizar todos os pedidos da mesa com os novos itens
+                    // IMPORTANTE: Preservar quantidadeImpressa de cada item
+                    pedidosMesa.forEach(pedidoExistente => {
+                        // Criar um mapa das quantidades impressas dos itens antigos
+                        const quantidadeImpressaMap = {};
+                        if (pedidoExistente.itens) {
+                            pedidoExistente.itens.forEach(itemAntigo => {
+                                const produtoId = itemAntigo.produtoId;
+                                const quantidadeImpressa = itemAntigo.quantidadeImpressa || 0;
+                                // Se já existe no mapa, somar (caso o mesmo produto apareça múltiplas vezes)
+                                if (quantidadeImpressaMap[produtoId]) {
+                                    quantidadeImpressaMap[produtoId] += quantidadeImpressa;
+                                } else {
+                                    quantidadeImpressaMap[produtoId] = quantidadeImpressa;
+                                }
+                            });
+                        }
+                        
+                        // Aplicar os novos itens, preservando quantidadeImpressa
+                        pedidoExistente.itens = itens.map(itemNovo => {
+                            const produtoId = itemNovo.produtoId;
+                            const quantidadeImpressa = quantidadeImpressaMap[produtoId] || 0;
+                            
+                            // Preservar quantidadeImpressa, mas não pode ser maior que a quantidade atual
+                            const quantidadeAtual = itemNovo.quantidade;
+                            const quantidadeImpressaPreservada = Math.min(quantidadeImpressa, quantidadeAtual);
+                            
+                            return {
+                                ...itemNovo,
+                                quantidadeImpressa: quantidadeImpressaPreservada,
+                                impresso: quantidadeImpressaPreservada > 0
+                            };
+                        });
+                        
+                        pedidoExistente.dataComandaGravada = dataComandaGravada;
+                    });
+                    
+                    // Salvar alterações
+                    dataManager.saveData();
+                    sairDaComandaMesa();
+                    carregarPedidosPdv();
+                    carregarEntregadoresPdv();
+                    return;
+                } else {
+                    // Não há pedidos existentes - criar nova comanda
+                    const agora = new Date();
+                    const dataComandaGravada = agora.toLocaleString('pt-BR', {
+                        day: '2-digit', month: '2-digit', year: 'numeric',
+                        hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
+                    });
+                    const pedido = {
+                        cliente: `Mesa ${mesaAberta}`,
+                        telefone: '(11) 0000-0000',
+                        tipo: 'retirada',
+                        endereco: null,
+                        itens: itens,
+                        observacoes: '',
+                        pagamento: null,
+                        numeroPedidoBalcao: null,
+                        numeroMesa: mesaAberta,
+                        tipoVenda: 'mesa',
+                        origem: 'pdv',
+                        dataComandaGravada: dataComandaGravada
+                    };
+                    const novoPedido = dataManager.adicionarPedido(pedido);
+                    if (typeof websocketSim !== 'undefined') websocketSim.simularNovoPedido(novoPedido);
+                    sairDaComandaMesa();
+                    carregarPedidosPdv();
+                    carregarEntregadoresPdv();
+                    return;
+                }
+            }
+
+            // Balcão / Online
+            if (!tipoVendaSelecionado || (tipoVendaSelecionado !== 'balcao' && tipoVendaSelecionado !== 'online')) {
+                alert('Selecione o tipo de venda: Balcão ou Online.');
+                return;
+            }
+            if (itens.length === 0) {
+                alert('Adicione itens ao carrinho antes de criar o pedido.');
+                return;
+            }
+            
+            // Se há um pedido carregado, atualizar ao invés de criar novo
+            if (pedidoIdCarregado !== null) {
+                const pedidoExistente = dataManager.getPedido(pedidoIdCarregado);
+                if (pedidoExistente) {
+                    // Atualizar pedido existente (não criar novo, não disparar notificação)
+                    let nomeCliente = 'Cliente PDV';
+                    let numeroPedido = null;
+                    if (tipoVendaSelecionado === 'balcao') {
+                        const nomeClienteBalcao = document.getElementById('nome-cliente-balcao').value.trim();
+                        if (!nomeClienteBalcao) {
+                            alert('Digite o nome do cliente (Balcão).');
+                            return;
+                        }
+                        nomeCliente = nomeClienteBalcao;
+                        numeroPedido = document.getElementById('numero-pedido-balcao').value;
+                    } else if (tipoVendaSelecionado === 'online') {
+                        if (!window.dadosClienteOnline || !window.dadosClienteOnline.nome) {
+                            alert('Preencha os dados do cliente no modal Online (nome, telefone, etc.).');
+                            return;
+                        }
+                        nomeCliente = window.dadosClienteOnline.nome;
+                    }
+                    let telefoneCliente = '(11) 0000-0000';
+                    let tipoPedido = tipoVendaSelecionado === 'online' ? 'entrega' : 'retirada';
+                    let enderecoPedido = null;
+                    let observacoesPedido = '';
+                    if (tipoVendaSelecionado === 'online' && window.dadosClienteOnline) {
+                        telefoneCliente = window.dadosClienteOnline.telefone || telefoneCliente;
+                        tipoPedido = window.dadosClienteOnline.tipo || tipoPedido;
+                        enderecoPedido = window.dadosClienteOnline.endereco || null;
+                        observacoesPedido = window.dadosClienteOnline.observacoes || '';
+                    }
+                    
+                    // Atualizar pedido existente
+                    pedidoExistente.cliente = nomeCliente;
+                    pedidoExistente.telefone = telefoneCliente;
+                    pedidoExistente.tipo = tipoPedido;
+                    pedidoExistente.endereco = enderecoPedido;
+                    // Preservar quantidadeImpressa ao atualizar itens
+                    const quantidadeImpressaMap = {};
+                    if (pedidoExistente.itens) {
+                        pedidoExistente.itens.forEach(itemAntigo => {
+                            const produtoId = itemAntigo.produtoId;
+                            const quantidadeImpressa = itemAntigo.quantidadeImpressa || 0;
+                            if (quantidadeImpressaMap[produtoId]) {
+                                quantidadeImpressaMap[produtoId] += quantidadeImpressa;
+                            } else {
+                                quantidadeImpressaMap[produtoId] = quantidadeImpressa;
+                            }
+                        });
+                    }
+                    
+                    // Aplicar os novos itens, preservando quantidadeImpressa
+                    const itensComImpressao = itens.map(itemNovo => {
+                        const produtoId = itemNovo.produtoId;
+                        const quantidadeImpressa = quantidadeImpressaMap[produtoId] || 0;
+                        const quantidadeAtual = itemNovo.quantidade;
+                        const quantidadeImpressaPreservada = Math.min(quantidadeImpressa, quantidadeAtual);
+                        
+                        return {
+                            ...itemNovo,
+                            quantidadeImpressa: quantidadeImpressaPreservada,
+                            impresso: quantidadeImpressaPreservada > 0
+                        };
+                    });
+                    
+                    pedidoExistente.itens = itensComImpressao;
+                    pedidoExistente.observacoes = observacoesPedido;
+                    pedidoExistente.numeroPedidoBalcao = numeroPedido || null;
+                    // Salvar alterações
+                    dataManager.saveData();
+                    atualizarCarrinho();
+                    carregarPedidosPdv();
+                    carregarEntregadoresPdv();
+                    return;
+                }
+            }
+            
+            // Criar novo pedido apenas se não houver pedido carregado
+            let nomeCliente = 'Cliente PDV';
+            let numeroPedido = null;
+            if (tipoVendaSelecionado === 'balcao') {
+                const nomeClienteBalcao = document.getElementById('nome-cliente-balcao').value.trim();
+                if (!nomeClienteBalcao) {
+                    alert('Digite o nome do cliente (Balcão).');
+                    return;
+                }
+                nomeCliente = nomeClienteBalcao;
+                numeroPedido = document.getElementById('numero-pedido-balcao').value;
+            } else if (tipoVendaSelecionado === 'online') {
+                if (!window.dadosClienteOnline || !window.dadosClienteOnline.nome) {
+                    alert('Preencha os dados do cliente no modal Online (nome, telefone, etc.).');
+                    return;
+                }
+                nomeCliente = window.dadosClienteOnline.nome;
+            }
+            let telefoneCliente = '(11) 0000-0000';
+            let tipoPedido = tipoVendaSelecionado === 'online' ? 'entrega' : 'retirada';
+            let enderecoPedido = null;
+            let observacoesPedido = '';
+            if (tipoVendaSelecionado === 'online' && window.dadosClienteOnline) {
+                telefoneCliente = window.dadosClienteOnline.telefone || telefoneCliente;
+                tipoPedido = window.dadosClienteOnline.tipo || tipoPedido;
+                enderecoPedido = window.dadosClienteOnline.endereco || null;
+                observacoesPedido = window.dadosClienteOnline.observacoes || '';
+            }
+            const pedido = {
+                cliente: nomeCliente,
+                telefone: telefoneCliente,
+                tipo: tipoPedido,
+                endereco: enderecoPedido,
+                itens: itens,
+                observacoes: observacoesPedido,
+                pagamento: null,
+                numeroPedidoBalcao: numeroPedido || null,
+                tipoVenda: tipoVendaSelecionado,
+                origem: 'pdv'
+            };
+            const novoPedido = dataManager.adicionarPedido(pedido);
+            pedidoIdCarregado = novoPedido.id;
+            // Só disparar notificação para pedidos realmente novos
+            if (typeof websocketSim !== 'undefined') websocketSim.simularNovoPedido(novoPedido);
+            atualizarCarrinho();
+            carregarPedidosPdv();
+            carregarEntregadoresPdv();
+        }
+
+        function limparAposFinalizarVenda() {
+            carrinho = {};
+            pedidoIdCarregado = null;
+            tipoVendaSelecionado = '';
+            document.getElementById('tipo-venda-pdv').value = '';
+            document.getElementById('campos-balcao').style.display = 'none';
+            document.getElementById('numero-pedido-balcao').value = '';
+            document.getElementById('nome-cliente-balcao').value = '';
+            window.dadosClienteOnline = null;
+            document.querySelectorAll('[id^="btn-tipo-"]').forEach(btn => {
+                btn.classList.remove('btn-primary');
+                btn.classList.add('btn-secondary');
+            });
+            atualizarCarrinho();
+        }
+
+        // Finalizar venda
+        function finalizarVenda() {
+            if (mesaAberta !== null) {
+                fecharComandaMesa();
+                return;
+            }
+            
+            if (pedidoIdCarregado !== null) {
+                const pedido = dataManager.getPedido(pedidoIdCarregado);
+                if (pedido) {
+                    if (pedido.status === 'finalizado' || pedido.status === 'entregue' || pedido.status === 'retirado') {
+                        alert('Este pedido já foi finalizado. Carregue outro pedido ou crie um novo.');
+                        pedidoIdCarregado = null;
+                        atualizarCarrinho();
+                        return;
+                    }
+                    
+                    // Verificar se o pedido foi impresso
+                    if (pedido.impresso !== true) {
+                        abrirModalAvisoNaoImpresso(pedidoIdCarregado, () => {
+                            // Após confirmar, continuar com o fluxo normal de finalização
+                            if (dataManager.precisaModalPagamento(pedido)) {
+                                abrirModalPagamentoParaFinalizar(pedidoIdCarregado, () => {
+                                    dataManager.finalizarPedido(pedidoIdCarregado);
+                                    limparAposFinalizarVenda();
+                                    carregarPedidosPdv();
+                                    carregarEntregadoresPdv();
+                                });
+                            } else {
+                                dataManager.finalizarPedido(pedidoIdCarregado);
+                                limparAposFinalizarVenda();
+                                carregarPedidosPdv();
+                                carregarEntregadoresPdv();
+                            }
+                        });
+                        return;
+                    }
+                    
+                    // Pedido já foi impresso - continuar normalmente
+                    if (dataManager.precisaModalPagamento(pedido)) {
+                        abrirModalPagamentoParaFinalizar(pedidoIdCarregado, () => {
+                            dataManager.finalizarPedido(pedidoIdCarregado);
+                            limparAposFinalizarVenda();
+                            carregarPedidosPdv();
+                            carregarEntregadoresPdv();
+                        });
+                    } else {
+                        dataManager.finalizarPedido(pedidoIdCarregado);
+                        limparAposFinalizarVenda();
+                        carregarPedidosPdv();
+                        carregarEntregadoresPdv();
+                    }
+                    return;
+                }
+            }
+            
+            const itens = Object.values(carrinho)
+                .filter(item => item.quantidade > 0)
+                .map(item => ({
+                    produtoId: item.produtoId,
+                    nome: item.nome,
+                    quantidade: Math.max(1, Math.floor(parseInt(item.quantidade) || 1)),
+                    preco: parseFloat(item.preco) || 0
+                }));
+            if (itens.length === 0) {
+                alert('Adicione itens ao carrinho antes de finalizar.');
+                return;
+            }
+            if (!tipoVendaSelecionado || (tipoVendaSelecionado !== 'balcao' && tipoVendaSelecionado !== 'online')) {
+                alert('Selecione o tipo de venda (Balcão ou Online) antes de finalizar.');
+                return;
+            }
+            let nomeCliente = 'Cliente PDV';
+            let numeroPedido = null;
+            if (tipoVendaSelecionado === 'mesa') nomeCliente = 'Mesa';
+            else if (tipoVendaSelecionado === 'balcao') {
+                nomeCliente = document.getElementById('nome-cliente-balcao').value.trim() || 'Cliente Balcão';
+                numeroPedido = document.getElementById('numero-pedido-balcao').value;
+            } else if (tipoVendaSelecionado === 'online') nomeCliente = 'Cliente Online';
+
+            let telefoneCliente = '(11) 0000-0000';
+            let tipoPedido = tipoVendaSelecionado === 'online' ? 'entrega' : 'retirada';
+            let enderecoPedido = null;
+            let observacoesPedido = '';
+            if (tipoVendaSelecionado === 'online' && window.dadosClienteOnline) {
+                telefoneCliente = window.dadosClienteOnline.telefone;
+                tipoPedido = window.dadosClienteOnline.tipo;
+                enderecoPedido = window.dadosClienteOnline.endereco;
+                observacoesPedido = window.dadosClienteOnline.observacoes || '';
+            }
+
+            const pedido = {
+                cliente: nomeCliente,
+                telefone: telefoneCliente,
+                tipo: tipoPedido,
+                endereco: enderecoPedido,
+                itens: itens,
+                observacoes: observacoesPedido,
+                pagamento: null,
+                numeroPedidoBalcao: numeroPedido || null,
+                tipoVenda: tipoVendaSelecionado,
+                origem: 'pdv'
+            };
+
+            const novoPedido = dataManager.adicionarPedido(pedido);
+            const tv = tipoVendaSelecionado;
+
+            limparAposFinalizarVenda();
+            if (typeof websocketSim !== 'undefined') websocketSim.simularNovoPedido(novoPedido);
+
+            if (dataManager.precisaModalPagamento({ tipoVenda: tv, origem: 'pdv' })) {
+                abrirModalPagamentoParaFinalizar(novoPedido.id, () => {
+                    dataManager.finalizarPedido(novoPedido.id);
+                    carregarPedidosPdv();
+                    carregarEntregadoresPdv();
+                });
+            } else {
+                dataManager.finalizarPedido(novoPedido.id);
+                carregarPedidosPdv();
+                carregarEntregadoresPdv();
+            }
+        }
+
+        // Imprimir pedido
+        function imprimirItemMesa(produtoId) {
+            if (mesaAberta === null) return;
+            
+            // Obter quantidade atual do item no carrinho
+            const itemCarrinho = carrinho[produtoId];
+            if (!itemCarrinho) return;
+            
+            const quantidadeAtual = Math.floor(parseInt(itemCarrinho.quantidade) || 0);
+            if (quantidadeAtual <= 0) return;
+            
+            // Obter quantidade já impressa
+            const quantidadeImpressa = dataManager.getQuantidadeImpressaItem(mesaAberta, produtoId);
+            
+            // Calcular quantas unidades ainda precisam ser impressas
+            const quantidadeParaImprimir = quantidadeAtual - quantidadeImpressa;
+            
+            if (quantidadeParaImprimir <= 0) {
+                // Todas as unidades já foram impressas
+                console.log(`Todas as ${quantidadeAtual} unidades já foram impressas`);
+                return;
+            }
+            
+            // Buscar todos os pedidos da mesa
+            const pedidosMesa = dataManager.getPedidos().filter(p => 
+                p.numeroMesa === mesaAberta && 
+                dataManager.isPedidoAtivo(p)
+            );
+            
+            // Marcar a quantidade não impressa como impressa
+            // Distribuir a quantidade entre os pedidos que contêm esse item
+            let quantidadeRestante = quantidadeParaImprimir;
+            pedidosMesa.forEach(pedido => {
+                if (pedido.itens && quantidadeRestante > 0) {
+                    pedido.itens.forEach(item => {
+                        if (item.produtoId === produtoId && quantidadeRestante > 0) {
+                            const quantidadeItem = Math.floor(parseInt(item.quantidade) || 0);
+                            const quantidadeImpressaItem = item.quantidadeImpressa || 0;
+                            const quantidadeNaoImpressaItem = quantidadeItem - quantidadeImpressaItem;
+                            
+                            if (quantidadeNaoImpressaItem > 0) {
+                                const quantidadeMarcar = Math.min(quantidadeNaoImpressaItem, quantidadeRestante);
+                                dataManager.marcarItemPedidoComoImpresso(pedido.id, produtoId, quantidadeMarcar);
+                                quantidadeRestante -= quantidadeMarcar;
+                            }
+                        }
+                    });
+                }
+            });
+            
+            // Atualizar no carrinho
+            if (carrinho[produtoId]) {
+                const novaQuantidadeImpressa = dataManager.getQuantidadeImpressaItem(mesaAberta, produtoId);
+                carrinho[produtoId].quantidadeImpressa = novaQuantidadeImpressa;
+                carrinho[produtoId].impresso = novaQuantidadeImpressa > 0;
+            }
+            
+            // Atualizar exibição
+            atualizarCarrinho();
+            carregarPedidosPdv();
+            carregarMesasPdv();
+            
+            console.log(`Imprimindo ${quantidadeParaImprimir} unidade(s) do item ${produtoId} da mesa ${mesaAberta}`);
+        }
+
+        function imprimirPedido() {
+            // Se houver um pedido carregado, marcar como impresso
+            if (pedidoIdCarregado !== null) {
+                dataManager.marcarPedidoComoImpresso(pedidoIdCarregado);
+                carregarPedidosPdv(); // Atualizar exibição dos pedidos
+                return;
+            }
+            
+            // Se houver uma mesa aberta, marcar todos os itens não impressos como impressos
+            if (mesaAberta !== null) {
+                const pedidosMesa = dataManager.getPedidos().filter(p => 
+                    p.numeroMesa === mesaAberta && 
+                    dataManager.isPedidoAtivo(p)
+                );
+                
+                // Para cada item no carrinho, marcar as unidades não impressas
+                Object.values(carrinho).forEach(itemCarrinho => {
+                    const produtoId = itemCarrinho.produtoId;
+                    const quantidadeAtual = Math.floor(parseInt(itemCarrinho.quantidade) || 0);
+                    const quantidadeImpressa = dataManager.getQuantidadeImpressaItem(mesaAberta, produtoId);
+                    const quantidadeParaImprimir = quantidadeAtual - quantidadeImpressa;
+                    
+                    if (quantidadeParaImprimir > 0) {
+                        // Marcar as unidades não impressas
+                        let quantidadeRestante = quantidadeParaImprimir;
+                        pedidosMesa.forEach(pedido => {
+                            if (pedido.itens && quantidadeRestante > 0) {
+                                pedido.itens.forEach(item => {
+                                    if (item.produtoId === produtoId && quantidadeRestante > 0) {
+                                        const quantidadeItem = Math.floor(parseInt(item.quantidade) || 0);
+                                        const quantidadeImpressaItem = item.quantidadeImpressa || 0;
+                                        const quantidadeNaoImpressaItem = quantidadeItem - quantidadeImpressaItem;
+                                        
+                                        if (quantidadeNaoImpressaItem > 0) {
+                                            const quantidadeMarcar = Math.min(quantidadeNaoImpressaItem, quantidadeRestante);
+                                            dataManager.marcarItemPedidoComoImpresso(pedido.id, produtoId, quantidadeMarcar);
+                                            quantidadeRestante -= quantidadeMarcar;
+                                        }
+                                    }
+                                });
+                            }
+                        });
+                        
+                        // Atualizar no carrinho
+                        itemCarrinho.quantidadeImpressa = dataManager.getQuantidadeImpressaItem(mesaAberta, produtoId);
+                        itemCarrinho.impresso = itemCarrinho.quantidadeImpressa > 0;
+                    }
+                });
+                
+                // Marcar todos os pedidos como impressos
+                pedidosMesa.forEach(pedido => {
+                    dataManager.marcarPedidoComoImpresso(pedido.id);
+                });
+                
+                carregarPedidosPdv(); // Atualizar exibição dos pedidos
+                carregarMesasPdv(); // Atualizar exibição das mesas
+                atualizarCarrinho(); // Atualizar indicadores visuais
+                return;
+            }
+            
+            // Se houver itens no carrinho mas não houver pedido/mesa carregada, não há nada para imprimir
+            const itens = Object.values(carrinho).filter(item => {
+                const qtd = Math.floor(parseInt(item.quantidade) || 0);
+                return qtd > 0;
+            });
+            
+            if (itens.length === 0) {
+                return; // Carrinho vazio, não há nada para imprimir
+            }
+        }
+
+        function snapshotCart() {
+            const items = Object.entries(carrinho)
+                .filter(([_, v]) => (Math.floor(parseInt(v.quantidade) || 0)) > 0)
+                .map(([k, v]) => ({ produtoId: parseInt(k, 10), quantidade: Math.floor(parseInt(v.quantidade) || 0) }))
+                .sort((a, b) => a.produtoId - b.produtoId);
+            return JSON.stringify(items);
+        }
+
+        function isMesaDirty() {
+            if (mesaAberta === null) return false;
+            return snapshotCart() !== (mesaSnapshot ?? '');
+        }
+
+        // Toggle comanda de mesa
+        // Abrir comanda de mesa
+        function toggleComandaMesa() {
+            const inputMesa = document.getElementById('pesquisa-mesa');
+            const numeroMesa = inputMesa.value.trim();
+            
+            if (mesaAberta !== null) {
+                const numMesa = parseInt(numeroMesa, 10);
+                if (mesaAberta === numMesa && !isNaN(numMesa)) {
+                    // Mesma mesa: uma comanda por vez - limpar pedido
+                    const inpP = document.getElementById('pesquisa-pedido');
+                    if (inpP) inpP.value = '';
+                    pedidoIdCarregado = null;
+                    carregarItensMesa(numMesa);
+                    return;
+                }
+                if (isMesaDirty()) {
+                    abrirModalAvisoComanda();
+                    return;
+                }
+                // Mesa diferente: limpar estado da anterior (sem limpar o input) e continuar para abrir a nova
+                carrinho = {};
+                pedidoIdCarregado = null;
+                mesaSnapshot = null;
+                mesaAberta = null;
+                tipoVendaSelecionado = '';
+                const tv = document.getElementById('tipo-venda-pdv');
+                if (tv) tv.value = '';
+                document.querySelectorAll('[id^="btn-tipo-"]').forEach(btn => {
+                    btn.classList.remove('btn-primary');
+                    btn.classList.add('btn-secondary');
+                });
+                atualizarCarrinho();
+            }
+            
+            const STORAGE_MESAS = 'peddy_numero_mesas';
+            const numeroMesasConfig = parseInt(localStorage.getItem(STORAGE_MESAS) || '0', 10);
+            
+            if (!numeroMesa) return;
+            
+            const numMesa = parseInt(numeroMesa, 10);
+            if (isNaN(numMesa) || numMesa <= 0) return;
+            if (numeroMesasConfig > 0 && numMesa > numeroMesasConfig) return;
+            
+            // Uma comanda por vez: ao abrir mesa, limpar pedido
+            const inpP = document.getElementById('pesquisa-pedido');
+            if (inpP) inpP.value = '';
+            pedidoIdCarregado = null;
+            
+            mesaAberta = numMesa;
+            tipoVendaSelecionado = 'mesa';
+            const tipoInput = document.getElementById('tipo-venda-pdv');
+            if (tipoInput) tipoInput.value = 'mesa';
+            
+            carregarItensMesa(numMesa);
+        }
+
+        // Fechar comanda de mesa sem salvar (apenas limpar)
+        function fecharComandaMesaSemSalvar() {
+            if (mesaAberta === null) return;
+            sairDaComandaMesa();
+        }
+
+        // Sair da comanda da mesa (limpar estado: mesa, carrinho, tipo venda). Usado após Criar/Salvar ou ao fechar sem salvar.
+        function sairDaComandaMesa() {
+            if (mesaAberta === null) return;
+            const inputMesa = document.getElementById('pesquisa-mesa');
+            if (inputMesa) {
+                inputMesa.disabled = false;
+                inputMesa.value = '';
+            }
+            mesaAberta = null;
+            mesaSnapshot = null;
+            pedidoIdCarregado = null;
+            tipoVendaSelecionado = '';
+            const tipoInput = document.getElementById('tipo-venda-pdv');
+            if (tipoInput) tipoInput.value = '';
+            carrinho = {};
+            document.getElementById('campos-balcao').style.display = 'none';
+            document.getElementById('numero-pedido-balcao').value = '';
+            document.getElementById('nome-cliente-balcao').value = '';
+            window.dadosClienteOnline = null;
+            document.querySelectorAll('[id^="btn-tipo-"]').forEach(btn => {
+                btn.classList.remove('btn-primary');
+                btn.classList.add('btn-secondary');
+            });
+            atualizarCarrinho();
+        }
+
+        // Fechar comanda de mesa e salvar pedido (ao clicar em "Finalizar Venda" com mesa aberta)
+        function fecharComandaMesa() {
+            if (mesaAberta === null) return;
+            
+            const inputMesa = document.getElementById('pesquisa-mesa');
+            const itensFiltrados = Object.values(carrinho)
+                .filter(item => (Math.floor(parseInt(item.quantidade) || 0)) > 0)
+                .map(item => ({
+                    produtoId: item.produtoId,
+                    nome: item.nome,
+                    quantidade: Math.max(1, Math.floor(parseInt(item.quantidade) || 0)),
+                    preco: parseFloat(item.preco) || 0
+                }))
+                .filter(item => item.quantidade > 0);
+            
+            const pedidos = dataManager.getPedidos();
+            const pedidosMesa = pedidos.filter(p => 
+                p.numeroMesa === mesaAberta && 
+                (p.status === 'recebido' || p.status === 'preparando' || p.status === 'pronto')
+            );
+            const idsMesa = pedidosMesa.map(p => p.id);
+            const totalMesa = totalDePedidos(idsMesa) + itensFiltrados.reduce((s, i) => s + (i.preco * i.quantidade), 0);
+
+            function concluirFecharMesa(pagamento) {
+                idsMesa.forEach(id => dataManager.finalizarPedido(id));
+                if (itensFiltrados.length > 0) {
+                    const agora = new Date();
+                    const dataComandaGravada = agora.toLocaleString('pt-BR', {
+                        day: '2-digit', month: '2-digit', year: 'numeric',
+                        hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
+                    });
+                    const pedido = {
+                        cliente: `Mesa ${mesaAberta}`,
+                        telefone: '(11) 0000-0000',
+                        tipo: 'retirada',
+                        endereco: null,
+                        itens: itensFiltrados,
+                        observacoes: '',
+                        pagamento: pagamento || 'Pix',
+                        numeroPedidoBalcao: null,
+                        numeroMesa: mesaAberta,
+                        tipoVenda: 'mesa',
+                        origem: 'pdv',
+                        dataComandaGravada: dataComandaGravada
+                    };
+                    const novo = dataManager.adicionarPedido(pedido);
+                    dataManager.finalizarPedido(novo.id);
+                }
+                mesaAberta = null;
+                mesaSnapshot = null;
+                pedidoIdCarregado = null;
+                inputMesa.disabled = false;
+                inputMesa.value = '';
+                tipoVendaSelecionado = '';
+                document.getElementById('tipo-venda-pdv').value = '';
+                carrinho = {};
+                document.querySelectorAll('[id^="btn-tipo-"]').forEach(btn => {
+                    btn.classList.remove('btn-primary');
+                    btn.classList.add('btn-secondary');
+                });
+                atualizarCarrinho();
+                carregarPedidosPdv();
+                carregarEntregadoresPdv();
+            }
+
+            if (idsMesa.length > 0 || itensFiltrados.length > 0) {
+                abrirModalPagamentoParaFinalizar(idsMesa, (pag) => concluirFecharMesa(pag), totalMesa);
+            } else {
+                concluirFecharMesa(null);
+            }
+        }
+
+        // Permitir pesquisa com Enter
+        document.getElementById('pesquisa-produto').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                filtrarProdutos();
+            }
+        });
+
+        function formatarTempoEntregador(dataAtribuicao) {
+            if (!dataAtribuicao) return '—';
+            const d = new Date(dataAtribuicao);
+            const diff = Math.max(0, Math.floor((Date.now() - d.getTime()) / 1000));
+            const h = Math.floor(diff / 3600);
+            const m = Math.floor((diff % 3600) / 60);
+            const s = diff % 60;
+            if (h > 0) return h + 'h ' + m + 'm ' + s + 's';
+            if (m > 0) return m + ' min ' + s + ' s';
+            return s + ' s';
+        }
+
+        function carregarEntregadoresPdv() {
+            const container = document.getElementById('entregadores-pdv-container');
+            const vazio = document.getElementById('entregadores-pdv-vazio');
+            if (!container || !vazio) return;
+
+            let entregadores = [];
+            try {
+                entregadores = JSON.parse(localStorage.getItem('peddy_entregadores') || '[]');
+                if (!Array.isArray(entregadores)) entregadores = [];
+            } catch {
+                entregadores = [];
+            }
+            let alteradoEnt = false;
+            entregadores = entregadores.map((e, i) => {
+                if (!e.id) {
+                    alteradoEnt = true;
+                    return { ...e, id: 'ENT' + Date.now() + '-' + i };
+                }
+                return e;
+            });
+            if (alteradoEnt) localStorage.setItem('peddy_entregadores', JSON.stringify(entregadores));
+
+            const pedidosAtivos = dataManager.getPedidos().filter(p =>
+                p.status !== 'finalizado' && p.status !== 'entregue' && p.status !== 'retirado' && p.entregadorId
+            );
+            const porEntregador = {};
+            pedidosAtivos.forEach(p => {
+                const eid = p.entregadorId;
+                if (!porEntregador[eid]) porEntregador[eid] = [];
+                porEntregador[eid].push(p);
+            });
+
+            if (entregadores.length === 0) {
+                container.innerHTML = '';
+                vazio.style.display = 'block';
+                return;
+            }
+
+            vazio.style.display = 'none';
+            container.innerHTML = entregadores.map((ent) => {
+                const pedidos = porEntregador[ent.id] || [];
+                const bloco = pedidos.length === 0
+                    ? '<div style="color: var(--text-light); font-size: 0.875rem;">Sem pedidos atribuídos.</div>'
+                    : pedidos.map(p => `
+                        <div style="padding: 0.5rem; background: var(--light-color); border-radius: 6px; margin-bottom: 0.5rem; font-size: 0.875rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+                            <div>
+                                <strong>📋 ${p.id}</strong>
+                                <div style="color: var(--primary-color); font-weight: 600;" data-atribuicao-pdv="${p.dataAtribuicao || ''}">⏱️ ${formatarTempoEntregador(p.dataAtribuicao)}</div>
+                            </div>
+                            <button type="button" class="btn btn-primary btn-small" onclick="event.stopPropagation(); finalizarPedidoPdv('${p.id}')">Finalizar</button>
+                        </div>
+                    `).join('');
+                return `
+                <div class="card" style="padding: 0.75rem;">
+                    <strong>${ent.nome}</strong>
+                    <div style="color: var(--text-light); font-size: 0.875rem;">Placa: ${ent.placa}</div>
+                    <div style="margin-top: 0.75rem; border: 2px dashed var(--border-color); border-radius: 8px; padding: 0.75rem;">
+                        ${bloco}
+                    </div>
+                </div>
+            `;
+            }).join('');
+        }
+
+        function carregarMesasPdv() {
+            const container = document.getElementById('mesas-pdv-container');
+            const vazio = document.getElementById('mesas-pdv-vazio');
+            if (!container || !vazio) return;
+
+            const STORAGE_MESAS = 'peddy_numero_mesas';
+            const numeroMesas = parseInt(localStorage.getItem(STORAGE_MESAS) || '0');
+
+            if (numeroMesas === 0) {
+                container.innerHTML = '';
+                vazio.style.display = 'block';
+                return;
+            }
+
+            vazio.style.display = 'none';
+
+            // Verificar quais mesas têm pedidos
+            const pedidos = dataManager.getPedidos();
+            
+            let html = '';
+            for (let i = 1; i <= numeroMesas; i++) {
+                const pedidosMesa = pedidos.filter(pedido => {
+                    return pedido.numeroMesa === i && 
+                           (pedido.status === 'recebido' || pedido.status === 'preparando' || pedido.status === 'pronto');
+                });
+                
+                let classe = 'mesa-livre';
+                if (pedidosMesa.length > 0) {
+                    // Verificar se todos os pedidos da mesa estão impressos
+                    const todosImpressos = pedidosMesa.every(pedido => pedido.impresso === true);
+                    classe = todosImpressos ? 'mesa-impressa' : 'mesa-ocupada';
+                }
+                
+                html += `
+                    <div class="mesa-pdv-card ${classe}" onclick="abrirMesa(${i})">
+                        <span class="mesa-pdv-icon">🪑</span>
+                        <span class="mesa-pdv-numero">${i}</span>
+                    </div>
+                `;
+            }
+            
+            container.innerHTML = html;
+        }
+
+        function abrirMesa(numeroMesa) {
+            const inputMesa = document.getElementById('pesquisa-mesa');
+            inputMesa.value = numeroMesa;
+            toggleComandaMesa();
+        }
+
+        function carregarPedidosPdv() {
+            const container = document.getElementById('pedidos-pdv-container');
+            const vazio = document.getElementById('pedidos-pdv-vazio');
+            if (!container || !vazio) return;
+
+            // Apenas pedidos ativos (não finalizados) e ainda NÃO atribuídos a motoboy.
+            // Pedidos atribuídos saem daqui e ficam somente na tela Entregador.
+            // EXCLUIR pedidos de mesa - eles ficam apenas na guia de mesas
+            const pedidos = dataManager.getPedidos().filter(p => {
+                // Verificar se é pedido de mesa
+                const isPedidoMesa = (p.id && p.id.startsWith('M')) || 
+                                     p.tipoVenda === 'mesa' || 
+                                     (p.numeroMesa != null && p.numeroMesa !== '');
+                
+                // Excluir pedidos de mesa
+                return p.status !== 'finalizado' && 
+                       p.status !== 'entregue' && 
+                       p.status !== 'retirado' &&
+                       !p.entregadorId &&
+                       !isPedidoMesa; // Excluir pedidos de mesa
+            });
+            
+            if (pedidos.length === 0) {
+                container.innerHTML = '';
+                vazio.style.display = 'block';
+                return;
+            }
+
+            vazio.style.display = 'none';
+
+            let html = '';
+            pedidos.forEach(pedido => {
+                // Determinar classe baseada no status de impressão
+                let classe = 'pedido-ativo'; // Verde por padrão (não impresso)
+                if (pedido.impresso === true) {
+                    classe = 'pedido-impresso'; // Roxo quando impresso
+                }
+                
+                html += `
+                    <div class="pedido-pdv-card ${classe}" onclick="carregarItensPedido('${pedido.id}')">
+                        <span class="pedido-pdv-icon">📋</span>
+                        <span class="pedido-pdv-numero">${pedido.id}</span>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+
+        // Carregar itens de um pedido específico no carrinho
+        function carregarItensPedido(pedidoId) {
+            if (mesaAberta !== null) {
+                if (isMesaDirty()) {
+                    alert('Salve a comanda em aberto antes de carregar outro pedido.');
+                    return;
+                }
+                sairDaComandaMesa();
+            }
+            carrinho = {};
+            pedidoIdCarregado = pedidoId;
+            const pedido = dataManager.getPedido(pedidoId);
+            if (!pedido) {
+                pedidoIdCarregado = null;
+                atualizarCarrinho();
+                return;
+            }
+            if (!pedido.itens || !Array.isArray(pedido.itens) || pedido.itens.length === 0) {
+                atualizarCarrinho();
+                return;
+            }
+            // Refletir tipo de venda e dados do pedido na UI
+            const tv = pedido.tipoVenda || (pedido.numeroMesa ? 'mesa' : '');
+            tipoVendaSelecionado = tv;
+            document.getElementById('tipo-venda-pdv').value = tv;
+            document.querySelectorAll('[id^="btn-tipo-"]').forEach(btn => {
+                btn.classList.remove('btn-primary');
+                btn.classList.add('btn-secondary');
+            });
+            const btnTipo = document.getElementById('btn-tipo-' + tv);
+            if (btnTipo) {
+                btnTipo.classList.remove('btn-secondary');
+                btnTipo.classList.add('btn-primary');
+            }
+            if (tv === 'balcao') {
+                document.getElementById('campos-balcao').style.display = 'block';
+                const inp = document.getElementById('numero-pedido-balcao');
+                if (inp) inp.value = pedido.numeroPedidoBalcao || gerarCodigoPedidoBalcao();
+                const nomeInp = document.getElementById('nome-cliente-balcao');
+                if (nomeInp) nomeInp.value = pedido.cliente || '';
+            } else {
+                document.getElementById('campos-balcao').style.display = 'none';
+                if (tv === 'online') {
+                    window.dadosClienteOnline = {
+                        nome: pedido.cliente || '',
+                        telefone: pedido.telefone || '',
+                        tipo: pedido.tipo || 'retirada',
+                        endereco: pedido.endereco || null,
+                        observacoes: pedido.observacoes || ''
+                    };
+                }
+            }
+            // Carregar itens do pedido no carrinho
+            pedido.itens.forEach(item => {
+                const produtoId = item.produtoId;
+                
+                // Validar quantidade do item (garantir número inteiro e > 0)
+                const quantidadeItem = Math.floor(parseInt(item.quantidade) || 0);
+                const precoItem = parseFloat(item.preco) || 0;
+                
+                // Ignorar itens com quantidade 0 ou inválida
+                if (quantidadeItem <= 0) {
+                    return;
+                }
+                
+                if (!carrinho[produtoId]) {
+                    carrinho[produtoId] = {
+                        produtoId: item.produtoId,
+                        nome: item.nome || 'Produto sem nome',
+                        quantidade: 0,
+                        preco: precoItem
+                    };
+                }
+                
+                // Somar a quantidade do item
+                carrinho[produtoId].quantidade += quantidadeItem;
+            });
+
+            // Uma comanda por vez: exibir só o pedido ativo e limpar mesa
+            const inputPedido = document.getElementById('pesquisa-pedido');
+            const inputMesa = document.getElementById('pesquisa-mesa');
+            if (inputPedido) {
+                if (pedido.tipoVenda === 'mesa' && pedido.numeroMesa != null && pedido.numeroMesa !== '') {
+                    inputPedido.value = 'Mesa ' + pedido.numeroMesa;
+                } else {
+                    inputPedido.value = pedido.id;
+                }
+            }
+            if (inputMesa) inputMesa.value = '';
+            
+            // Atualizar exibição do carrinho
+            atualizarCarrinho();
+            // Manter painel de pedidos aberto (conferência rápida), igual ao menu de mesas.
+            // Só fecha ao clicar em outro ícone rápido ou no ícone Pedidos para fechar.
+        }
+
+        // Pesquisar pedido por ID
+        function pesquisarPedido() {
+            const inputPedido = document.getElementById('pesquisa-pedido');
+            const pedidoId = inputPedido.value.trim().toUpperCase();
+            
+            if (!pedidoId) {
+                return;
+            }
+
+            // Buscar pedido (apenas ativos, não finalizados e não atribuídos a motoboy)
+            const pedidos = dataManager.getPedidos().filter(p => 
+                p.status !== 'finalizado' && 
+                p.status !== 'entregue' && 
+                p.status !== 'retirado' &&
+                !p.entregadorId
+            );
+            
+            const pedido = pedidos.find(p => p.id === pedidoId);
+            
+            if (pedido) {
+                carregarItensPedido(pedidoId);
+            } else {
+                // Limpar carrinho se pedido não encontrado
+                carrinho = {};
+                pedidoIdCarregado = null;
+                atualizarCarrinho();
+            }
+        }
+
+        // Pesquisar mesa por número
+        function pesquisarMesa() {
+            const inputMesa = document.getElementById('pesquisa-mesa');
+            const numeroMesa = inputMesa.value.trim();
+            
+            if (!numeroMesa) {
+                return;
+            }
+
+            // Se já houver uma mesa aberta e for a mesma mesa, apenas recarregar
+            if (mesaAberta !== null) {
+                const numMesa = parseInt(numeroMesa);
+                if (mesaAberta === numMesa) {
+                    // Mesma mesa - apenas recarregar itens; uma comanda por vez: limpar pedido
+                    const inpPedido = document.getElementById('pesquisa-pedido');
+                    if (inpPedido) inpPedido.value = '';
+                    pedidoIdCarregado = null;
+                    carregarItensMesa(numMesa);
+                    return;
+                }
+                if (isMesaDirty()) {
+                    abrirModalAvisoComanda();
+                    return;
+                }
+                fecharComandaMesaSemSalvar();
+            }
+
+            // Uma comanda por vez: ao abrir mesa, limpar pedido
+            const inpPedido = document.getElementById('pesquisa-pedido');
+            if (inpPedido) inpPedido.value = '';
+            pedidoIdCarregado = null;
+
+            // Carregar número de mesas configurado
+            const STORAGE_MESAS = 'peddy_numero_mesas';
+            const numeroMesasConfig = parseInt(localStorage.getItem(STORAGE_MESAS) || '0');
+            
+            const numMesa = parseInt(numeroMesa);
+            if (isNaN(numMesa) || numMesa <= 0) {
+                return;
+            }
+            
+            if (numeroMesasConfig > 0 && numMesa > numeroMesasConfig) {
+                return;
+            }
+            
+            // Abrir comanda
+            mesaAberta = numMesa;
+            // Não desabilitar o campo - permitir pesquisar novamente
+            // inputMesa.disabled = true;
+            
+            // Selecionar tipo de venda como mesa
+            tipoVendaSelecionado = 'mesa';
+            document.getElementById('tipo-venda-pdv').value = 'mesa';
+            
+            // Carregar itens da mesa se ela já tiver pedidos
+            carregarItensMesa(numMesa);
+        }
+
+        // Carregar itens de uma mesa que já tem pedidos
+        function carregarItensMesa(numeroMesa) {
+            // Limpar carrinho atual
+            carrinho = {};
+            
+            // Buscar todos os pedidos da mesa com status ativo
+            const pedidos = dataManager.getPedidos();
+            const pedidosMesa = pedidos.filter(pedido => {
+                return pedido.numeroMesa === numeroMesa && 
+                       (pedido.status === 'recebido' || pedido.status === 'preparando' || pedido.status === 'pronto');
+            });
+            
+            // Se não houver pedidos, apenas atualizar o carrinho vazio
+            if (pedidosMesa.length === 0) {
+                atualizarCarrinho();
+                mesaSnapshot = snapshotCart();
+                return;
+            }
+            
+            // Consolidar todos os itens dos pedidos da mesa
+            pedidosMesa.forEach(pedido => {
+                if (pedido.itens && Array.isArray(pedido.itens)) {
+                    pedido.itens.forEach(item => {
+                        const produtoId = item.produtoId;
+                        
+                        // Validar quantidade do item (garantir número inteiro e > 0)
+                        const quantidadeItem = Math.floor(parseInt(item.quantidade) || 0);
+                        const precoItem = parseFloat(item.preco) || 0;
+                        
+                        // Ignorar itens com quantidade 0 ou inválida
+                        if (quantidadeItem <= 0) {
+                            return;
+                        }
+                        
+                        if (!carrinho[produtoId]) {
+                            carrinho[produtoId] = {
+                                produtoId: item.produtoId,
+                                nome: item.nome || 'Produto sem nome',
+                                quantidade: 0,
+                                preco: precoItem,
+                                impresso: false // Inicializar como não impresso
+                            };
+                        }
+                        
+                        // Somar a quantidade do item
+                        carrinho[produtoId].quantidade += quantidadeItem;
+                        
+                        // Preservar quantidade impressa
+                        const quantidadeImpressaItem = item.quantidadeImpressa || 0;
+                        if (!carrinho[produtoId].quantidadeImpressa) {
+                            carrinho[produtoId].quantidadeImpressa = 0;
+                        }
+                        carrinho[produtoId].quantidadeImpressa += quantidadeImpressaItem;
+                        carrinho[produtoId].impresso = carrinho[produtoId].quantidadeImpressa > 0;
+                    });
+                }
+            });
+            
+            // Atualizar exibição do carrinho
+            atualizarCarrinho();
+            mesaSnapshot = snapshotCart();
+        }
+
+        // Event listeners para pesquisa
+        const inputPedido = document.getElementById('pesquisa-pedido');
+        const inputMesa = document.getElementById('pesquisa-mesa');
+        
+        // Limpar campo de mesa quando começar a digitar no campo de pedido
+        inputPedido.addEventListener('input', function() {
+            if (this.value.trim().length > 0 && inputMesa.value.trim().length > 0) {
+                if (mesaAberta !== null && isMesaDirty()) {
+                    abrirModalAvisoComanda();
+                    return;
+                }
+                inputMesa.value = '';
+                if (mesaAberta !== null) {
+                    fecharComandaMesaSemSalvar();
+                }
+            }
+        });
+        
+        // Limpar campo de pedido quando começar a digitar no campo de mesa
+        inputMesa.addEventListener('input', function() {
+            if (this.value.trim().length > 0 && inputPedido.value.trim().length > 0) {
+                inputPedido.value = '';
+                // Se houver pedido carregado, limpar
+                if (pedidoIdCarregado !== null) {
+                    carrinho = {};
+                    pedidoIdCarregado = null;
+                    atualizarCarrinho();
+                }
+            }
+        });
+        
+        inputPedido.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                pesquisarPedido();
+            }
+        });
+
+        inputMesa.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                pesquisarMesa();
+            }
+        });
+
+        // Barra de contadores (data/hora + totais hoje por tipo e impressos)
+        function atualizarPdVContadoresBar() {
+            const elData = document.getElementById('pdv-contadores-data');
+            const elHora = document.getElementById('pdv-contadores-hora');
+            if (elData) {
+                const d = new Date();
+                const diaSemana = d.toLocaleDateString('pt-BR', { weekday: 'long' });
+                const dataAbreviada = d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+                elData.textContent = diaSemana + ', ' + dataAbreviada;
+            }
+            if (elHora) {
+                elHora.textContent = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            }
+
+            const hoje = new Date().toISOString().slice(0, 10);
+            const pedidos = dataManager.getPedidos();
+            const finalizados = dataManager.getPedidosFinalizados();
+            const todos = [...pedidos, ...finalizados];
+            
+            // Total hoje: TODOS os pedidos de hoje (ativos + finalizados)
+            const hojeTodos = todos.filter(p => p.dataCriacao && String(p.dataCriacao).startsWith(hoje));
+            
+            // Contadores específicos: apenas pedidos ATIVOS (não finalizados) de hoje
+            const pedidosHoje = pedidos.filter(p => p.dataCriacao && String(p.dataCriacao).startsWith(hoje));
+
+            function isOnline(p) { return p.tipoVenda === 'online' || (p.id && String(p.id).startsWith('O')); }
+            function isBalcao(p) { return p.tipoVenda === 'balcao' || (p.id && String(p.id).startsWith('B')); }
+            function isMesa(p) { return p.tipoVenda === 'mesa' || (p.id && String(p.id).startsWith('M')) || (p.numeroMesa != null && p.numeroMesa !== ''); }
+
+            // Total: todos os pedidos de hoje (incluindo finalizados)
+            const total = hojeTodos.length;
+            
+            // Contadores específicos: apenas pedidos ativos (não finalizados)
+            const online = pedidosHoje.filter(isOnline);
+            const balcao = pedidosHoje.filter(isBalcao);
+            const mesa = pedidosHoje.filter(isMesa);
+
+            function set(id, text) { const e = document.getElementById(id); if (e) e.textContent = text; }
+
+            set('pdv-contador-total', String(total));
+            set('pdv-contador-online', String(online.length));
+            set('pdv-contador-balcao', String(balcao.length));
+            set('pdv-contador-mesa', String(mesa.length));
+        }
+
+        // Inicializar
+        carregarCategorias();
+        carregarProdutos('Todas', '');
+        carregarEntregadoresPdv();
+        carregarMesasPdv();
+        carregarPedidosPdv();
+        atualizarPdVContadoresBar();
+
+        // Atualizar mesas a cada 2 segundos
+        setInterval(carregarMesasPdv, 2000);
+
+        // Atualizar pedidos a cada 2 segundos
+        setInterval(carregarPedidosPdv, 2000);
+
+        // Atualizar entregadores (pedidos atribuídos e timer) a cada 2 segundos
+        setInterval(carregarEntregadoresPdv, 2000);
+
+        // Data/hora e contadores: atualizar a cada 1 segundo
+        setInterval(atualizarPdVContadoresBar, 1000);
+
+        // Notificação push: novo pedido online (canto da tela, some após alguns segundos)
+        function mostrarNotificacaoNovoPedidoOnline() {
+            const container = document.getElementById('pdv-notificacao-container');
+            if (!container) return;
+            const toast = document.createElement('div');
+            toast.className = 'pdv-notificacao-toast';
+            toast.setAttribute('role', 'alert');
+            toast.innerHTML = '<span class="pdv-notificacao-icon">💻</span><span class="pdv-notificacao-texto">Novo pedido online!</span>';
+            container.appendChild(toast);
+            const duracao = 4500;
+            const duracaoSair = 300;
+            const t = setTimeout(() => {
+                toast.classList.add('pdv-notificacao-saindo');
+                setTimeout(() => {
+                    if (toast.parentNode) toast.parentNode.removeChild(toast);
+                }, duracaoSair);
+            }, duracao);
+            toast._timeout = t;
+        }
+
+        window.addEventListener('novo-pedido', function(event) {
+            const pedido = event.detail;
+            const isOnline = pedido && (pedido.tipoVenda === 'online' || (pedido.id && String(pedido.id).startsWith('O')));
+            if (isOnline) mostrarNotificacaoNovoPedidoOnline();
+        });
+
+        // Escutar BroadcastChannel: pedido criado em outra aba (ex. cliente.html) → notificação no PDV
+        try {
+            const bcNovoPedido = new BroadcastChannel('peddy-novo-pedido');
+            bcNovoPedido.onmessage = function(e) {
+                const d = e.data || {};
+                if (d.tipo !== 'novo-pedido' || !d.pedido) return;
+                const p = d.pedido;
+                const isOnline = p.tipoVenda === 'online' || (p.id && String(p.id).startsWith('O'));
+                if (isOnline) mostrarNotificacaoNovoPedidoOnline();
+            };
+        } catch (err) {}
+    </script>
+    <script src="pdv-paineis.js"></script>
+</body>
+</html>
