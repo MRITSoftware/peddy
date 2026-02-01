@@ -2690,7 +2690,6 @@
             janela.focus();
             janela.onload = function() {
                 janela.print();
-                janela.onafterprint = function() { janela.close(); };
             };
             setTimeout(function() {
                 try { if (janela.print) janela.print(); } catch (e) {}
