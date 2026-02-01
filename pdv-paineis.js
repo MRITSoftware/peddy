@@ -12,8 +12,20 @@
             return;
         }
 
+        const isWebView = typeof window.Android !== 'undefined';
+        if (isWebView) {
+            document.body.classList.add('webview');
+        }
+
         // Garantir que mesas comece colapsado
         container.classList.add('mesas-colapsadas');
+
+        if (isWebView) {
+            container.classList.remove('produtos-colapsados');
+            container.classList.add('entregadores-colapsados');
+            container.classList.add('mesas-colapsadas');
+            container.classList.add('pedidos-colapsados');
+        }
 
         function atualizarLabelBotao(botao, colapsado, nome) {
             const label = colapsado ? `Mostrar ${nome}` : `Ocultar ${nome}`;

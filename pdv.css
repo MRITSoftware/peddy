@@ -180,6 +180,38 @@
     align-items: stretch;
 }
 
+body.webview .pdv-container {
+    flex-direction: column;
+    height: auto;
+}
+
+body.webview .pdv-carrinho {
+    width: 100%;
+    min-width: 0;
+    max-height: none;
+}
+
+body.webview .pdv-lateral-wrapper {
+    width: 100%;
+    max-width: 100%;
+    flex: 1 1 auto;
+    order: 2;
+}
+
+body.webview .pdv-container:not(.produtos-colapsados) .pdv-carrinho,
+body.webview .pdv-container:not(.entregadores-colapsados) .pdv-carrinho,
+body.webview .pdv-container:not(.mesas-colapsadas) .pdv-carrinho,
+body.webview .pdv-container:not(.pedidos-colapsados) .pdv-carrinho {
+    min-width: 0;
+}
+
+body.webview .pdv-container:not(.produtos-colapsados) .pdv-lateral-wrapper,
+body.webview .pdv-container:not(.entregadores-colapsados) .pdv-lateral-wrapper,
+body.webview .pdv-container:not(.mesas-colapsadas) .pdv-lateral-wrapper,
+body.webview .pdv-container:not(.pedidos-colapsados) .pdv-lateral-wrapper {
+    flex: 1 1 auto;
+}
+
 /* Reorganizar campos de pesquisa quando um painel está expandido */
 .pdv-container:not(.produtos-colapsados) #campos-pesquisa-container,
 .pdv-container:not(.entregadores-colapsados) #campos-pesquisa-container,
