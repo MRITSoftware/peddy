@@ -189,6 +189,8 @@ body.webview .pdv-carrinho {
     width: 100%;
     min-width: 0;
     max-height: none;
+    min-height: 0;
+    flex-direction: column;
 }
 
 body.webview .pdv-lateral-wrapper {
@@ -196,6 +198,24 @@ body.webview .pdv-lateral-wrapper {
     max-width: 100%;
     flex: 1 1 auto;
     order: 2;
+}
+
+body.webview .carrinho-esquerda,
+body.webview .carrinho-direita {
+    width: 100%;
+    max-width: 100%;
+}
+
+body.webview .carrinho-direita {
+    border-left: none;
+    border-top: 2px solid var(--border-color);
+    padding-left: 0;
+    padding-right: 0;
+    padding-top: 1rem;
+}
+
+body.webview .carrinho-itens-container {
+    max-height: 40vh;
 }
 
 body.webview .pdv-container:not(.produtos-colapsados) .pdv-carrinho,
