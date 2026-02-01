@@ -946,10 +946,7 @@
                 </html>
             `;
             
-            const janela = window.open('', '_blank');
-            janela.document.write(html);
-            janela.document.close();
-            janela.print();
+            imprimirHtml(html, 'Relatorio do Dia', 420, 640);
         }
 
         // Inicializar botão de caixa ao carregar
@@ -2676,6 +2673,30 @@
             return linhas.join('\n');
         }
 
+        function imprimirHtml(html, titulo, largura, altura) {
+            if (window.Android && typeof Android.printHtml === 'function') {
+                Android.printHtml(html, titulo || 'Impressao');
+                return;
+            }
+            const w = largura || 320;
+            const h = altura || 500;
+            const janela = window.open('', '_blank', `width=${w},height=${h}`);
+            if (!janela) {
+                alert('Permita pop-ups para imprimir.');
+                return;
+            }
+            janela.document.write(html);
+            janela.document.close();
+            janela.focus();
+            janela.onload = function() {
+                janela.print();
+                janela.onafterprint = function() { janela.close(); };
+            };
+            setTimeout(function() {
+                try { if (janela.print) janela.print(); } catch (e) {}
+            }, 250);
+        }
+
         /** Abre janela de impressão e imprime o slip do item (impressora térmica). */
         function imprimirSlipTermico(texto, titulo) {
             const html = `
@@ -2691,21 +2712,7 @@ body { font-family: 'Courier New', Courier, monospace; font-size: 11px; line-hei
 </head>
 <body><pre>${(texto || '').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</pre></body>
 </html>`;
-            const janela = window.open('', '_blank', 'width=320,height=280');
-            if (!janela) {
-                alert('Permita pop-ups para imprimir o item.');
-                return;
-            }
-            janela.document.write(html);
-            janela.document.close();
-            janela.focus();
-            janela.onload = function() {
-                janela.print();
-                janela.onafterprint = function() { janela.close(); };
-            };
-            setTimeout(function() {
-                try { if (janela.print) janela.print(); } catch (e) {}
-            }, 250);
+            imprimirHtml(html, titulo || 'Slip', 320, 280);
         }
 
         // Imprimir item da mesa (botão por item na comanda)
@@ -2848,22 +2855,7 @@ body { font-family: 'Courier New', Courier, monospace; font-size: 11px; line-hei
 </head>
 <body><pre>${textoCompleto.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</pre></body>
 </html>`;
-            const janela = window.open('', '_blank', 'width=320,height=500');
-            if (!janela) {
-                alert('Permita pop-ups para imprimir a comanda.');
-                return;
-            }
-            janela.document.write(html);
-            janela.document.close();
-            janela.focus();
-            janela.onload = function() {
-                janela.print();
-                janela.onafterprint = function() { janela.close(); };
-            };
-            // Fallback se onload não disparar
-            setTimeout(function() {
-                try { if (janela.print) janela.print(); } catch (e) {}
-            }, 250);
+            imprimirHtml(html, 'Comanda', 320, 500);
 
             // Marcar como impresso os pedidos que foram enviados para impressão
             pedidos.forEach(p => dataManager.marcarPedidoComoImpresso(p.id));
