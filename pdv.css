@@ -178,64 +178,6 @@
     gap: 1rem;
     height: calc(100vh - 252px);
     align-items: stretch;
-    position: relative;
-}
-
-.pdv-caixa-fechado-overlay {
-    position: fixed;
-    inset: 0;
-    display: none;
-    align-items: center;
-    justify-content: center;
-    background: rgba(15, 15, 15, 0.6);
-    z-index: 9999;
-    pointer-events: auto;
-}
-
-.pdv-caixa-fechado-card {
-    background: #fff;
-    color: #111;
-    padding: 2rem 2.5rem;
-    border-radius: 16px;
-    text-align: center;
-    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.25);
-    max-width: 420px;
-    width: min(420px, 90%);
-}
-
-.pdv-caixa-fechado-icone {
-    font-size: 2.5rem;
-    margin-bottom: 0.75rem;
-}
-
-.pdv-caixa-fechado-titulo {
-    font-weight: 700;
-    margin-bottom: 0.75rem;
-    font-size: 1.35rem;
-}
-
-.pdv-caixa-fechado-texto {
-    color: var(--text-light);
-    font-size: 1rem;
-    line-height: 1.5;
-    margin-bottom: 1.5rem;
-}
-
-.pdv-caixa-fechado-abrir {
-    background: #e74c3c;
-    border-color: #e74c3c;
-    color: #fff;
-    padding: 0.75rem 1.75rem;
-    font-size: 1rem;
-    border-radius: 12px;
-    font-weight: 700;
-    box-shadow: 0 6px 14px rgba(231, 76, 60, 0.35);
-}
-
-.pdv-caixa-fechado-abrir:hover {
-    background: #d64537;
-    border-color: #d64537;
-    transform: translateY(-1px);
 }
 
 /* Reorganizar campos de pesquisa quando um painel está expandido */
@@ -412,8 +354,6 @@ body:has(.pdv-container:not(.pedidos-colapsados)) .container {
     display: flex;
     justify-content: center;
     margin-bottom: 0.5rem;
-    position: relative;
-    z-index: 1;
 }
 
 .pdv-caixa-toggle {

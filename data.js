@@ -1059,3 +1059,107 @@ function gerarPedidoAleatorio() {
     
     return dataManager.adicionarPedido(pedido);
 }
+
+// Zoom persistente para WebView
+const ZOOM_STORAGE_KEY = 'peddy_zoom';
+const ZOOM_CONFIGURED_KEY = 'peddy_zoom_configurado';
+const ZOOM_MIN = 0.7;
+const ZOOM_MAX = 1.3;
+const ZOOM_STEP = 0.05;
+
+function aplicarZoom(valor) {
+    const numero = parseFloat(valor);
+    if (Number.isNaN(numero)) return 1;
+    const clamp = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, numero));
+    const formatado = clamp.toFixed(2);
+    document.documentElement.style.zoom = formatado;
+    document.body.style.zoom = formatado;
+    return clamp;
+}
+
+function inicializarZoomUI() {
+    if (document.getElementById('zoom-config-overlay')) return;
+
+    const overlay = document.createElement('div');
+    overlay.id = 'zoom-config-overlay';
+    overlay.className = 'zoom-config-overlay';
+    overlay.innerHTML = `
+        <div class="zoom-config-card">
+            <h3>Ajustar Zoom</h3>
+            <p>Defina o zoom ideal para esta tela.</p>
+            <div class="zoom-config-controls">
+                <button type="button" class="btn btn-secondary" id="zoom-decrease">-</button>
+                <span class="zoom-config-value" id="zoom-value">100%</span>
+                <button type="button" class="btn btn-secondary" id="zoom-increase">+</button>
+            </div>
+            <div class="zoom-config-actions">
+                <button type="button" class="btn btn-secondary" id="zoom-cancel">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="zoom-save">Salvar</button>
+            </div>
+        </div>
+    `;
+
+    const botao = document.createElement('button');
+    botao.id = 'zoom-config-button';
+    botao.type = 'button';
+    botao.className = 'btn btn-secondary zoom-config-button';
+    botao.textContent = 'Zoom';
+
+    document.body.appendChild(overlay);
+    document.body.appendChild(botao);
+
+    const valorLabel = overlay.querySelector('#zoom-value');
+    let zoomAtual = aplicarZoom(localStorage.getItem(ZOOM_STORAGE_KEY) || 1);
+
+    const atualizarLabel = () => {
+        valorLabel.textContent = `${Math.round(zoomAtual * 100)}%`;
+    };
+
+    const abrir = () => {
+        overlay.style.display = 'flex';
+    };
+
+    const fechar = () => {
+        overlay.style.display = 'none';
+    };
+
+    atualizarLabel();
+
+    overlay.querySelector('#zoom-decrease').addEventListener('click', () => {
+        zoomAtual = aplicarZoom(zoomAtual - ZOOM_STEP);
+        atualizarLabel();
+    });
+
+    overlay.querySelector('#zoom-increase').addEventListener('click', () => {
+        zoomAtual = aplicarZoom(zoomAtual + ZOOM_STEP);
+        atualizarLabel();
+    });
+
+    overlay.querySelector('#zoom-cancel').addEventListener('click', () => {
+        zoomAtual = aplicarZoom(localStorage.getItem(ZOOM_STORAGE_KEY) || 1);
+        atualizarLabel();
+        fechar();
+    });
+
+    overlay.querySelector('#zoom-save').addEventListener('click', () => {
+        localStorage.setItem(ZOOM_STORAGE_KEY, zoomAtual.toFixed(2));
+        localStorage.setItem(ZOOM_CONFIGURED_KEY, '1');
+        fechar();
+    });
+
+    overlay.addEventListener('click', (event) => {
+        if (event.target === overlay) fechar();
+    });
+
+    botao.addEventListener('click', abrir);
+
+    if (!localStorage.getItem(ZOOM_CONFIGURED_KEY)) {
+        abrir();
+    }
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+    const salvo = localStorage.getItem(ZOOM_STORAGE_KEY);
+    if (salvo) aplicarZoom(salvo);
+    inicializarZoomUI();
+});

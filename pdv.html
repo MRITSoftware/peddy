@@ -56,18 +56,6 @@
 
     <div class="container">
         <div class="pdv-container produtos-colapsados entregadores-colapsados mesas-colapsadas pedidos-colapsados" id="pdv-container">
-            <div id="pdv-caixa-fechado-overlay" class="pdv-caixa-fechado-overlay" aria-hidden="true">
-                <div class="pdv-caixa-fechado-card">
-                    <div class="pdv-caixa-fechado-icone">💰</div>
-                    <div class="pdv-caixa-fechado-titulo">Caixa Fechado</div>
-                    <div class="pdv-caixa-fechado-texto">
-                        É necessário abrir o caixa antes de realizar qualquer operação.
-                    </div>
-                    <button type="button" class="btn pdv-caixa-fechado-abrir" onclick="abrirModalAbrirCaixa()">
-                        Abrir Caixa
-                    </button>
-                </div>
-            </div>
             <!-- Carrinho -->
             <div class="pdv-carrinho">
                 <!-- Parte Esquerda: Itens do Carrinho -->
@@ -666,7 +654,6 @@
         function atualizarBotaoCaixa() {
             const btn = document.getElementById('btn-toggle-caixa');
             const icon = document.getElementById('caixa-icon');
-            const overlay = document.getElementById('pdv-caixa-fechado-overlay');
             const status = getStatusCaixa();
             
             if (!status || !status.aberto) {
@@ -674,13 +661,11 @@
                 btn.className = 'btn pdv-caixa-toggle caixa-fechado';
                 icon.textContent = '✕';
                 btn.title = 'Caixa Fechado - Clique para abrir';
-                if (overlay) overlay.style.display = 'flex';
             } else {
                 // Caixa aberto
                 btn.className = 'btn pdv-caixa-toggle caixa-aberto';
                 icon.textContent = '✓';
                 btn.title = 'Caixa Aberto - Clique para fechar';
-                if (overlay) overlay.style.display = 'none';
             }
         }
 
