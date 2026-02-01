@@ -1063,7 +1063,7 @@ function gerarPedidoAleatorio() {
 // Zoom persistente para WebView
 const ZOOM_STORAGE_KEY = 'peddy_zoom';
 const ZOOM_CONFIGURED_KEY = 'peddy_zoom_configurado';
-const ZOOM_MIN = 0.7;
+const ZOOM_MIN = 0.2;
 const ZOOM_MAX = 1.3;
 const ZOOM_STEP = 0.05;
 
