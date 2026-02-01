@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mesas - Restaurante Demo</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .mesa-card {
+            background: white;
+            border-radius: 8px;
+            padding: 0.75rem;
+            box-shadow: var(--shadow);
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 2px solid transparent;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.25rem;
+        }
+
+        .mesa-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .mesa-card.mesa-ocupada {
+            background: var(--success-color);
+            color: white;
+        }
+
+        .mesa-card.mesa-livre {
+            background: #8B4513;
+            color: white;
+        }
+
+        .mesa-icon {
+            font-size: 1.5rem;
+            line-height: 1;
+            margin: 0;
+        }
+
+        .mesa-numero {
+            font-size: 0.875rem;
+            font-weight: 600;
+            line-height: 1;
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="nav-container">
+            <a href="pdv.html" class="nav-link">💰 PDV</a>
+            <a href="cliente.html" class="nav-link">🍽️ Cliente</a>
+            <a href="produtos.html" class="nav-link">🍕 Produto</a>
+            <a href="relatorios.html" class="nav-link">📈 Relatórios</a>
+            <a href="configuracoes.html" class="nav-link">⚙️ Configurações</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Mesas</h2>
+            </div>
+            <p style="color: var(--text-light);">
+                Visualize o status de todas as mesas do restaurante.
+            </p>
+        </div>
+
+        <div id="mesas-vazio" class="card" style="display: none;">
+            <p style="color: var(--text-light); margin: 0;">
+                Nenhuma mesa configurada. Configure em Configurações.
+            </p>
+        </div>
+
+        <div id="mesas-container" class="grid grid-4"></div>
+    </div>
+
+    <script src="data.js"></script>
+    <script>
+        const STORAGE_MESAS = 'peddy_numero_mesas';
+
+        // Carregar dados do restaurante
+        const restaurante = dataManager.getRestaurante();
+        // Header removido - elementos não existem mais
+        // const logoImg = document.getElementById('logo-img');
+        // if (logoImg) logoImg.src = restaurante.logo;
+        // const restauranteNome = document.getElementById('restaurante-nome');
+        // if (restauranteNome) restauranteNome.textContent = restaurante.nome;
+
+        function carregarNumeroMesas() {
+            const salvo = localStorage.getItem(STORAGE_MESAS);
+            if (!salvo || salvo === '0') {
+                return 0;
+            }
+            return parseInt(salvo);
+        }
+
+        function verificarMesaTemPedidos(numeroMesa) {
+            const pedidos = dataManager.getPedidos();
+            return pedidos.some(pedido => {
+                return pedido.numeroMesa === numeroMesa && 
+                       pedido.status !== 'finalizado' &&
+                       pedido.status !== 'entregue' &&
+                       pedido.status !== 'retirado' &&
+                       (pedido.status === 'recebido' || pedido.status === 'preparando' || pedido.status === 'pronto');
+            });
+        }
+
+        function renderizarMesas() {
+            const numeroMesas = carregarNumeroMesas();
+            const container = document.getElementById('mesas-container');
+            const vazio = document.getElementById('mesas-vazio');
+
+            if (numeroMesas === 0) {
+                container.innerHTML = '';
+                vazio.style.display = 'block';
+                return;
+            }
+
+            vazio.style.display = 'none';
+            
+            let html = '';
+            for (let i = 1; i <= numeroMesas; i++) {
+                const temPedidos = verificarMesaTemPedidos(i);
+                const classe = temPedidos ? 'mesa-ocupada' : 'mesa-livre';
+                const status = temPedidos ? 'Ocupada' : 'Livre';
+                
+                html += `
+                    <div class="mesa-card ${classe}" onclick="window.location.href='pdv.html?mesa=${i}'">
+                        <div class="mesa-icon">🪑</div>
+                        <div class="mesa-numero">${i}</div>
+                    </div>
+                `;
+            }
+            
+            container.innerHTML = html;
+        }
+
+        // Atualizar a cada 2 segundos
+        renderizarMesas();
+        setInterval(renderizarMesas, 2000);
+    </script>
+</body>
+</html>

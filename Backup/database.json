@@ -203,5 +203,10 @@
     "tempoMedioPreparo": 25,
     "tempoMedioEntrega": 35,
     "taxaEntrega": 5.00
-  }
+  },
+  "formasPagamento": [
+    { "id": 1, "nome": "Pix", "ativa": true },
+    { "id": 2, "nome": "Cartão", "ativa": true },
+    { "id": 3, "nome": "Dinheiro", "ativa": true }
+  ]
 }

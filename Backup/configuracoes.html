@@ -24,7 +24,7 @@
                 <h2 class="card-title">Configurações</h2>
             </div>
             <p style="color: var(--text-light);">
-                Cadastre entregadores e defina o numero de mesas do restaurante.
+                Cadastre entregadores, formas de pagamento e defina o número de mesas do restaurante.
             </p>
         </div>
 
@@ -70,6 +70,31 @@
                     <strong>Total configurado:</strong>
                     <span id="total-mesas">-</span>
                 </div>
+            </div>
+        </div>
+
+        <!-- Formas de Pagamento -->
+        <div class="card" style="margin-top: 1.5rem;">
+            <div class="card-header">
+                <h3 class="card-title">Formas de Pagamento</h3>
+            </div>
+            <p style="color: var(--text-light); font-size: 0.875rem; margin-bottom: 1rem;">
+                As formas cadastradas aparecem no PDV e na tela de pedido online do cliente.
+            </p>
+            <form id="form-formas-pagamento">
+                <div class="form-group" style="display: flex; gap: 0.75rem; align-items: flex-end; flex-wrap: wrap;">
+                    <div style="flex: 1; min-width: 200px;">
+                        <label for="forma-pagamento-nome">Nome</label>
+                        <input type="text" id="forma-pagamento-nome" placeholder="Ex: Pix, Cartão, Dinheiro" required>
+                    </div>
+                    <input type="hidden" id="forma-pagamento-id" value="">
+                    <button type="submit" class="btn btn-primary" id="btn-salvar-forma">Cadastrar</button>
+                    <button type="button" class="btn btn-secondary" id="btn-cancelar-forma" style="display: none;">Cancelar</button>
+                </div>
+            </form>
+            <div class="mt-2">
+                <h4 style="margin-bottom: 0.5rem;">Formas cadastradas</h4>
+                <div id="lista-formas-pagamento" style="display: grid; gap: 0.5rem;"></div>
             </div>
         </div>
     </div>
@@ -173,8 +198,85 @@
             totalMesas.textContent = salvo;
         }
 
+        function renderizarFormasPagamento() {
+            const lista = document.getElementById('lista-formas-pagamento');
+            const formas = dataManager.getFormasPagamentoTodas();
+            if (formas.length === 0) {
+                lista.innerHTML = '<span style="color: var(--text-light);">Nenhuma forma de pagamento cadastrada.</span>';
+                return;
+            }
+            lista.innerHTML = formas.map(f => {
+                const nomeEsc = (f.nome || '').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                return `
+                <div class="card" style="padding: 0.75rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem;">
+                    <div>
+                        <strong>${(f.nome || '').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</strong>
+                        ${f.ativa === false ? ' <span style="color: var(--text-light); font-size: 0.875rem;">(inativa)</span>' : ''}
+                    </div>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <button type="button" class="btn btn-small btn-secondary" data-forma-id="${f.id}" data-forma-nome="${nomeEsc}">Editar</button>
+                        <button type="button" class="btn btn-small btn-danger" data-forma-id="${f.id}" data-forma-nome="${(f.nome || '').replace(/"/g, '&quot;')}">Excluir</button>
+                    </div>
+                </div>
+            `;
+            }).join('');
+            lista.querySelectorAll('button[data-forma-id]').forEach(btn => {
+                const id = btn.getAttribute('data-forma-id');
+                const nome = btn.getAttribute('data-forma-nome') || '';
+                if (btn.classList.contains('btn-danger')) {
+                    btn.onclick = () => excluirFormaPagamento(Number(id), nome);
+                } else {
+                    btn.onclick = () => editarFormaPagamento(id, nome);
+                }
+            });
+        }
+
+        function editarFormaPagamento(id, nome) {
+            document.getElementById('forma-pagamento-id').value = id;
+            document.getElementById('forma-pagamento-nome').value = (nome || '').replace(/&quot;/g, '"').replace(/&lt;/g, '<').replace(/&gt;/g, '>');
+            document.getElementById('btn-salvar-forma').textContent = 'Salvar';
+            document.getElementById('btn-cancelar-forma').style.display = 'inline-block';
+            document.getElementById('forma-pagamento-nome').focus();
+        }
+
+        function excluirFormaPagamento(id, nome) {
+            const nomeExibir = (nome || '').replace(/&quot;/g, '"').replace(/&lt;/g, '<').replace(/&gt;/g, '>');
+            if (!confirm('Excluir a forma de pagamento "' + nomeExibir + '"?')) return;
+            dataManager.removerFormaPagamento(Number(id));
+            renderizarFormasPagamento();
+            document.getElementById('form-formas-pagamento').reset();
+            document.getElementById('forma-pagamento-id').value = '';
+            document.getElementById('btn-salvar-forma').textContent = 'Cadastrar';
+            document.getElementById('btn-cancelar-forma').style.display = 'none';
+        }
+
+        document.getElementById('form-formas-pagamento').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const id = document.getElementById('forma-pagamento-id').value;
+            const nome = document.getElementById('forma-pagamento-nome').value.trim();
+            if (!nome) return;
+            if (id) {
+                dataManager.atualizarFormaPagamento(Number(id), { nome });
+            } else {
+                dataManager.adicionarFormaPagamento({ nome });
+            }
+            renderizarFormasPagamento();
+            document.getElementById('form-formas-pagamento').reset();
+            document.getElementById('forma-pagamento-id').value = '';
+            document.getElementById('btn-salvar-forma').textContent = 'Cadastrar';
+            document.getElementById('btn-cancelar-forma').style.display = 'none';
+        });
+
+        document.getElementById('btn-cancelar-forma').addEventListener('click', function() {
+            document.getElementById('forma-pagamento-id').value = '';
+            document.getElementById('forma-pagamento-nome').value = '';
+            document.getElementById('btn-salvar-forma').textContent = 'Cadastrar';
+            document.getElementById('btn-cancelar-forma').style.display = 'none';
+        });
+
         renderizarEntregadores();
         carregarMesas();
+        renderizarFormasPagamento();
     </script>
 </body>
 </html>

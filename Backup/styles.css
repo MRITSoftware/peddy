@@ -311,11 +311,26 @@ nav .nav-link.active {
 }
 
 .radio-group label,
-.checkbox-group label {
+.checkbox-group label,
+.label-checkbox {
     display: flex;
     align-items: center;
     gap: 0.5rem;
     cursor: pointer;
+    font-weight: 500;
+    color: var(--dark-color);
+}
+
+/* Checkbox dentro de label: alinhamento e tamanho consistente (não herdar width/padding do form-group) */
+.label-checkbox input[type="checkbox"],
+.checkbox-group input[type="checkbox"] {
+    width: 1.125rem;
+    height: 1.125rem;
+    margin: 0;
+    padding: 0;
+    cursor: pointer;
+    flex-shrink: 0;
+    border-radius: 4px;
 }
 
 /* Badges */

@@ -1,0 +1,49 @@
+
+
+
+                     Página de Teste da Impressora do Windows
+     Você instalou corretamente Generic / Text Only em DESKTOP-N3DCMTF.
+     PROPRIEDADES DA IMPRESSORA
+     Horário de      20:28:55
+     Envio:
+     Data:           .29/.01/.26
+     Nome de         DESKTOP-N3DCMTF\Sr.Guilherme
+     Usuário:
+     Nome do         DESKTOP-N3DCMTF
+     Computador:
+     Nome da         IMP
+     Impressora:
+     Modelo da       Generic / Text Only
+     Impressora:
+     Suporte         Não
+     para Cores:
+     Nome(s) de      TCP_9100
+     Porta:
+     Formato de      RAW
+     Dados:
+     Local da 
+     Impressora:
+     Processador     winprint
+     de 
+     Impressão:
+     Comentário:
+     Ambiente de     Windows x64
+     SO:
+     PROPRIEDADES DE DRIVER DE IMPRESSÃO
+     Nome do         Generic / Text Only
+     Driver:
+     Tipo de         Tipo 3 - Modo de Usuário
+     Driver:
+     Versão do       10.0.26100.7623
+     Driver:
+     ARQUIVOS ADICIONAIS DE DRIVER DE IMPRESSÃO
+      C:\WINDOWS\system32\spool\DRIVERS\x64\3\TTYRES.DLL
+      C:\WINDOWS\system32\spool\DRIVERS\x64\3\TTY.INI
+      C:\WINDOWS\system32\spool\DRIVERS\x64\3\TTY.DLL
+      C:\WINDOWS\system32\spool\DRIVERS\x64\3\TTYUI.DLL
+      C:\WINDOWS\system32\spool\DRIVERS\x64\3\TTYUI.HLP
+      C:\WINDOWS\system32\spool\DRIVERS\x64\3\UNIRES.DLL
+      C:\WINDOWS\system32\spool\DRIVERS\x64\3\STDNAMES.GPD
+      C:\WINDOWS\system32\spool\DRIVERS\x64\3\STDDTYPE.GDL
+      C:\WINDOWS\system32\spool\DRIVERS\x64\3\STDSCHEM.GDL
+      C:\WINDOWS\system32\spool\DRIVERS\x64\3\STDSCHMX.GDL

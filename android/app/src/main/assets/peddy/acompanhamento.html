@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acompanhamento do Pedido - Restaurante Demo</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .acompanhamento-container { max-width: 560px; margin: 0 auto; padding: 2rem 1rem; }
+        .acompanhamento-numero { font-size: 1.5rem; font-weight: 700; color: var(--primary-color); margin-bottom: 2rem; text-align: center; }
+        .timeline { position: relative; padding-left: 2rem; }
+        .timeline::before { content: ''; position: absolute; left: 0.5rem; top: 0; bottom: 0; width: 3px; background: var(--border-color); border-radius: 2px; }
+        .timeline-item { position: relative; padding-bottom: 2rem; }
+        .timeline-item:last-child { padding-bottom: 0; }
+        .timeline-item::before { content: ''; position: absolute; left: -1.625rem; top: 0.35rem; width: 16px; height: 16px; border-radius: 50%; background: var(--border-color); border: 3px solid var(--light-color); box-shadow: var(--shadow); }
+        .timeline-item.ativo::before { background: var(--primary-color); }
+        .timeline-item.concluido::before { background: var(--success-color); }
+        .timeline-item.concluido::after { content: '✓'; position: absolute; left: -1.75rem; top: -0.05rem; color: white; font-size: 10px; font-weight: bold; }
+        .timeline-titulo { font-weight: 600; color: var(--text-color); margin-bottom: 0.25rem; }
+        .timeline-desc { font-size: 0.9rem; color: var(--text-light); }
+        .btn-novo-pedido { display: block; width: 100%; max-width: 280px; margin: 2rem auto 0; padding: 1rem; font-size: 1.1rem; text-align: center; }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="nav-container">
+            <a href="pdv.html" class="nav-link">💰 PDV</a>
+            <a href="cliente.html" class="nav-link active">🍽️ Cliente</a>
+            <a href="entregador.html" class="nav-link">🏍️ Entregador</a>
+            <a href="produtos.html" class="nav-link">🍕 Produto</a>
+            <a href="relatorios.html" class="nav-link">📈 Relatórios</a>
+            <a href="configuracoes.html" class="nav-link">⚙️ Configurações</a>
+        </div>
+    </nav>
+
+    <div class="container acompanhamento-container">
+        <h2 style="margin-bottom: 0.5rem; text-align: center;">📦 Acompanhamento do Pedido</h2>
+        <p style="text-align: center; color: var(--text-light); margin-bottom: 1.5rem;">Acompanhe o status do seu pedido em tempo real.</p>
+
+        <div class="acompanhamento-numero" id="numero-pedido">—</div>
+
+        <div class="timeline" id="timeline">
+            <div class="timeline-item concluido" id="step-1">
+                <div class="timeline-titulo">Pedido realizado</div>
+                <div class="timeline-desc">Seu pedido foi recebido.</div>
+            </div>
+            <div class="timeline-item" id="step-2">
+                <div class="timeline-titulo">Pedido em preparo</div>
+                <div class="timeline-desc">Aguardando impressão para iniciar o preparo.</div>
+            </div>
+            <div class="timeline-item" id="step-3">
+                <div class="timeline-titulo">Pedido saiu para entrega</div>
+                <div class="timeline-desc">Aguardando atribuição ao entregador.</div>
+            </div>
+        </div>
+
+        <a href="cliente.html" class="btn btn-secondary btn-novo-pedido" id="btn-novo-pedido">🛒 Novo pedido</a>
+    </div>
+
+    <script>
+        var PEDDY_PEDIDO_ACOMPANHAMENTO = 'peddy_pedido_acompanhamento';
+
+        function getIdPedido() {
+            var params = new URLSearchParams(window.location.search);
+            var id = params.get('id');
+            if (id) return id;
+            try {
+                return localStorage.getItem(PEDDY_PEDIDO_ACOMPANHAMENTO);
+            } catch (e) { return null; }
+        }
+
+        function setCachePedido(id) {
+            try {
+                if (id) localStorage.setItem(PEDDY_PEDIDO_ACOMPANHAMENTO, id);
+                else localStorage.removeItem(PEDDY_PEDIDO_ACOMPANHAMENTO);
+            } catch (e) {}
+        }
+
+        function getPedidoDoStorage(idPedido) {
+            try {
+                var raw = localStorage.getItem('restaurante_demo_data');
+                if (!raw) return null;
+                var data = JSON.parse(raw);
+                var pedidos = data.pedidos || [];
+                var p = pedidos.find(function(p) { return p && p.id === idPedido; });
+                if (p) return p;
+                var finalizados = data.pedidosFinalizados || [];
+                return finalizados.find(function(p) { return p && p.id === idPedido; }) || null;
+            } catch (e) { return null; }
+        }
+
+        function ehFinalizado(pedido) {
+            if (!pedido || !pedido.status) return false;
+            var s = pedido.status;
+            return s === 'finalizado' || s === 'entregue' || s === 'retirado';
+        }
+
+        function atualizarTela(pedido) {
+            var numEl = document.getElementById('numero-pedido');
+            var idPedido = getIdPedido();
+            numEl.textContent = idPedido ? 'Pedido #' + idPedido : '—';
+
+            var step1 = document.getElementById('step-1');
+            var step2 = document.getElementById('step-2');
+            var step3 = document.getElementById('step-3');
+
+            step1.classList.remove('ativo');
+            step1.classList.add('concluido');
+
+            step2.classList.remove('concluido', 'ativo');
+            step2.querySelector('.timeline-desc').textContent = 'Aguardando impressão para iniciar o preparo.';
+            if (pedido && pedido.impresso === true) {
+                step2.classList.add('concluido');
+                step2.querySelector('.timeline-desc').textContent = 'Seu pedido está sendo preparado.';
+            } else {
+                step2.classList.add('ativo');
+            }
+
+            step3.classList.remove('concluido', 'ativo');
+            step3.querySelector('.timeline-desc').textContent = 'Aguardando atribuição ao entregador.';
+            if (pedido && (pedido.motoboyId || pedido.entregadorId)) {
+                step3.classList.add('concluido');
+                step3.querySelector('.timeline-desc').textContent = 'Pedido saiu para entrega!';
+            } else if (pedido && pedido.impresso === true) {
+                step3.classList.add('ativo');
+            }
+        }
+
+        function verificarEAtualizar() {
+            var idPedido = getIdPedido();
+            if (!idPedido) {
+                window.location.href = 'cliente.html';
+                return;
+            }
+            setCachePedido(idPedido);
+            var pedido = getPedidoDoStorage(idPedido);
+            if (ehFinalizado(pedido)) {
+                setCachePedido(null);
+                window.location.href = 'cliente.html';
+                return;
+            }
+            atualizarTela(pedido);
+        }
+
+        document.getElementById('btn-novo-pedido').addEventListener('click', function(e) {
+            e.preventDefault();
+            setCachePedido(null);
+            window.location.href = 'cliente.html';
+        });
+
+        verificarEAtualizar();
+        setInterval(verificarEAtualizar, 2500);
+    </script>
+</body>
+</html>

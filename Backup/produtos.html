@@ -82,17 +82,26 @@
                     <input type="number" id="produto-preco" required min="0" step="0.01" placeholder="18.90">
                 </div>
                 <div class="form-group">
-                    <label for="produto-imagem">URL da Imagem</label>
-                    <input type="url" id="produto-imagem" placeholder="https://via.placeholder.com/200">
+                    <label for="produto-imagem">Imagem do produto</label>
+                    <input type="text" id="produto-imagem" placeholder="URL da imagem ou use o botão abaixo para carregar do computador">
+                    <div style="margin-top: 0.75rem;">
+                        <label class="btn btn-secondary" style="cursor: pointer; margin-bottom: 0.5rem; display: inline-block; color: white; font-weight: bold;">
+                            📁 Carregar do computador
+                            <input type="file" id="produto-imagem-file" accept="image/*" style="display: none;">
+                        </label>
+                    </div>
+                    <div id="produto-imagem-preview" style="margin-top: 0.75rem; display: none;">
+                        <img id="produto-imagem-preview-img" src="" alt="Preview" style="max-width: 200px; max-height: 200px; object-fit: contain; border-radius: 8px; border: 2px solid var(--border-color);">
+                    </div>
                 </div>
                 <div class="form-group">
                     <label for="produto-descricao">Descrição</label>
                     <textarea id="produto-descricao" placeholder="Descrição do produto"></textarea>
                 </div>
                 <div class="form-group">
-                    <label>
+                    <label class="label-checkbox" for="produto-prato-do-dia">
                         <input type="checkbox" id="produto-prato-do-dia">
-                        Prato do Dia
+                        <span>Prato do Dia</span>
                     </label>
                 </div>
                 <div class="form-group" id="dias-semana-group" style="display: none;">
@@ -123,6 +132,37 @@
         // Header removido - elemento não existe mais
         // const logoImg = document.getElementById('logo-img');
         // if (logoImg) logoImg.src = restaurante.logo;
+
+        // Preview e carregamento de imagem do computador
+        function atualizarPreviewImagemProduto() {
+            const valor = document.getElementById('produto-imagem').value.trim();
+            const previewDiv = document.getElementById('produto-imagem-preview');
+            const previewImg = document.getElementById('produto-imagem-preview-img');
+            if (!valor) {
+                previewDiv.style.display = 'none';
+                previewImg.src = '';
+                return;
+            }
+            previewDiv.style.display = 'block';
+            previewImg.src = valor;
+            previewImg.onerror = function() { previewDiv.style.display = 'none'; };
+        }
+
+        document.getElementById('produto-imagem-file').addEventListener('change', function(e) {
+            const file = e.target.files && e.target.files[0];
+            if (!file || !file.type.startsWith('image/')) return;
+            const reader = new FileReader();
+            reader.onload = function() {
+                document.getElementById('produto-imagem').value = reader.result;
+                atualizarPreviewImagemProduto();
+            };
+            reader.readAsDataURL(file);
+            e.target.value = '';
+        });
+
+        document.getElementById('produto-imagem').addEventListener('input', function() {
+            atualizarPreviewImagemProduto();
+        });
 
         // Carregar categorias no select
         function carregarCategoriasSelect() {
@@ -273,6 +313,7 @@
                     document.getElementById('produto-preco').value = produto.preco;
                     document.getElementById('produto-imagem').value = produto.imagem || '';
                     document.getElementById('produto-descricao').value = produto.descricao || '';
+                    atualizarPreviewImagemProduto();
                     
                     if (produto.pratoDoDia && produto.pratoDoDia.length > 0) {
                         document.getElementById('produto-prato-do-dia').checked = true;
@@ -287,6 +328,8 @@
                 }
             } else {
                 document.getElementById('modal-produto-titulo').textContent = 'Adicionar Produto';
+                document.getElementById('produto-imagem').value = '';
+                atualizarPreviewImagemProduto();
             }
 
             document.getElementById('modal-produto').classList.add('active');

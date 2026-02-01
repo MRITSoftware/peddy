@@ -79,14 +79,17 @@
             <div id="pagamento-legend" style="display: flex; justify-content: center; gap: 2rem; margin-top: 1rem; flex-wrap: wrap;"></div>
         </div>
 
-        <!-- Tabela de Pedidos -->
+        <!-- Tabela de Pedidos Finalizados -->
         <div class="card">
             <div class="card-header">
-                <h2 class="card-title">Pedidos do Período</h2>
+                <h2 class="card-title">Pedidos Finalizados do Período</h2>
                 <button class="btn btn-primary" onclick="exportarCSV()">
                     📥 Exportar CSV
                 </button>
             </div>
+            <p style="color: var(--text-light); font-size: 0.875rem; margin: 0 0 1rem 0;">
+                Inclui todos os pedidos finalizados: mesa, balcão e online (concluídos no PDV ou pedidos online entregues/retirados).
+            </p>
             <div class="table-container">
                 <table>
                     <thead>
@@ -95,6 +98,7 @@
                             <th>Data/Hora Criação</th>
                             <th>Data/Hora Finalização</th>
                             <th>Cliente</th>
+                            <th>Canal</th>
                             <th>Tipo</th>
                             <th>Itens</th>
                             <th>Valor Total</th>
@@ -105,8 +109,8 @@
                     </thead>
                     <tbody id="tabela-pedidos">
                         <tr>
-                            <td colspan="10" style="text-align: center; padding: 2rem; color: var(--text-light);">
-                                Nenhum pedido no período selecionado.
+                            <td colspan="11" style="text-align: center; padding: 2rem; color: var(--text-light);">
+                                Nenhum pedido finalizado no período selecionado.
                             </td>
                         </tr>
                     </tbody>
@@ -139,23 +143,19 @@
             document.getElementById('data-inicio').value = seteDiasAtras.toISOString().split('T')[0];
         }
 
-        // Obter pedidos filtrados
+        // Obter pedidos finalizados filtrados por período (fonte: tela de relatório)
         function obterPedidosFiltrados() {
             const dataInicio = document.getElementById('data-inicio').value;
             const dataFim = document.getElementById('data-fim').value;
 
-            // Apenas pedidos finalizados (status = "finalizado")
-            let pedidos = dataManager.getPedidosFinalizados().filter(p => 
-                p.status === 'finalizado'
-            );
+            // Pedidos finalizados vêm de getPedidosFinalizados() (PDV/cliente ao finalizar)
+            let pedidos = dataManager.getPedidosFinalizados().slice();
 
             if (dataInicio) {
-                pedidos = pedidos.filter(p => p.dataCriacao >= dataInicio);
+                pedidos = pedidos.filter(p => p.dataCriacao && String(p.dataCriacao).slice(0, 10) >= dataInicio);
             }
             if (dataFim) {
-                const dataFimLimite = new Date(dataFim);
-                dataFimLimite.setHours(23, 59, 59, 999);
-                pedidos = pedidos.filter(p => p.dataCriacao <= dataFimLimite.toISOString());
+                pedidos = pedidos.filter(p => p.dataCriacao && String(p.dataCriacao).slice(0, 10) <= dataFim);
             }
 
             return pedidos;
@@ -305,8 +305,8 @@
             if (todosPedidosFiltrados.length === 0) {
                 tbody.innerHTML = `
                     <tr>
-                        <td colspan="10" style="text-align: center; padding: 2rem; color: var(--text-light);">
-                            Nenhum pedido no período selecionado.
+                        <td colspan="11" style="text-align: center; padding: 2rem; color: var(--text-light);">
+                            Nenhum pedido finalizado no período selecionado.
                         </td>
                     </tr>
                 `;
@@ -335,6 +335,13 @@
                 const itens = pedido.itens.map(item => `${item.quantidade}x ${item.nome}`).join(', ');
                 const tempoEntrega = pedido.tempoEntrega ? `${pedido.tempoEntrega} min` : '-';
                 const formaPagamento = pedido.pagamento || 'Não informado';
+                const canal = (function() {
+                    const v = pedido.tipoVenda || '';
+                    if (v === 'mesa') return 'Mesa';
+                    if (v === 'balcao') return 'Balcão';
+                    if (v === 'online') return 'Online';
+                    return v ? String(v).charAt(0).toUpperCase() + String(v).slice(1) : '-';
+                })();
 
                 return `
                     <tr>
@@ -342,6 +349,7 @@
                         <td>${dataCriacaoFormatada}</td>
                         <td>${dataFinalizacaoFormatada}</td>
                         <td>${pedido.cliente}</td>
+                        <td>${canal}</td>
                         <td>${pedido.tipo === 'entrega' ? 'Entrega' : 'Retirada'}</td>
                         <td>${itens}</td>
                         <td>R$ ${(pedido.valorTotal || 0).toFixed(2).replace('.', ',')}</td>
@@ -433,7 +441,7 @@
                 return;
             }
 
-            let csv = 'ID,Data/Hora Criação,Data/Hora Finalização,Cliente,Tipo,Itens,Valor Total,Pagamento,Status,Tempo Entrega\n';
+            let csv = 'ID,Data/Hora Criação,Data/Hora Finalização,Cliente,Canal,Tipo,Itens,Valor Total,Pagamento,Status,Tempo Entrega\n';
             
             pedidos.forEach(pedido => {
                 const dataCriacao = new Date(pedido.dataCriacao);
@@ -448,8 +456,10 @@
                 const itens = pedido.itens.map(item => `${item.quantidade}x ${item.nome}`).join('; ');
                 const tempoEntrega = pedido.tempoEntrega ? `${pedido.tempoEntrega} min` : '-';
                 const formaPagamento = pedido.pagamento || 'Não informado';
+                const v = pedido.tipoVenda || '';
+                const canal = v === 'mesa' ? 'Mesa' : (v === 'balcao' ? 'Balcão' : (v === 'online' ? 'Online' : (v ? String(v).charAt(0).toUpperCase() + String(v).slice(1) : '-')));
                 
-                csv += `${pedido.id},${dataCriacaoFormatada},${dataFinalizacaoFormatada},"${pedido.cliente}",${pedido.tipo},"${itens}",${pedido.valorTotal || 0},${formaPagamento},${pedido.status},${tempoEntrega}\n`;
+                csv += `${pedido.id},${dataCriacaoFormatada},${dataFinalizacaoFormatada},"${pedido.cliente}",${canal},${pedido.tipo},"${itens}",${pedido.valorTotal || 0},${formaPagamento},${pedido.status},${tempoEntrega}\n`;
             });
 
             const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });

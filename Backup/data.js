@@ -59,7 +59,12 @@ const initialRestaurantData = {
         tempoMedioPreparo: 25, // minutos
         tempoMedioEntrega: 35, // minutos
         taxaEntrega: 5.00
-    }
+    },
+    formasPagamento: [
+        { id: 1, nome: "Pix", ativa: true },
+        { id: 2, nome: "Cartão", ativa: true },
+        { id: 3, nome: "Dinheiro", ativa: true }
+    ]
 };
 
 // Gerenciador de dados
@@ -87,15 +92,14 @@ class DataManager {
     }
     
     loadFromLocalStorage() {
-        // PRIORIDADE 2: Se não conseguir carregar do JSON, usar localStorage
         const saved = localStorage.getItem('restaurante_demo_data');
         if (saved) {
             try {
                 const parsed = JSON.parse(saved);
-                if (this.importarDados(parsed)) {
+                if (parsed && typeof parsed === 'object') {
+                    this.aplicarDadosSalvos(parsed);
                     console.log('✅ Dados carregados do localStorage');
-                    // Sincronizar JSON com localStorage (backup)
-                    this.sincronizarComDatabaseJSON();
+                    this.sincronizarComDatabaseJSON(); // envia this.data atual para o arquivo (se servidor estiver rodando)
                     this.dadosCarregados = true;
                     this.carregando = false;
                     return;
@@ -105,12 +109,64 @@ class DataManager {
             }
         }
         
-        // PRIORIDADE 3: Se não houver dados salvos, usar dados iniciais
-        console.log('ℹ️ Usando dados iniciais padrão');
-        this.data = { ...initialRestaurantData };
-        this.dadosCarregados = true;
-        this.carregando = false;
-        this.saveData();
+        // Se não houver dados salvos ou parse falhou: tentar database.json (quando servidor está rodando)
+        this.tentarCarregarDoArquivo();
+    }
+    
+    /** Aplica dados vindos do localStorage ou arquivo, garantindo estrutura completa. Sempre sobrescreve this.data. */
+    aplicarDadosSalvos(dados) {
+        if (!dados || typeof dados !== 'object') return;
+        this.data = {
+            restaurante: dados.restaurante || initialRestaurantData.restaurante,
+            cardapio: Array.isArray(dados.cardapio) ? dados.cardapio : initialRestaurantData.cardapio,
+            pedidos: Array.isArray(dados.pedidos) ? dados.pedidos.map(p => ({
+                ...p,
+                dataCriacao: p.dataCriacao ? new Date(p.dataCriacao).toISOString() : new Date().toISOString()
+            })) : [],
+            pedidosFinalizados: Array.isArray(dados.pedidosFinalizados) ? dados.pedidosFinalizados : [],
+            motoboys: Array.isArray(dados.motoboys) ? dados.motoboys.map(m => ({
+                ...m,
+                pedidosAtribuidos: Array.isArray(m.pedidosAtribuidos) ? m.pedidosAtribuidos : []
+            })) : initialRestaurantData.motoboys,
+            categorias: Array.isArray(dados.categorias) ? dados.categorias : initialRestaurantData.categorias,
+            proximoNumeroPedido: dados.proximoNumeroPedido != null ? dados.proximoNumeroPedido : 1,
+            proximoNumeroPedidoOnline: dados.proximoNumeroPedidoOnline != null ? dados.proximoNumeroPedidoOnline : 1,
+            proximoNumeroPedidoBalcao: dados.proximoNumeroPedidoBalcao != null ? dados.proximoNumeroPedidoBalcao : 1,
+            configuracao: dados.configuracao || initialRestaurantData.configuracao,
+            formasPagamento: Array.isArray(dados.formasPagamento) ? dados.formasPagamento : (initialRestaurantData.formasPagamento || [])
+        };
+    }
+    
+    /** Quando não há localStorage, tenta carregar database.json (ex.: servidor rodando). Se falhar, usa dados iniciais. */
+    tentarCarregarDoArquivo() {
+        const usarDadosIniciais = () => {
+            console.log('ℹ️ Usando dados iniciais padrão');
+            this.data = JSON.parse(JSON.stringify(initialRestaurantData));
+            this.dadosCarregados = true;
+            this.carregando = false;
+            this.saveData();
+        };
+        if (typeof fetch === 'undefined') {
+            usarDadosIniciais();
+            return;
+        }
+        fetch('database.json?' + new Date().getTime())
+            .then(response => {
+                if (!response.ok) throw new Error('Arquivo não encontrado');
+                return response.json();
+            })
+            .then(dados => {
+                if (dados && typeof dados === 'object') {
+                    this.aplicarDadosSalvos(dados);
+                    console.log('✅ Dados carregados do database.json');
+                    localStorage.setItem('restaurante_demo_data', JSON.stringify(this.data));
+                }
+                this.dadosCarregados = true;
+                this.carregando = false;
+            })
+            .catch(() => {
+                usarDadosIniciais();
+            });
     }
     
     // Função auxiliar para importar dados (validação e estruturação)
@@ -137,7 +193,8 @@ class DataManager {
                 proximoNumeroPedido: dados.proximoNumeroPedido || 1,
                 proximoNumeroPedidoOnline: dados.proximoNumeroPedidoOnline || 1,
                 proximoNumeroPedidoBalcao: dados.proximoNumeroPedidoBalcao || 1,
-                configuracao: dados.configuracao || initialRestaurantData.configuracao
+                configuracao: dados.configuracao || initialRestaurantData.configuracao,
+                formasPagamento: Array.isArray(dados.formasPagamento) ? dados.formasPagamento : (initialRestaurantData.formasPagamento || [])
             };
             
             // Verificar se os dados realmente mudaram antes de atualizar
@@ -154,17 +211,33 @@ class DataManager {
         }
     }
     
+    /** Retorna objeto completo para persistência (todas as chaves garantidas). */
+    getDataParaSalvar() {
+        return {
+            restaurante: this.data.restaurante || initialRestaurantData.restaurante,
+            cardapio: Array.isArray(this.data.cardapio) ? this.data.cardapio : initialRestaurantData.cardapio,
+            pedidos: Array.isArray(this.data.pedidos) ? this.data.pedidos : [],
+            pedidosFinalizados: Array.isArray(this.data.pedidosFinalizados) ? this.data.pedidosFinalizados : [],
+            motoboys: Array.isArray(this.data.motoboys) ? this.data.motoboys : initialRestaurantData.motoboys,
+            categorias: Array.isArray(this.data.categorias) ? this.data.categorias : initialRestaurantData.categorias,
+            proximoNumeroPedido: this.data.proximoNumeroPedido != null ? this.data.proximoNumeroPedido : 1,
+            proximoNumeroPedidoOnline: this.data.proximoNumeroPedidoOnline != null ? this.data.proximoNumeroPedidoOnline : 1,
+            proximoNumeroPedidoBalcao: this.data.proximoNumeroPedidoBalcao != null ? this.data.proximoNumeroPedidoBalcao : 1,
+            configuracao: this.data.configuracao || initialRestaurantData.configuracao,
+            formasPagamento: Array.isArray(this.data.formasPagamento) ? this.data.formasPagamento : (initialRestaurantData.formasPagamento || [])
+        };
+    }
+    
     saveData() {
-        // PRIORIDADE 1: Salvar no arquivo JSON primeiro (fonte de verdade)
-        this.sincronizarComDatabaseJSON();
-        
-        // PRIORIDADE 2: Salvar no localStorage como backup
-        localStorage.setItem('restaurante_demo_data', JSON.stringify(this.data));
+        const payload = this.getDataParaSalvar();
+        this.sincronizarComDatabaseJSON(payload);
+        localStorage.setItem('restaurante_demo_data', JSON.stringify(payload));
     }
     
     // Sincronizar dados com o arquivo database.json
-    sincronizarComDatabaseJSON() {
-        const jsonData = JSON.stringify(this.data, null, 2);
+    sincronizarComDatabaseJSON(payload) {
+        const dados = payload != null ? payload : this.getDataParaSalvar();
+        const jsonData = JSON.stringify(dados, null, 2);
         
         // Verificar se estamos em ambiente HTTP/HTTPS (não file://)
         const isHttpProtocol = typeof window !== 'undefined' && 
@@ -255,29 +328,14 @@ class DataManager {
         return json;
     }
     
-    // Importar dados de JSON
+    // Importar dados de JSON (preserva todas as chaves: formasPagamento, pedidosFinalizados, etc.)
     importarDeJSON(jsonString) {
         try {
             const dados = JSON.parse(jsonString);
-            // Validar estrutura básica
-            if (dados.restaurante && dados.cardapio && Array.isArray(dados.cardapio)) {
-                this.data = {
-                    restaurante: dados.restaurante || this.data.restaurante,
-                    cardapio: dados.cardapio || this.data.cardapio,
-                    pedidos: dados.pedidos || [],
-                    pedidosFinalizados: dados.pedidosFinalizados || [],
-                    motoboys: dados.motoboys || this.data.motoboys,
-                    categorias: dados.categorias || this.data.categorias,
-                    proximoNumeroPedido: dados.proximoNumeroPedido || 1,
-                    proximoNumeroPedidoOnline: dados.proximoNumeroPedidoOnline || 1,
-                    proximoNumeroPedidoBalcao: dados.proximoNumeroPedidoBalcao || 1,
-                    configuracao: dados.configuracao || this.data.configuracao
-                };
-                this.saveData();
-                return true;
-            } else {
-                throw new Error('Estrutura de dados inválida');
-            }
+            if (!dados || typeof dados !== 'object') return false;
+            this.aplicarDadosSalvos(dados);
+            this.saveData();
+            return true;
         } catch (e) {
             console.error('Erro ao importar dados:', e);
             return false;
@@ -327,9 +385,10 @@ class DataManager {
         }
     }
     
+    /** ZERA todos os dados (só usar em Gestor quando o usuário confirmar). */
     resetData() {
         localStorage.removeItem('restaurante_demo_data');
-        this.data = { ...initialRestaurantData };
+        this.data = JSON.parse(JSON.stringify(initialRestaurantData));
         this.saveData();
         return true;
     }
@@ -368,6 +427,17 @@ class DataManager {
         // Retorna todos os pedidos finalizados (independente do status específico)
         // Isso garante que todos os pedidos finalizados sejam considerados para numeração única
         return this.data.pedidosFinalizados;
+    }
+    
+    /** Remove todos os pedidos (ativos e finalizados) criados hoje. Zera os contadores do dia. */
+    zerarContadoresDoDia() {
+        const hoje = new Date().toISOString().slice(0, 10);
+        const antesPedidos = this.data.pedidos.length;
+        const antesFinalizados = this.data.pedidosFinalizados.length;
+        this.data.pedidos = this.data.pedidos.filter(p => !p.dataCriacao || !String(p.dataCriacao).startsWith(hoje));
+        this.data.pedidosFinalizados = this.data.pedidosFinalizados.filter(p => !p.dataCriacao || !String(p.dataCriacao).startsWith(hoje));
+        this.saveData();
+        return { removidosPedidos: antesPedidos - this.data.pedidos.length, removidosFinalizados: antesFinalizados - this.data.pedidosFinalizados.length };
     }
     
     isPedidoAtivo(pedido) {
@@ -899,6 +969,52 @@ class DataManager {
         const index = this.data.categorias.findIndex(c => c.id === id);
         if (index !== -1) {
             this.data.categorias.splice(index, 1);
+            this.saveData();
+            return true;
+        }
+        return false;
+    }
+
+    // Formas de pagamento (cadastradas em Configurações)
+    getFormasPagamento() {
+        const list = this.data.formasPagamento || [];
+        return list.filter(f => f.ativa !== false);
+    }
+
+    getFormasPagamentoTodas() {
+        return this.data.formasPagamento || [];
+    }
+
+    getFormaPagamento(id) {
+        return (this.data.formasPagamento || []).find(f => f.id === id);
+    }
+
+    adicionarFormaPagamento(forma) {
+        if (!this.data.formasPagamento) this.data.formasPagamento = [];
+        const ids = this.data.formasPagamento.map(f => f.id);
+        const novoId = ids.length > 0 ? Math.max(...ids) + 1 : 1;
+        const nova = { id: novoId, nome: (forma.nome || '').trim(), ativa: forma.ativa !== undefined ? forma.ativa : true };
+        this.data.formasPagamento.push(nova);
+        this.saveData();
+        return nova;
+    }
+
+    atualizarFormaPagamento(id, dados) {
+        const list = this.data.formasPagamento || [];
+        const index = list.findIndex(f => f.id === id);
+        if (index !== -1) {
+            this.data.formasPagamento[index] = { ...this.data.formasPagamento[index], ...dados };
+            this.saveData();
+            return this.data.formasPagamento[index];
+        }
+        return null;
+    }
+
+    removerFormaPagamento(id) {
+        const list = this.data.formasPagamento || [];
+        const index = list.findIndex(f => f.id === id);
+        if (index !== -1) {
+            this.data.formasPagamento.splice(index, 1);
             this.saveData();
             return true;
         }

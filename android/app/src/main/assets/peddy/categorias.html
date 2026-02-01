@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciar Categorias - Restaurante Demo</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <div class="logo-section">
+            <img id="logo-img" src="" alt="Logo">
+            <h1>📁 Gerenciar Categorias</h1>
+        </div>
+        <div class="header-actions">
+            <button class="btn btn-secondary" onclick="window.location.href='produtos.html'">
+                Voltar para Produtos
+            </button>
+        </div>
+    </header>
+
+    <nav>
+        <div class="nav-container">
+            <a href="pdv.html" class="nav-link">💰 PDV</a>
+            <a href="cliente.html" class="nav-link">🍽️ Cliente</a>
+            <a href="produtos.html" class="nav-link">🍕 Produto</a>
+            <a href="relatorios.html" class="nav-link">📈 Relatórios</a>
+            <a href="configuracoes.html" class="nav-link">⚙️ Configurações</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Categorias do Cardápio</h2>
+                <button class="btn btn-primary" onclick="abrirModalCategoria()">
+                    ➕ Adicionar Categoria
+                </button>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab active" onclick="abrirTab('ativas')">Ativas</button>
+            <button class="tab" onclick="abrirTab('inativas')">Inativas</button>
+        </div>
+
+        <!-- Tab: Ativas -->
+        <div id="tab-ativas" class="tab-content active">
+            <div id="categorias-ativas-container" class="grid grid-4"></div>
+            <div id="sem-categorias-ativas" style="text-align: center; padding: 2rem; color: var(--text-light); display: none;">
+                Nenhuma categoria ativa no momento.
+            </div>
+        </div>
+
+        <!-- Tab: Inativas -->
+        <div id="tab-inativas" class="tab-content">
+            <div id="categorias-inativas-container" class="grid grid-4"></div>
+            <div id="sem-categorias-inativas" style="text-align: center; padding: 2rem; color: var(--text-light); display: none;">
+                Nenhuma categoria inativa no momento.
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Categoria -->
+    <div id="modal-categoria" class="modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="fecharModal('modal-categoria')">&times;</button>
+            <h2 id="modal-categoria-titulo">Adicionar Categoria</h2>
+            <form id="form-categoria">
+                <input type="hidden" id="categoria-id-editar">
+                <div class="form-group">
+                    <label for="categoria-nome">Nome da Categoria *</label>
+                    <input type="text" id="categoria-nome" required placeholder="Ex: Lanches, Pizzas, Bebidas">
+                </div>
+                <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                    <button type="submit" class="btn btn-primary">Salvar</button>
+                    <button type="button" class="btn btn-secondary" onclick="fecharModal('modal-categoria')">Cancelar</button>
+                    <button type="button" class="btn btn-danger" id="btn-remover-categoria" style="display: none;" onclick="removerCategoria()">Excluir</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="data.js"></script>
+    <script>
+        // Carregar dados do restaurante
+        const restaurante = dataManager.getRestaurante();
+        document.getElementById('logo-img').src = restaurante.logo;
+
+        // Abrir tab
+        function abrirTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            document.getElementById(`tab-${tabId}`).classList.add('active');
+            event.target.classList.add('active');
+
+            if (tabId === 'ativas') {
+                carregarCategorias(true);
+            } else {
+                carregarCategorias(false);
+            }
+        }
+
+        // Carregar categorias
+        function carregarCategorias(ativas = true) {
+            const categorias = dataManager.getCategorias();
+            const container = ativas ? 
+                document.getElementById('categorias-ativas-container') : 
+                document.getElementById('categorias-inativas-container');
+            const semCategorias = ativas ?
+                document.getElementById('sem-categorias-ativas') :
+                document.getElementById('sem-categorias-inativas');
+
+            const categoriasFiltradas = categorias.filter(c => ativas ? c.ativa : !c.ativa);
+
+            if (categoriasFiltradas.length === 0) {
+                container.innerHTML = '';
+                semCategorias.style.display = 'block';
+                return;
+            }
+
+            semCategorias.style.display = 'none';
+            container.innerHTML = '';
+
+            categoriasFiltradas.forEach(categoria => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.style.padding = '1rem';
+                card.innerHTML = `
+                    <div style="display: flex; flex-direction: column; gap: 1rem;">
+                        <div>
+                            <h3 style="margin: 0; font-size: 1.1rem; color: var(--dark-color);">${categoria.nome}</h3>
+                            <span class="badge ${categoria.ativa ? 'badge-success' : 'badge-warning'}" style="margin-top: 0.5rem; display: inline-block;">
+                                ${categoria.ativa ? 'Ativa' : 'Inativa'}
+                            </span>
+                        </div>
+                        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                            <button class="btn btn-small btn-secondary" onclick="editarCategoria(${categoria.id})" style="flex: 1;">
+                                ✏️ Editar
+                            </button>
+                            <button class="btn btn-small ${categoria.ativa ? 'btn-warning' : 'btn-success'}" onclick="toggleAtivarCategoria(${categoria.id})" style="flex: 1;">
+                                ${categoria.ativa ? '⏸️ Desativar' : '▶️ Ativar'}
+                            </button>
+                            <button class="btn btn-small btn-danger" onclick="confirmarExcluirCategoria(${categoria.id})" style="flex: 1;">
+                                🗑️ Excluir
+                            </button>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // Abrir modal categoria
+        function abrirModalCategoria(categoriaId = null) {
+            document.getElementById('categoria-id-editar').value = categoriaId || '';
+            document.getElementById('form-categoria').reset();
+            document.getElementById('btn-remover-categoria').style.display = 'none';
+
+            if (categoriaId) {
+                const categoria = dataManager.getCategoria(categoriaId);
+                if (categoria) {
+                    document.getElementById('modal-categoria-titulo').textContent = 'Editar Categoria';
+                    document.getElementById('categoria-nome').value = categoria.nome;
+                    document.getElementById('btn-remover-categoria').style.display = 'inline-block';
+                }
+            } else {
+                document.getElementById('modal-categoria-titulo').textContent = 'Adicionar Categoria';
+            }
+
+            document.getElementById('modal-categoria').classList.add('active');
+        }
+
+        // Editar categoria
+        function editarCategoria(categoriaId) {
+            abrirModalCategoria(categoriaId);
+        }
+
+        // Toggle ativar/desativar categoria
+        function toggleAtivarCategoria(categoriaId) {
+            const categoria = dataManager.getCategoria(categoriaId);
+            if (categoria) {
+                const novaStatus = !categoria.ativa;
+                dataManager.atualizarCategoria(categoriaId, { ativa: novaStatus });
+                carregarCategorias(true);
+                carregarCategorias(false);
+            }
+        }
+
+        // Confirmar excluir categoria
+        function confirmarExcluirCategoria(categoriaId) {
+            const categoria = dataManager.getCategoria(categoriaId);
+            if (categoria) {
+                // Verificar se há produtos usando esta categoria
+                const produtos = dataManager.getCardapio();
+                const produtosComCategoria = produtos.filter(p => p.categoria === categoria.nome);
+                
+                if (produtosComCategoria.length > 0) {
+                    alert(`Não é possível excluir a categoria "${categoria.nome}" pois existem ${produtosComCategoria.length} produto(s) associado(s) a ela.`);
+                    return;
+                }
+
+                if (confirm(`Tem certeza que deseja excluir a categoria "${categoria.nome}"?`)) {
+                    dataManager.removerCategoria(categoriaId);
+                    carregarCategorias(true);
+                    carregarCategorias(false);
+                }
+            }
+        }
+
+        // Remover categoria
+        function removerCategoria() {
+            const categoriaId = parseInt(document.getElementById('categoria-id-editar').value);
+            if (categoriaId) {
+                confirmarExcluirCategoria(categoriaId);
+                fecharModal('modal-categoria');
+            }
+        }
+
+        // Form categoria
+        document.getElementById('form-categoria').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const categoriaId = document.getElementById('categoria-id-editar').value;
+            const nome = document.getElementById('categoria-nome').value.trim();
+
+            if (!nome) {
+                alert('Por favor, informe o nome da categoria.');
+                return;
+            }
+
+            // Verificar se já existe categoria com o mesmo nome (exceto a atual se estiver editando)
+            const categorias = dataManager.getCategorias();
+            const categoriaExistente = categorias.find(c => 
+                c.nome.toLowerCase() === nome.toLowerCase() && 
+                (!categoriaId || c.id !== parseInt(categoriaId))
+            );
+
+            if (categoriaExistente) {
+                alert('Já existe uma categoria com este nome.');
+                return;
+            }
+
+            if (categoriaId) {
+                dataManager.atualizarCategoria(parseInt(categoriaId), { nome });
+            } else {
+                dataManager.adicionarCategoria({ nome, ativa: true });
+            }
+
+            fecharModal('modal-categoria');
+            carregarCategorias(true);
+            carregarCategorias(false);
+        });
+
+        // Fechar modal
+        function fecharModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        // Fechar modal ao clicar fora
+        document.getElementById('modal-categoria').addEventListener('click', function(e) {
+            if (e.target === this) {
+                fecharModal('modal-categoria');
+            }
+        });
+
+        // Inicializar
+        carregarCategorias(true);
+        carregarCategorias(false);
+    </script>
+</body>
+</html>

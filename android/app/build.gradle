@@ -1,0 +1,45 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'com.peddy.app'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId "com.peddy.app"
+        minSdk 23
+        targetSdk 34
+        versionCode 1
+        versionName "1.0"
+    }
+
+    buildFeatures {
+        viewBinding true
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+}
+
+def webRoot = rootProject.projectDir.parentFile
+def assetsDir = file("${projectDir}/src/main/assets/peddy")
+
+tasks.register("copyPeddyAssets", Copy) {
+    from(webRoot) {
+        include "*.html"
+        include "*.css"
+        include "*.js"
+        include "database.json"
+    }
+    into(assetsDir)
+}
+
+preBuild.dependsOn("copyPeddyAssets")
+
+dependencies {
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+}

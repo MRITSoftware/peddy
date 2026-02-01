@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pedidos - Restaurante Demo</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .pedido-card {
+            background: white;
+            border-radius: 8px;
+            padding: 0.75rem;
+            box-shadow: var(--shadow);
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 2px solid transparent;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.25rem;
+        }
+
+        .pedido-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .pedido-card.pedido-ativo {
+            background: var(--success-color);
+            color: white;
+        }
+
+        .pedido-card.pedido-impresso {
+            background: #9B59B6; /* Roxo */
+            color: white;
+        }
+
+        .pedido-card.pedido-finalizado {
+            background: #8B4513;
+            color: white;
+        }
+
+        .pedido-icon {
+            font-size: 1.5rem;
+            line-height: 1;
+            margin: 0;
+        }
+
+        .pedido-numero {
+            font-size: 0.875rem;
+            font-weight: 600;
+            line-height: 1;
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="nav-container">
+            <a href="pdv.html" class="nav-link">💰 PDV</a>
+            <a href="cliente.html" class="nav-link">🍽️ Cliente</a>
+            <a href="produtos.html" class="nav-link">🍕 Produto</a>
+            <a href="relatorios.html" class="nav-link">📈 Relatórios</a>
+            <a href="configuracoes.html" class="nav-link">⚙️ Configurações</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Pedidos</h2>
+            </div>
+            <p style="color: var(--text-light);">
+                Visualize o status de todos os pedidos do restaurante.
+            </p>
+        </div>
+
+        <div id="pedidos-vazio" class="card" style="display: none;">
+            <p style="color: var(--text-light); margin: 0;">
+                Nenhum pedido encontrado.
+            </p>
+        </div>
+
+        <div id="pedidos-container" class="grid grid-4" style="grid-template-columns: repeat(4, 1fr);"></div>
+    </div>
+
+    <script src="data.js"></script>
+    <script>
+        // Carregar dados do restaurante
+        const restaurante = dataManager.getRestaurante();
+        // Header removido - elementos não existem mais
+        // const logoImg = document.getElementById('logo-img');
+        // if (logoImg) logoImg.src = restaurante.logo;
+        // const restauranteNome = document.getElementById('restaurante-nome');
+        // if (restauranteNome) restauranteNome.textContent = restaurante.nome;
+
+        function verificarPedidoAtivo(pedido) {
+            return pedido.status === 'recebido' || 
+                   pedido.status === 'preparando' || 
+                   pedido.status === 'pronto';
+        }
+
+        function renderizarPedidos() {
+            // Apenas pedidos ativos (não finalizados)
+            const pedidos = dataManager.getPedidos().filter(p => 
+                p.status !== 'finalizado' && 
+                p.status !== 'entregue' && 
+                p.status !== 'retirado'
+            );
+            const container = document.getElementById('pedidos-container');
+            const vazio = document.getElementById('pedidos-vazio');
+
+            if (pedidos.length === 0) {
+                container.innerHTML = '';
+                vazio.style.display = 'block';
+                return;
+            }
+
+            vazio.style.display = 'none';
+            
+            let html = '';
+            pedidos.forEach(pedido => {
+                // Determinar classe baseada no status de impressão
+                let classe = 'pedido-ativo'; // Verde por padrão (não impresso)
+                if (pedido.impresso === true) {
+                    classe = 'pedido-impresso'; // Roxo quando impresso
+                }
+                
+                html += `
+                    <div class="pedido-card ${classe}" onclick="window.location.href='pdv.html?pedido=${pedido.id}'">
+                        <div class="pedido-icon">📋</div>
+                        <div class="pedido-numero">${pedido.id}</div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+
+        // Atualizar a cada 2 segundos
+        renderizarPedidos();
+        setInterval(renderizarPedidos, 2000);
+    </script>
+</body>
+</html>

@@ -47,6 +47,7 @@
                     <div class="pdv-contador-ratio" id="pdv-contador-mesa">0</div>
                     <div class="pdv-contador-legenda">Pedido</div>
                 </div>
+                </div>
             </div>
         </div>
     </div>
@@ -325,19 +326,8 @@
                 <!-- Forma de Pagamento -->
                 <div class="form-group">
                     <label>Forma de Pagamento *</label>
-                    <div class="radio-group">
-                        <label>
-                            <input type="radio" name="pagamento-online" value="Pix" checked>
-                            <span>Pix</span>
-                        </label>
-                        <label>
-                            <input type="radio" name="pagamento-online" value="Cartão">
-                            <span>Cartão</span>
-                        </label>
-                        <label>
-                            <input type="radio" name="pagamento-online" value="Dinheiro">
-                            <span>Dinheiro</span>
-                        </label>
+                    <div id="container-pagamento-online" class="radio-group">
+                        <!-- Preenchido por renderizarFormasPagamentoPDV() -->
                     </div>
                 </div>
 
@@ -378,27 +368,8 @@
             <p style="color: var(--text-light); font-size: 0.875rem; margin-bottom: 1rem;">
                 Selecione a forma de pagamento para finalizar o pedido.
             </p>
-            <div class="radio-group" style="display: flex; flex-direction: column; gap: 0.5rem;">
-                <label style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem; border-radius: 8px; cursor: pointer;">
-                    <input type="radio" name="pagamento-finalizar" value="Dinheiro">
-                    <span>Dinheiro</span>
-                </label>
-                <label style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem; border-radius: 8px; cursor: pointer;">
-                    <input type="radio" name="pagamento-finalizar" value="Pix" checked>
-                    <span>Pix</span>
-                </label>
-                <label style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem; border-radius: 8px; cursor: pointer;">
-                    <input type="radio" name="pagamento-finalizar" value="Débito">
-                    <span>Débito</span>
-                </label>
-                <label style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem; border-radius: 8px; cursor: pointer;">
-                    <input type="radio" name="pagamento-finalizar" value="Crédito">
-                    <span>Crédito</span>
-                </label>
-                <label style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem; border-radius: 8px; cursor: pointer;">
-                    <input type="radio" name="pagamento-finalizar" value="VR">
-                    <span>VR</span>
-                </label>
+            <div id="container-pagamento-finalizar" class="radio-group" style="display: flex; flex-direction: column; gap: 0.5rem;">
+                <!-- Preenchido por renderizarFormasPagamentoPDV() -->
             </div>
             
             <!-- Botão Dividir Conta -->
@@ -446,27 +417,8 @@
             <p style="color: var(--text-light); font-size: 0.875rem; margin-bottom: 1rem;">
                 Selecione a forma de pagamento.
             </p>
-            <div class="radio-group" style="display: flex; flex-direction: column; gap: 0.5rem;">
-                <label style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem; border-radius: 8px; cursor: pointer;">
-                    <input type="radio" name="pagamento-individual" value="Dinheiro">
-                    <span>Dinheiro</span>
-                </label>
-                <label style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem; border-radius: 8px; cursor: pointer;">
-                    <input type="radio" name="pagamento-individual" value="Pix" checked>
-                    <span>Pix</span>
-                </label>
-                <label style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem; border-radius: 8px; cursor: pointer;">
-                    <input type="radio" name="pagamento-individual" value="Débito">
-                    <span>Débito</span>
-                </label>
-                <label style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem; border-radius: 8px; cursor: pointer;">
-                    <input type="radio" name="pagamento-individual" value="Crédito">
-                    <span>Crédito</span>
-                </label>
-                <label style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem; border-radius: 8px; cursor: pointer;">
-                    <input type="radio" name="pagamento-individual" value="VR">
-                    <span>VR</span>
-                </label>
+            <div id="container-pagamento-individual" class="radio-group" style="display: flex; flex-direction: column; gap: 0.5rem;">
+                <!-- Preenchido por renderizarFormasPagamentoPDV() -->
             </div>
             <div style="margin-top: 1rem; display: flex; gap: 0.5rem; justify-content: flex-end;">
                 <button type="button" class="btn btn-secondary" onclick="fecharModalPagamentoIndividual()">Cancelar</button>
@@ -583,6 +535,20 @@
         </div>
     </div>
 
+    <!-- Modal: Pedidos em aberto (impede fechar caixa) -->
+    <div id="modal-pedidos-em-aberto" class="modal">
+        <div class="modal-content" style="max-width: 420px; width: 90%;">
+            <button class="modal-close" onclick="fecharModalPedidosEmAberto()">&times;</button>
+            <h2 style="margin-bottom: 1rem;">⚠️ Não é possível encerrar o caixa</h2>
+            <p style="color: var(--text-color); margin-bottom: 1.5rem;">
+                Existem pedidos em aberto. Finalize ou cancele todos os pedidos antes de encerrar o caixa.
+            </p>
+            <div style="display: flex; justify-content: flex-end;">
+                <button type="button" class="btn btn-primary" onclick="fecharModalPedidosEmAberto()">OK</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Modal: Fechar Caixa -->
     <div id="modal-fechar-caixa" class="modal">
         <div class="modal-content" style="max-width: 600px; width: 90%; max-height: 90vh; overflow-y: auto;">
@@ -640,6 +606,24 @@
         let tipoVendaSelecionado = '';
         let formaPagamentoSelecionada = 'Pix';
 
+        /** Preenche os containers de forma de pagamento (PDV online, modal finalizar, modal individual) com as formas cadastradas em Configurações. */
+        function renderizarFormasPagamentoPDV() {
+            const formas = (typeof dataManager !== 'undefined' && dataManager.getFormasPagamento) ? dataManager.getFormasPagamento() : [];
+            const lista = formas.length ? formas : [{ id: 0, nome: 'Não informado' }];
+            const estiloLabel = 'display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem; border-radius: 8px; cursor: pointer;';
+            const htmlOption = (nome, name, i) => {
+                const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
+                return `<label style="${estiloLabel}"><input type="radio" name="${name}" value="${esc(nome)}" ${i === 0 ? 'checked' : ''}><span>${esc(nome)}</span></label>`;
+            };
+            const c1 = document.getElementById('container-pagamento-online');
+            const c2 = document.getElementById('container-pagamento-finalizar');
+            const c3 = document.getElementById('container-pagamento-individual');
+            if (c1) c1.innerHTML = lista.map((f, i) => htmlOption(f.nome, 'pagamento-online', i)).join('');
+            if (c2) c2.innerHTML = lista.map((f, i) => htmlOption(f.nome, 'pagamento-finalizar', i)).join('');
+            if (c3) c3.innerHTML = lista.map((f, i) => htmlOption(f.nome, 'pagamento-individual', i)).join('');
+        }
+        renderizarFormasPagamentoPDV();
+
         // Gerenciamento de Caixa
         const STORAGE_CAIXA = 'peddy_caixa_status';
         const STORAGE_CAIXA_HISTORICO = 'peddy_caixa_historico';
@@ -689,8 +673,13 @@
                 // Abrir caixa
                 abrirModalAbrirCaixa();
             } else {
-                // Fechar caixa
-                abrirModalFecharCaixa();
+                // Fechar caixa: verificar se há pedidos em aberto
+                const pedidosEmAberto = dataManager.getPedidos();
+                if (pedidosEmAberto && pedidosEmAberto.length > 0) {
+                    abrirModalPedidosEmAberto();
+                } else {
+                    abrirModalFecharCaixa();
+                }
             }
         }
 
@@ -839,6 +828,14 @@
 
         function fecharModalFecharCaixa() {
             document.getElementById('modal-fechar-caixa').classList.remove('active');
+        }
+
+        function abrirModalPedidosEmAberto() {
+            document.getElementById('modal-pedidos-em-aberto').classList.add('active');
+        }
+
+        function fecharModalPedidosEmAberto() {
+            document.getElementById('modal-pedidos-em-aberto').classList.remove('active');
         }
 
         function confirmarFecharCaixa() {
@@ -1497,7 +1494,8 @@
                     // Após confirmar, abrir modal de pagamento normalmente
                     const total = totalOpcional != null ? totalOpcional : totalDePedidos(ids);
                     finalizarAposPagamento = { pedidoIds: ids, aoConfirmar, total };
-                    document.querySelector('input[name="pagamento-finalizar"][value="Pix"]').checked = true;
+                    var firstFinalizar = document.querySelector('#container-pagamento-finalizar input[type="radio"]');
+                    if (firstFinalizar) firstFinalizar.checked = true;
                     document.getElementById('modal-pagamento-finalizar').classList.add('active');
                     // Resetar divisão de conta
                     document.getElementById('dividir-conta-section').style.display = 'none';
@@ -1510,7 +1508,8 @@
             // Todos os pedidos foram impressos - abrir modal normalmente
             const total = totalOpcional != null ? totalOpcional : totalDePedidos(ids);
             finalizarAposPagamento = { pedidoIds: ids, aoConfirmar, total };
-            document.querySelector('input[name="pagamento-finalizar"][value="Pix"]').checked = true;
+            var firstF = document.querySelector('#container-pagamento-finalizar input[type="radio"]');
+            if (firstF) firstF.checked = true;
             document.getElementById('modal-pagamento-finalizar').classList.add('active');
             // Resetar divisão de conta
             document.getElementById('dividir-conta-section').style.display = 'none';
@@ -1623,7 +1622,8 @@
             const { pagamentoAtual, numPessoas, valorPorPessoa } = pagamentosDivididos;
             document.getElementById('pagamento-individual-numero').textContent = pagamentoAtual + ' pagamento';
             document.getElementById('pagamento-individual-valor').textContent = 'R$ ' + valorPorPessoa.toFixed(2).replace('.', ',');
-            document.querySelector('input[name="pagamento-individual"][value="Pix"]').checked = true;
+            var firstInd = document.querySelector('#container-pagamento-individual input[type="radio"]');
+            if (firstInd) firstInd.checked = true;
             document.getElementById('modal-pagamento-individual').classList.add('active');
         }
 
@@ -2321,11 +2321,12 @@
                         pedidoExistente.dataComandaGravada = dataComandaGravada;
                     });
                     
-                    // Salvar alterações
+                    // Salvar alterações — manter tela da comanda (não sair da mesa)
                     dataManager.saveData();
-                    sairDaComandaMesa();
+                    carregarItensMesa(mesaAberta);
                     carregarPedidosPdv();
                     carregarEntregadoresPdv();
+                    mostrarNotificacaoPush('✓', 'Comanda atualizada');
                     return;
                 } else {
                     // Não há pedidos existentes - criar nova comanda
@@ -2350,9 +2351,11 @@
                     };
                     const novoPedido = dataManager.adicionarPedido(pedido);
                     if (typeof websocketSim !== 'undefined') websocketSim.simularNovoPedido(novoPedido);
-                    sairDaComandaMesa();
+                    // Manter tela da comanda (não sair da mesa); recarregar carrinho do pedido salvo
+                    carregarItensMesa(mesaAberta);
                     carregarPedidosPdv();
                     carregarEntregadoresPdv();
+                    mostrarNotificacaoPush('✓', 'Comanda criada');
                     return;
                 }
             }
@@ -2436,11 +2439,12 @@
                     pedidoExistente.itens = itensComImpressao;
                     pedidoExistente.observacoes = observacoesPedido;
                     pedidoExistente.numeroPedidoBalcao = numeroPedido || null;
-                    // Salvar alterações
+                    // Salvar alterações — manter tela da comanda
                     dataManager.saveData();
                     atualizarCarrinho();
                     carregarPedidosPdv();
                     carregarEntregadoresPdv();
+                    mostrarNotificacaoPush('✓', 'Comanda atualizada');
                     return;
                 }
             }
@@ -2487,11 +2491,11 @@
             };
             const novoPedido = dataManager.adicionarPedido(pedido);
             pedidoIdCarregado = novoPedido.id;
-            // Só disparar notificação para pedidos realmente novos
             if (typeof websocketSim !== 'undefined') websocketSim.simularNovoPedido(novoPedido);
             atualizarCarrinho();
             carregarPedidosPdv();
             carregarEntregadoresPdv();
+            mostrarNotificacaoPush('✓', 'Comanda criada');
         }
 
         function limparAposFinalizarVenda() {
@@ -2633,37 +2637,88 @@
             }
         }
 
-        // Imprimir pedido
+        /** Formata um slip de item (cozinha) para impressora térmica — mesa + item + qtd. */
+        function formatarSlipItemTermico(mesaNum, nomeItem, quantidade, nomeRestaurante) {
+            const L = 48;
+            const traco = '-'.repeat(L);
+            const tracoDuplo = '='.repeat(L);
+            const centro = (t) => {
+                const n = Math.max(0, Math.floor((L - (t.length || 0)) / 2));
+                return ' '.repeat(n) + (t || '').substring(0, L);
+            };
+            const linhas = [];
+            linhas.push(centro(nomeRestaurante || 'RESTAURANTE'));
+            linhas.push(traco);
+            linhas.push(centro('*** PEDIDO COZINHA ***'));
+            linhas.push(traco);
+            linhas.push('MESA: ' + String(mesaNum));
+            linhas.push('');
+            linhas.push('ITEM: ' + (nomeItem || '—').substring(0, L - 6));
+            linhas.push('QTD:  ' + String(quantidade));
+            linhas.push(tracoDuplo);
+            linhas.push('');
+            return linhas.join('\n');
+        }
+
+        /** Abre janela de impressão e imprime o slip do item (impressora térmica). */
+        function imprimirSlipTermico(texto, titulo) {
+            const html = `
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>${titulo || 'Slip'}</title>
+<style>
+@media print { body { margin: 0; padding: 2mm; } }
+body { font-family: 'Courier New', Courier, monospace; font-size: 11px; line-height: 1.2; width: 80mm; max-width: 80mm; margin: 0 auto; padding: 4px; white-space: pre; }
+</style>
+</head>
+<body><pre>${(texto || '').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</pre></body>
+</html>`;
+            const janela = window.open('', '_blank', 'width=320,height=280');
+            if (!janela) {
+                alert('Permita pop-ups para imprimir o item.');
+                return;
+            }
+            janela.document.write(html);
+            janela.document.close();
+            janela.focus();
+            janela.onload = function() {
+                janela.print();
+                janela.onafterprint = function() { janela.close(); };
+            };
+            setTimeout(function() {
+                try { if (janela.print) janela.print(); } catch (e) {}
+            }, 250);
+        }
+
+        // Imprimir item da mesa (botão por item na comanda)
         function imprimirItemMesa(produtoId) {
             if (mesaAberta === null) return;
             
-            // Obter quantidade atual do item no carrinho
             const itemCarrinho = carrinho[produtoId];
             if (!itemCarrinho) return;
             
             const quantidadeAtual = Math.floor(parseInt(itemCarrinho.quantidade) || 0);
             if (quantidadeAtual <= 0) return;
             
-            // Obter quantidade já impressa
             const quantidadeImpressa = dataManager.getQuantidadeImpressaItem(mesaAberta, produtoId);
-            
-            // Calcular quantas unidades ainda precisam ser impressas
             const quantidadeParaImprimir = quantidadeAtual - quantidadeImpressa;
             
             if (quantidadeParaImprimir <= 0) {
-                // Todas as unidades já foram impressas
-                console.log(`Todas as ${quantidadeAtual} unidades já foram impressas`);
                 return;
             }
             
-            // Buscar todos os pedidos da mesa
+            const nomeRestaurante = (dataManager.data && dataManager.data.restaurante && dataManager.data.restaurante.nome) ? dataManager.data.restaurante.nome : 'Restaurante Demo';
+            const nomeItem = itemCarrinho.nome || (dataManager.getProduto && dataManager.getProduto(produtoId) ? dataManager.getProduto(produtoId).nome : 'Item');
+            const textoSlip = formatarSlipItemTermico(mesaAberta, nomeItem, quantidadeParaImprimir, nomeRestaurante);
+            imprimirSlipTermico(textoSlip, 'Item Mesa ' + mesaAberta);
+            
+            // Marcar a quantidade impressa nos pedidos da mesa
             const pedidosMesa = dataManager.getPedidos().filter(p => 
                 p.numeroMesa === mesaAberta && 
                 dataManager.isPedidoAtivo(p)
             );
-            
-            // Marcar a quantidade não impressa como impressa
-            // Distribuir a quantidade entre os pedidos que contêm esse item
             let quantidadeRestante = quantidadeParaImprimir;
             pedidosMesa.forEach(pedido => {
                 if (pedido.itens && quantidadeRestante > 0) {
@@ -2672,7 +2727,6 @@
                             const quantidadeItem = Math.floor(parseInt(item.quantidade) || 0);
                             const quantidadeImpressaItem = item.quantidadeImpressa || 0;
                             const quantidadeNaoImpressaItem = quantidadeItem - quantidadeImpressaItem;
-                            
                             if (quantidadeNaoImpressaItem > 0) {
                                 const quantidadeMarcar = Math.min(quantidadeNaoImpressaItem, quantidadeRestante);
                                 dataManager.marcarItemPedidoComoImpresso(pedido.id, produtoId, quantidadeMarcar);
@@ -2683,46 +2737,130 @@
                 }
             });
             
-            // Atualizar no carrinho
             if (carrinho[produtoId]) {
-                const novaQuantidadeImpressa = dataManager.getQuantidadeImpressaItem(mesaAberta, produtoId);
-                carrinho[produtoId].quantidadeImpressa = novaQuantidadeImpressa;
-                carrinho[produtoId].impresso = novaQuantidadeImpressa > 0;
+                carrinho[produtoId].quantidadeImpressa = dataManager.getQuantidadeImpressaItem(mesaAberta, produtoId);
+                carrinho[produtoId].impresso = carrinho[produtoId].quantidadeImpressa > 0;
             }
             
-            // Atualizar exibição
             atualizarCarrinho();
             carregarPedidosPdv();
             carregarMesasPdv();
-            
-            console.log(`Imprimindo ${quantidadeParaImprimir} unidade(s) do item ${produtoId} da mesa ${mesaAberta}`);
         }
 
+        /** Obtém os pedidos a imprimir (mesma lógica dos detalhes do pedido). */
+        function obterPedidosParaImpressao() {
+            const inputPedido = document.getElementById('pesquisa-pedido');
+            const pedidoIdDigitado = (inputPedido && inputPedido.value.trim()) ? inputPedido.value.trim().toUpperCase() : '';
+            if (pedidoIdCarregado) {
+                const p = dataManager.getPedido(pedidoIdCarregado);
+                return p ? [p] : [];
+            }
+            if (pedidoIdDigitado) {
+                const p = dataManager.getPedido(pedidoIdDigitado);
+                return p ? [p] : [];
+            }
+            if (mesaAberta !== null) {
+                return dataManager.getPedidos().filter(p =>
+                    p.numeroMesa === mesaAberta &&
+                    (p.status === 'recebido' || p.status === 'preparando' || p.status === 'pronto')
+                );
+            }
+            return [];
+        }
+
+        /** Formata um pedido como comanda para impressora térmica (cupom) — mesmos dados dos detalhes do pedido. */
+        function formatarComandaTermica(pedido, nomeRestaurante) {
+            const total = (pedido.itens || []).reduce((s, i) => s + (i.preco * (i.quantidade || 1)), 0);
+            const localEntrega = (pedido.tipo === 'entrega' && pedido.endereco) ? pedido.endereco : 'Retirada no local';
+            let origemTexto = 'Online';
+            if (pedido.origem === 'cliente') origemTexto = 'Online (cliente)';
+            else if (pedido.tipoVenda === 'mesa' || pedido.numeroMesa != null) origemTexto = 'Mesa ' + (pedido.numeroMesa ?? '');
+            else if (pedido.tipoVenda === 'balcao' || pedido.numeroPedidoBalcao) origemTexto = 'Balcao';
+            const linhas = [];
+            const L = 48; // largura típica cupom (caracteres)
+            const traco = '-'.repeat(L);
+            const tracoDuplo = '='.repeat(L);
+            const centro = (t) => {
+                const n = Math.max(0, Math.floor((L - (t.length || 0)) / 2));
+                return ' '.repeat(n) + (t || '').substring(0, L);
+            };
+            linhas.push(centro(nomeRestaurante || 'RESTAURANTE'));
+            linhas.push(traco);
+            linhas.push('N.PEDIDO: ' + (pedido.id || '—'));
+            linhas.push('ORIGEM: ' + origemTexto);
+            linhas.push('NOME: ' + (pedido.cliente || '—').substring(0, L - 7));
+            linhas.push('TEL: ' + (pedido.telefone || '—').substring(0, L - 5));
+            linhas.push('ENTREGA: ' + (localEntrega || '—').substring(0, L - 9));
+            linhas.push('PAGTO: ' + (pedido.pagamento || '—').substring(0, L - 6));
+            linhas.push(traco);
+            linhas.push('ITEM              QTD   PRECO  SUBTOTAL');
+            linhas.push(traco);
+            (pedido.itens || []).forEach(i => {
+                const qtd = Math.max(1, Math.floor(i.quantidade || 1));
+                const sub = (i.preco || 0) * qtd;
+                const nome = (i.nome || '—').substring(0, 18);
+                const precoStr = (i.preco || 0).toFixed(2).replace('.', ',');
+                const subStr = sub.toFixed(2).replace('.', ',');
+                linhas.push(nome.padEnd(18) + String(qtd).padStart(3) + '  R$ ' + precoStr.padStart(6) + '  R$ ' + subStr.padStart(6));
+            });
+            linhas.push(tracoDuplo);
+            linhas.push('TOTAL: R$ ' + total.toFixed(2).replace('.', ','));
+            linhas.push(tracoDuplo);
+            linhas.push('');
+            return linhas.join('\n');
+        }
+
+        /** Abre janela de impressão com comanda(s) formatada(s) para impressora térmica e chama print(). */
         function imprimirPedido() {
-            // Se houver um pedido carregado, marcar como impresso
-            if (pedidoIdCarregado !== null) {
-                dataManager.marcarPedidoComoImpresso(pedidoIdCarregado);
-                carregarPedidosPdv(); // Atualizar exibição dos pedidos
+            const pedidos = obterPedidosParaImpressao();
+            if (pedidos.length === 0) {
+                alert('Nenhum pedido para imprimir. Carregue um pedido ou abra uma mesa com comanda.');
                 return;
             }
-            
-            // Se houver uma mesa aberta, marcar todos os itens não impressos como impressos
+            const nomeRestaurante = (dataManager.data && dataManager.data.restaurante && dataManager.data.restaurante.nome) ? dataManager.data.restaurante.nome : 'Restaurante Demo';
+            const textoCompleto = pedidos.map(p => formatarComandaTermica(p, nomeRestaurante)).join('\n');
+            const html = `
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Comanda</title>
+<style>
+@media print { body { margin: 0; padding: 2mm; } }
+body { font-family: 'Courier New', Courier, monospace; font-size: 11px; line-height: 1.2; width: 80mm; max-width: 80mm; margin: 0 auto; padding: 4px; white-space: pre; }
+</style>
+</head>
+<body><pre>${textoCompleto.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</pre></body>
+</html>`;
+            const janela = window.open('', '_blank', 'width=320,height=500');
+            if (!janela) {
+                alert('Permita pop-ups para imprimir a comanda.');
+                return;
+            }
+            janela.document.write(html);
+            janela.document.close();
+            janela.focus();
+            janela.onload = function() {
+                janela.print();
+                janela.onafterprint = function() { janela.close(); };
+            };
+            // Fallback se onload não disparar
+            setTimeout(function() {
+                try { if (janela.print) janela.print(); } catch (e) {}
+            }, 250);
+
+            // Marcar como impresso os pedidos que foram enviados para impressão
+            pedidos.forEach(p => dataManager.marcarPedidoComoImpresso(p.id));
             if (mesaAberta !== null) {
-                const pedidosMesa = dataManager.getPedidos().filter(p => 
-                    p.numeroMesa === mesaAberta && 
-                    dataManager.isPedidoAtivo(p)
+                const pedidosMesa = dataManager.getPedidos().filter(p =>
+                    p.numeroMesa === mesaAberta && dataManager.isPedidoAtivo(p)
                 );
-                
-                // Para cada item no carrinho, marcar as unidades não impressas
                 Object.values(carrinho).forEach(itemCarrinho => {
                     const produtoId = itemCarrinho.produtoId;
                     const quantidadeAtual = Math.floor(parseInt(itemCarrinho.quantidade) || 0);
                     const quantidadeImpressa = dataManager.getQuantidadeImpressaItem(mesaAberta, produtoId);
-                    const quantidadeParaImprimir = quantidadeAtual - quantidadeImpressa;
-                    
-                    if (quantidadeParaImprimir > 0) {
-                        // Marcar as unidades não impressas
-                        let quantidadeRestante = quantidadeParaImprimir;
+                    if (quantidadeAtual > 0 && quantidadeImpressa < quantidadeAtual) {
+                        let quantidadeRestante = quantidadeAtual - quantidadeImpressa;
                         pedidosMesa.forEach(pedido => {
                             if (pedido.itens && quantidadeRestante > 0) {
                                 pedido.itens.forEach(item => {
@@ -2730,7 +2868,6 @@
                                         const quantidadeItem = Math.floor(parseInt(item.quantidade) || 0);
                                         const quantidadeImpressaItem = item.quantidadeImpressa || 0;
                                         const quantidadeNaoImpressaItem = quantidadeItem - quantidadeImpressaItem;
-                                        
                                         if (quantidadeNaoImpressaItem > 0) {
                                             const quantidadeMarcar = Math.min(quantidadeNaoImpressaItem, quantidadeRestante);
                                             dataManager.marcarItemPedidoComoImpresso(pedido.id, produtoId, quantidadeMarcar);
@@ -2740,33 +2877,14 @@
                                 });
                             }
                         });
-                        
-                        // Atualizar no carrinho
                         itemCarrinho.quantidadeImpressa = dataManager.getQuantidadeImpressaItem(mesaAberta, produtoId);
                         itemCarrinho.impresso = itemCarrinho.quantidadeImpressa > 0;
                     }
                 });
-                
-                // Marcar todos os pedidos como impressos
-                pedidosMesa.forEach(pedido => {
-                    dataManager.marcarPedidoComoImpresso(pedido.id);
-                });
-                
-                carregarPedidosPdv(); // Atualizar exibição dos pedidos
-                carregarMesasPdv(); // Atualizar exibição das mesas
-                atualizarCarrinho(); // Atualizar indicadores visuais
-                return;
+                carregarMesasPdv();
+                atualizarCarrinho();
             }
-            
-            // Se houver itens no carrinho mas não houver pedido/mesa carregada, não há nada para imprimir
-            const itens = Object.values(carrinho).filter(item => {
-                const qtd = Math.floor(parseInt(item.quantidade) || 0);
-                return qtd > 0;
-            });
-            
-            if (itens.length === 0) {
-                return; // Carrinho vazio, não há nada para imprimir
-            }
+            carregarPedidosPdv();
         }
 
         function snapshotCart() {
@@ -2896,7 +3014,10 @@
 
             function concluirFecharMesa(pagamento) {
                 idsMesa.forEach(id => dataManager.finalizarPedido(id));
-                if (itensFiltrados.length > 0) {
+                // Só criar novo pedido a partir do carrinho quando NÃO houver pedidos já na mesa.
+                // Se já existem pedidos na mesa, o carrinho foi carregado por carregarItensMesa (mesmos itens);
+                // criar outro pedido duplicaria o valor no fechamento do caixa.
+                if (itensFiltrados.length > 0 && idsMesa.length === 0) {
                     const agora = new Date();
                     const dataComandaGravada = agora.toLocaleString('pt-BR', {
                         day: '2-digit', month: '2-digit', year: 'numeric',
@@ -3436,23 +3557,21 @@
             const finalizados = dataManager.getPedidosFinalizados();
             const todos = [...pedidos, ...finalizados];
             
-            // Total hoje: TODOS os pedidos de hoje (ativos + finalizados)
+            // Total hoje: comandas (pedidos) de hoje — ativos + finalizados, por dataCriacao
             const hojeTodos = todos.filter(p => p.dataCriacao && String(p.dataCriacao).startsWith(hoje));
-            
-            // Contadores específicos: apenas pedidos ATIVOS (não finalizados) de hoje
-            const pedidosHoje = pedidos.filter(p => p.dataCriacao && String(p.dataCriacao).startsWith(hoje));
 
             function isOnline(p) { return p.tipoVenda === 'online' || (p.id && String(p.id).startsWith('O')); }
             function isBalcao(p) { return p.tipoVenda === 'balcao' || (p.id && String(p.id).startsWith('B')); }
             function isMesa(p) { return p.tipoVenda === 'mesa' || (p.id && String(p.id).startsWith('M')) || (p.numeroMesa != null && p.numeroMesa !== ''); }
 
-            // Total: todos os pedidos de hoje (incluindo finalizados)
-            const total = hojeTodos.length;
+            // Total: quantidade de comandas (pedidos) do dia — contagem por comanda, nunca por itens; deduplica por ID
+            const idsUnicosHoje = new Set(hojeTodos.map(p => p.id).filter(Boolean));
+            const total = idsUnicosHoje.size;
             
-            // Contadores específicos: apenas pedidos ativos (não finalizados)
-            const online = pedidosHoje.filter(isOnline);
-            const balcao = pedidosHoje.filter(isBalcao);
-            const mesa = pedidosHoje.filter(isMesa);
+            // Contadores por tipo: também em comandas (online, balcão, mesa) do dia
+            const online = hojeTodos.filter(isOnline);
+            const balcao = hojeTodos.filter(isBalcao);
+            const mesa = hojeTodos.filter(isMesa);
 
             function set(id, text) { const e = document.getElementById(id); if (e) e.textContent = text; }
 
@@ -3482,6 +3601,26 @@
         // Data/hora e contadores: atualizar a cada 1 segundo
         setInterval(atualizarPdVContadoresBar, 1000);
 
+        // Notificação push genérica (canto da tela, some após alguns segundos)
+        function mostrarNotificacaoPush(icone, texto) {
+            const container = document.getElementById('pdv-notificacao-container');
+            if (!container) return;
+            const toast = document.createElement('div');
+            toast.className = 'pdv-notificacao-toast';
+            toast.setAttribute('role', 'alert');
+            toast.innerHTML = '<span class="pdv-notificacao-icon">' + (icone || '✓') + '</span><span class="pdv-notificacao-texto">' + (texto || '') + '</span>';
+            container.appendChild(toast);
+            const duracao = 3500;
+            const duracaoSair = 300;
+            const t = setTimeout(() => {
+                toast.classList.add('pdv-notificacao-saindo');
+                setTimeout(() => {
+                    if (toast.parentNode) toast.parentNode.removeChild(toast);
+                }, duracaoSair);
+            }, duracao);
+            toast._timeout = t;
+        }
+
         // Notificação push: novo pedido online (canto da tela, some após alguns segundos)
         function mostrarNotificacaoNovoPedidoOnline() {
             const container = document.getElementById('pdv-notificacao-container');
@@ -3506,9 +3645,10 @@
             const pedido = event.detail;
             const isOnline = pedido && (pedido.tipoVenda === 'online' || (pedido.id && String(pedido.id).startsWith('O')));
             if (isOnline) mostrarNotificacaoNovoPedidoOnline();
+            carregarPedidosPdv();
         });
 
-        // Escutar BroadcastChannel: pedido criado em outra aba (ex. cliente.html) → notificação no PDV
+        // Escutar BroadcastChannel: pedido criado em outra aba (ex. cliente.html) → notificação e adicionar pedido à lista do PDV
         try {
             const bcNovoPedido = new BroadcastChannel('peddy-novo-pedido');
             bcNovoPedido.onmessage = function(e) {
@@ -3517,6 +3657,15 @@
                 const p = d.pedido;
                 const isOnline = p.tipoVenda === 'online' || (p.id && String(p.id).startsWith('O'));
                 if (isOnline) mostrarNotificacaoNovoPedidoOnline();
+                // Inserir apenas o novo pedido na lista do PDV (evita sobrescrever com estado da outra aba)
+                if (typeof dataManager !== 'undefined' && dataManager.data && dataManager.data.pedidos && Array.isArray(dataManager.data.pedidos)) {
+                    const jaExiste = dataManager.data.pedidos.some(function(ped) { return ped && ped.id === p.id; });
+                    if (!jaExiste) {
+                        dataManager.data.pedidos.push(p);
+                        dataManager.saveData();
+                    }
+                }
+                carregarPedidosPdv();
             };
         } catch (err) {}
     </script>
